@@ -27,7 +27,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sesión</p>
-                    <p id="user-email" class="text-xs font-bold text-slate-700 truncate max-w-[150px]">Invitado</p>
+                    <p id="user-email" class="text-xs font-bold text-slate-700 truncate max-w-[150px]">Cargando...</p>
                 </div>
             </div>
             <button onclick="logout()" class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
@@ -39,10 +39,10 @@
     <main class="max-w-7xl mx-auto px-6 py-8">
         <div class="mb-10 flex justify-between items-end">
             <div>
-                <h1 class="text-4xl font-extrabold tracking-tight">Tu Carrito</h1>
-                <p class="text-slate-500">Gestiona tus productos y finaliza tu compra de forma segura.</p>
+                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Tu Carrito</h1>
+                <p class="text-slate-500">Gestiona tus productos y finaliza tu compra.</p>
             </div>
-            <a href="catolg.html" class="text-blue-600 font-bold flex items-center gap-2 hover:underline">
+            <a href="catolg.html" class="text-blue-600 font-bold flex items-center gap-2 hover:underline transition-all">
                 <i data-lucide="arrow-left" size="18"></i> Volver al catálogo
             </a>
         </div>
@@ -64,7 +64,7 @@
                             <span class="font-bold text-green-600">Gratis</span>
                         </div>
                         <div class="border-t pt-4 flex justify-between items-center">
-                            <span class="font-bold text-lg">Total</span>
+                            <span class="font-bold text-lg text-slate-900">Total</span>
                             <span id="total" class="text-3xl font-black text-blue-600">$0.00</span>
                         </div>
                     </div>
@@ -83,6 +83,7 @@
     </main>
 
     <script>
+        // Configuración Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
         const sb = supabase.createClient(_url, _key);
@@ -91,12 +92,12 @@
 
         async function cargarUsuario() {
             const { data: { user } } = await sb.auth.getUser();
-            if (user) document.getElementById('user-email').innerText = user.email;
+            document.getElementById('user-email').innerText = user ? user.email : "Invitado";
         }
 
         async function logout() {
             await sb.auth.signOut();
-            window.location.href = "catolg.html";
+            window.location.href = "catolg.html"; // Redirige al catálogo tras cerrar sesión
         }
 
         function render() {
@@ -111,7 +112,7 @@
                             <i data-lucide="shopping-basket" class="text-blue-600" size="32"></i>
                         </div>
                         <h2 class="text-3xl font-black mb-4">Tu carrito está vacío</h2>
-                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Parece que aún no has añadido ninguna medicina a tu pedido.</p>
+                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Parece que aún no has añadido ninguna medicina. ¡Explora nuestras ofertas!</p>
                         <a href="catolg.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg inline-block hover:scale-105 transition-transform">Ver Productos</a>
                     </div>`;
                 lucide.createIcons();
@@ -119,14 +120,14 @@
             }
 
             sidebar.classList.remove('hidden');
-            let total = 0;
+            let totalValue = 0;
             container.innerHTML = cart.map((item, index) => {
-                total += item.precio * item.cantidad;
+                totalValue += item.precio * item.cantidad;
                 return `
                     <div class="card-style p-6 flex items-center gap-6">
                         <img src="${item.imagen_url}" class="w-24 h-24 object-cover rounded-2xl bg-slate-50 border border-slate-100">
                         <div class="flex-grow">
-                            <h4 class="font-black text-xl text-slate-800">${item.nombre}</h4>
+                            <h4 class="font-black text-xl text-slate-800 capitalize">${item.nombre}</h4>
                             <p class="text-blue-600 font-extrabold text-lg">$${item.precio}</p>
                         </div>
                         <div class="flex items-center bg-slate-100 rounded-xl p-1 px-2 border border-slate-200">
@@ -135,30 +136,32 @@
                             <button onclick="changeQty(${index}, 1)" class="p-2 font-black text-slate-500 hover:text-blue-600">+</button>
                         </div>
                         <button onclick="remove(${index})" class="p-3 text-slate-300 hover:text-red-500 transition-colors">
-                            <i data-lucide="trash-2"></i>
+                            <i data-lucide="trash-2" size="20"></i>
                         </button>
                     </div>`;
             }).join('');
             
-            document.getElementById('total').innerText = `$${total.toFixed(2)}`;
-            document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('total').innerText = `$${totalValue.toFixed(2)}`;
+            document.getElementById('subtotal').innerText = `$${totalValue.toFixed(2)}`;
             lucide.createIcons();
         }
 
         async function procesarPedido(metodo) {
             const { data: { user } } = await sb.auth.getUser();
-            const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+            const totalValue = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
             
+            // Verificamos si la tabla existe o si hay error de inserción
             const { error } = await sb.from('pedidos').insert({
                 usuario_email: user ? user.email : "Invitado",
                 items: cart,
-                total: total,
-                metodo_pago: metodo
+                total: totalValue,
+                metodo_pago: metodo,
+                fecha: new Date().toISOString()
             });
 
             if (error) {
-                console.error(error);
-                alert("Error al guardar el pedido. Verifica tu tabla en Supabase.");
+                console.error("Error Supabase:", error);
+                alert("Error al procesar el pago. Asegúrate de que la tabla 'pedidos' esté creada en Supabase.");
             } else {
                 alert("¡Pedido realizado con éxito!");
                 localStorage.removeItem('farmaCart');
@@ -174,9 +177,13 @@
 
         window.remove = (idx) => { cart.splice(idx, 1); save(); };
         function save() { localStorage.setItem('farmaCart', JSON.stringify(cart)); render(); }
-        window.onload = () => { cargarUsuario(); render(); lucide.createIcons(); };
+        
+        window.onload = () => { 
+            cargarUsuario(); 
+            render(); 
+            lucide.createIcons(); 
+        };
     </script>
 </body>
 </html>
-
 
