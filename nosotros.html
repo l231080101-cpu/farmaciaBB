@@ -1,199 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre Nosotros - FarmaPlus</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nosotros - FarmaPlus</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        /* --- RESET Y ESTILOS BASE --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- TUS ESTILOS EXISTENTES ADAPTADOS --- */
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .top-bar { background: #1e293b; color: white; padding: 8px 0; font-size: 0.85rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content, .contact-info { display: flex; gap: 20px; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 6px; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Gris muy claro, profesional */
-            color: #334155;
-            line-height: 1.6;
-        }
+        .main-header { background: white; border-bottom: 1px solid #e2e8f0; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { font-size: 2rem; }
+        .logo-title { font-size: 1.5rem; font-weight: 800; color: #1e293b; line-height: 1; }
+        .logo-subtitle { font-size: 0.8rem; color: #64748b; }
 
-        .about-page {
-            padding: 80px 20px;
-        }
+        .search-bar { flex: 1; position: relative; max-width: 500px; }
+        .search-input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .nav-desktop { display: flex; gap: 25px; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+        .nav-link { text-decoration: none; color: #64748b; font-weight: 600; transition: color 0.2s; }
+        .nav-link:hover, .nav-link.active { color: #2563eb; }
 
-        /* --- ENCABEZADO --- */
-        .section-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+        /* --- ESTILOS DE LA SECCIÓN NOSOTROS --- */
+        .about-section { padding: 60px 0; }
+        .about-hero-image { width: 100%; height: 400px; object-fit: cover; border-radius: 24px; margin: 40px 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .about-card { background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
+        
+        .mission-vision-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .blue-box { background: #eff6ff; color: #2563eb; }
+        .green-box { background: #f0fdf4; color: #16a34a; }
 
-        .page-title {
-            font-size: clamp(2rem, 5vw, 3rem); /* Tamaño fluido */
-            color: #0f172a;
-            font-weight: 800;
-            margin-bottom: 15px;
-            letter-spacing: -0.02em;
-        }
-
-        .section-description {
-            font-size: 1.2rem;
-            color: #64748b;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* --- HERO IMAGE --- */
-        .about-hero-image {
-            width: 100%;
-            height: 450px;
-            object-fit: cover;
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 80px;
-            display: block;
-        }
-
-        /* --- HISTORIA --- */
-        .about-story {
-            background: white;
-            padding: 60px;
-            border-radius: 24px;
-            margin-bottom: 50px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .section-title {
-            font-size: 2rem;
-            color: #0f172a;
-            margin-bottom: 25px;
+        /* --- BOTÓN DE REGRESO FLOTANTE --- */
+        .back-to-index {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .about-story p {
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            color: #475569;
-        }
-
-        /* --- GRID MISIÓN Y VISIÓN --- */
-        .mission-vision-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-        }
-
-        .mission-vision-card {
-            background: white;
-            padding: 40px;
-            border-radius: 24px;
-            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            z-index: 100;
         }
-
-        .mission-vision-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            border-color: #3b82f6;
-        }
-
-        /* --- ICONOS --- */
-        .icon-wrapper {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-        }
-
-        .icon-wrapper svg {
-            width: 30px;
-            height: 30px;
-        }
-
-        .icon-wrapper.blue { 
-            background-color: #eff6ff; 
-            color: #2563eb; 
-        }
-
-        .icon-wrapper.green { 
-            background-color: #f0fdf4; 
-            color: #16a34a; 
-        }
-
-        .mission-vision-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #0f172a;
-        }
-
-        /* --- RESPONSIVIDAD --- */
-        @media (max-width: 768px) {
-            .about-page { padding: 40px 15px; }
-            .about-hero-image { height: 300px; border-radius: 20px; }
-            .about-story { padding: 30px; }
+        .back-to-index:hover {
+            transform: translateY(-5px);
+            background: #1d4ed8;
+            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
         }
     </style>
 </head>
 <body>
 
-<div class="about-page">
-    <div class="container">
-        
-        <header class="section-header">
-            <h1 class="page-title">Sobre Nosotros</h1>
-            <p class="section-description">Más de 15 años comprometidos con tu salud y el bienestar de tu familia.</p>
-        </header>
-
-        <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-             alt="Equipo FarmaPlus" 
-             class="about-hero-image">
-
-        <article class="about-story">
-            <h2 class="section-title">Nuestra Historia</h2>
-            <p>FarmaPlus nació en 2010 con una visión clara: hacer que el cuidado de la salud sea accesible para todos. Desde nuestros humildes comienzos, hemos crecido hasta convertirnos en una de las farmacias online más confiables del país.</p>
-            <p>Nuestro compromiso siempre ha sido ofrecer productos de la más alta calidad, acompañados de un servicio al cliente excepcional. Hoy servimos a miles de clientes, manteniendo los mismos valores que nos inspiraron desde el primer día: confianza, calidad y dedicación.</p>
-        </article>
-
-        <div class="mission-vision-grid">
-            <div class="mission-vision-card">
-                <div class="icon-wrapper blue">
-                    <i data-lucide="target"></i>
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <div class="contact-info">
+                        <div class="contact-item"><i data-lucide="phone" size="16"></i><span>+52 55 23 69 79 40</span></div>
+                        <div class="contact-item"><i data-lucide="map-pin" size="16"></i><span>Calle 67 #16 duplex</span></div>
+                    </div>
                 </div>
-                <h3>Nuestra Misión</h3>
-                <p>Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad, ofreciendo asesoramiento profesional y un servicio excepcional que mejore la vida de las personas.</p>
-            </div>
-
-            <div class="mission-vision-card">
-                <div class="icon-wrapper green">
-                    <i data-lucide="award"></i>
-                </div>
-                <h3>Nuestra Visión</h3>
-                <p>Ser la farmacia online líder, reconocida por nuestra excelencia en el servicio, innovación constante y un compromiso inquebrantable con la salud de nuestra comunidad.</p>
             </div>
         </div>
 
-    </div>
-</div>
+        <div class="main-header">
+            <div class="container">
+                <div class="main-header-content">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="logo-subtitle">Tu farmacia de confianza</p>
+                        </div>
+                    </a>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>
-  lucide.createIcons();
-</script>
+                    <div class="search-bar">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Buscar medicamentos..." class="search-input" />
+                    </div>
 
+                    <div class="header-actions">
+                        <a href="index.html" class="nav-link">Volver</a>
+                    </div>
+                </div>
+
+                <nav class="nav-desktop">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="#" class="nav-link">Catálogo</a>
+                    <a href="#" class="nav-link active">Nosotros</a>
+                    <a href="#" class="nav-link">Contacto</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container about-section">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Nuestra Identidad</h2>
+            <p class="text-slate-500 text-lg">Cuidando de ti y de los tuyos desde el primer día.</p>
+        </div>
+
+        <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?auto=format&fit=crop&q=80&w=1080" alt="Equipo" class="about-hero-image">
+
+        <div class="about-card">
+            <h3 class="text-2xl font-bold mb-4 text-slate-800">Nuestra Historia</h3>
+            <p class="text-slate-600 mb-4">FarmaPlus nació en 2010 con una visión clara: hacer que el cuidado de la salud sea accesible para todos. Desde nuestros humildes comienzos, hemos crecido hasta convertirnos en una de las farmacias online más confiables.</p>
+            <p class="text-slate-600">Hoy servimos a miles de clientes, manteniendo los mismos valores que nos inspiraron: confianza y dedicación.</p>
+        </div>
+
+        <div class="mission-vision-grid">
+            <div class="about-card">
+                <div class="icon-box blue-box"><i data-lucide="target"></i></div>
+                <h4 class="text-xl font-bold mb-2">Misión</h4>
+                <p class="text-slate-500">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad y asesoramiento profesional.</p>
+            </div>
+            <div class="about-card">
+                <div class="icon-box green-box"><i data-lucide="award"></i></div>
+                <h4 class="text-xl font-bold mb-2">Visión</h4>
+                <p class="text-slate-500">Ser la farmacia líder reconocida por nuestra excelencia en el servicio y compromiso con la salud.</p>
+            </div>
+        </div>
+    </main>
+
+    <a href="index.html" class="back-to-index">
+        <i data-lucide="arrow-left"></i>
+        <span>Regresar al Inicio</span>
+    </a>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
+
