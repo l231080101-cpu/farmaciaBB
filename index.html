@@ -5,59 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FarmaPlus - Tu Farmacia de Confianza</title>
 
-    <link rel="stylesheet" href="stylefarma.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- ESTILOS BASE --- */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #ffffff; 
+            margin: 0;
+        }
+        
+        /* Barra superior con el azul de tu captura */
+        .top-bar { 
+            background: #2563eb; 
+            color: white; 
+            padding: 10px 0; 
+            font-size: 0.85rem; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
+        .contact-item { display: flex; align-items: center; gap: 6px; }
+
+        /* Header Principal */
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        
+        /* Logo con el icono azul cuadrado */
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        /* Buscador Moderno */
+        .search-bar { flex: 1; position: relative; max-width: 550px; }
+        .search-input { 
+            width: 100%; 
+            padding: 12px 15px 12px 45px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px; 
+            background: #f8fafc;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: #2563eb; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
+
+        /* Acciones (Dashboard, Carrito, Login) */
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
+        .cart-container { position: relative; }
+        .cart-badge { 
+            position: absolute; -top: 8px; -right: 8px; 
+            background: #ef4444; color: white; 
+            font-size: 0.7rem; padding: 2px 6px; 
+            border-radius: 50px; border: 2px solid white;
+        }
+
+        /* Navegación Desktop */
+        .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-link { 
+            text-decoration: none; 
+            color: #475569; 
+            font-weight: 600; 
+            padding: 10px 20px; 
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-link:hover { color: #2563eb; background: #eff6ff; }
+        .nav-link.active { background: #2563eb; color: white; }
+
+        /* Estilo para las secciones de contenido */
+        .content-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid #e2e8f0;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 
 <body>
     <div id="root">
 
-        <!-- HEADER -->
         <header class="site-header">
 
-            <!-- Barra superior -->
             <div class="top-bar">
                 <div class="container">
                     <div class="top-bar-content">
                         <div class="contact-info">
-
                             <a href="tel:+525523697940" class="contact-item">
-                                <i data-lucide="phone"></i>
+                                <i data-lucide="phone" size="16"></i>
                                 <span>+52 55 23 69 79 40</span>
                             </a>
-
                             <div class="contact-item">
-                                <i data-lucide="map-pin"></i>
+                                <i data-lucide="map-pin" size="16"></i>
                                 <span>Calle 67 #16 duplex</span>
                             </div>
-
                             <div class="contact-item">
-                                <i data-lucide="clock"></i>
-                                <span>Lun-Sáb: 9:00 - 22:00</span>
+                                <i data-lucide="clock" size="16"></i>
+                                <span id="live-clock">Cargando hora...</span>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Header principal -->
             <div class="main-header">
                 <div class="container">
                     <div class="main-header-content">
 
-                        <!-- Logo -->
                         <a href="home.html" class="logo">
-                            <div class="logo-icon">⚕️</div>
+                            <div class="logo-box">⚕️</div>
                             <div>
                                 <h1 class="logo-title">FarmaPlus</h1>
                                 <p class="logo-subtitle">Tu farmacia de confianza</p>
                             </div>
                         </a>
 
-                        <!-- Buscador -->
                         <div class="search-bar">
                             <i data-lucide="search" class="search-icon"></i>
                             <input 
@@ -67,33 +134,26 @@
                             />
                         </div>
 
-                        <!-- Acciones -->
                         <div class="header-actions">
-
-                            <a href="admin.html" 
-                               class="icon-button admin-button" 
-                               title="Panel de Control" 
-                               style="color: #2563eb;">
-                                <i data-lucide="layout-dashboard"></i>
+                            <a href="admin.html" title="Panel de Control" class="text-blue-600">
+                                <i data-lucide="layout-grid"></i>
                             </a>
 
-                            <a href="carrito.html" class="icon-button cart-button">
+                            <a href="carrito.html" class="cart-container text-slate-700">
                                 <i data-lucide="shopping-cart"></i>
                                 <span class="cart-badge">0</span>
                             </a>
 
-                            <a href="login.html" class="login-button">
+                            <a href="login.html" class="action-link">
                                 <i data-lucide="user"></i>
                                 <span>Iniciar Sesión</span>
                             </a>
-
                         </div>
 
                     </div>
 
-                    <!-- Navegación Desktop -->
                     <nav class="nav-desktop">
-                        <a href="home.html" class="nav-link active">Inicio</a>
+                        <a href="index.html" class="nav-link active">Inicio</a>
                         <a href="catalog.html" class="nav-link">Catálogo</a>
                         <a href="nosotros.html" class="nav-link">Nosotros</a>
                         <a href="contacto.html" class="nav-link">Contacto</a>
@@ -104,20 +164,50 @@
 
         </header>
 
-        <!-- CONTENIDO -->
-        <main class="flex-1">
-            <!-- Aquí puedes insertar contenido si lo necesitas -->
+        <main class="container py-12">
+            <div class="content-card text-center">
+                <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-width-2xl mx-auto">
+                    Estamos trabajando para ofrecerte los mejores productos para tu salud con la rapidez que necesitas.
+                </p>
+            </div>
         </main>
 
-        <!-- FOOTER -->
-        <footer class="site-footer">
-            <!-- Tu footer aquí -->
+        <footer class="bg-slate-900 text-white py-12 mt-20">
+            <div class="container text-center">
+                <p>© 2026 FarmaPlus. Todos los derechos reservados.</p>
+            </div>
         </footer>
 
     </div>
 
     <script>
+        // Inicializar Iconos Lucide
         lucide.createIcons();
+
+        // Función del Reloj en Tiempo Real
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const dayName = days[now.getDay()];
+            
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            
+            // Formato 00:00:00
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            clockElement.textContent = `${dayName}: ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateClock, 1000);
+        updateClock(); 
     </script>
 
 </body>
