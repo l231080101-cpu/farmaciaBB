@@ -91,7 +91,7 @@
             </form>
 
             <div class="text-center mt-6">
-                <p class="text-slate-500 text-sm">¿Ya tienes cuenta? <a href="login.html" class="text-blue-600 font-bold">Inicia Sesión</a></p>
+                <p class="text-slate-500 text-sm">¿Ya tienes cuenta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Inicia Sesión</a></p>
             </div>
         </div>
     </main>
@@ -101,19 +101,19 @@
     </a>
 
     <script>
-        // --- CONFIGURACIÓN DE SUPABASE (SIN MÓDULOS) ---
+        // --- CONFIGURACIÓN DE SUPABASE CORREGIDA ---
         const _supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         
-        // Inicializamos el cliente globalmente
-        const supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
+        // Cambiamos el nombre de la constante para evitar conflicto con la librería global 'supabase'
+        const dbClient = supabase.createClient(_supabaseUrl, _supabaseKey);
 
-        // --- FUNCIONALIDADES ---
         lucide.createIcons();
 
         // Reloj en vivo
         setInterval(() => {
-            document.getElementById('live-clock').textContent = new Date().toLocaleTimeString();
+            const clock = document.getElementById('live-clock');
+            if(clock) clock.textContent = new Date().toLocaleTimeString();
         }, 1000);
 
         // Lógica de Registro
@@ -124,7 +124,8 @@
             const password = document.getElementById('reg-password').value;
             const name = document.getElementById('reg-name').value;
 
-            const { data, error } = await supabase.auth.signUp({
+            // Usamos dbClient en lugar de supabase
+            const { data, error } = await dbClient.auth.signUp({
                 email: email,
                 password: password,
                 options: { data: { full_name: name } }
@@ -140,3 +141,4 @@
     </script>
 </body>
 </html>
+
