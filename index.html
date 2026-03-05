@@ -39,6 +39,9 @@
         #user-auth-section { display: flex; align-items: center; gap: 15px; }
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
         .logout-btn:hover { background: #fee2e2; }
+        
+        /* Estilo para el botón de admin */
+        .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
     </style>
 </head>
 
@@ -83,9 +86,7 @@
                         </div>
 
                         <div class="header-actions">
-                            <a href="admin.html" title="Panel de Control" class="text-blue-600">
-                                <i data-lucide="layout-grid"></i>
-                            </a>
+                            <div id="admin-action-container"></div>
 
                             <a href="carrito.html" class="cart-container text-slate-700">
                                 <i data-lucide="shopping-cart"></i>
@@ -135,16 +136,29 @@
         async function checkSession() {
             const { data: { session } } = await dbClient.auth.getSession();
             const authSection = document.getElementById('user-auth-section');
+            const adminContainer = document.getElementById('admin-action-container');
             const welcomeTitle = document.getElementById('welcome-title');
 
             if (session) {
+                // Obtenemos nombre y rol del perfil
                 const { data: profile } = await dbClient
                     .from('profiles')
-                    .select('full_name')
+                    .select('full_name, role')
                     .eq('id', session.user.id)
                     .single();
 
                 const name = profile ? profile.full_name : session.user.email;
+                const role = profile ? profile.role : 'usuario';
+
+                // Si es admin, mostramos el acceso al panel
+                if (role === 'admin') {
+                    adminContainer.innerHTML = `
+                        <a href="admin.html" title="Panel de Control" class="flex items-center gap-2 text-blue-600 hover:opacity-80 transition">
+                            <span class="admin-badge">ADMIN</span>
+                            <i data-lucide="layout-grid"></i>
+                        </a>
+                    `;
+                }
 
                 authSection.innerHTML = `
                     <div class="flex items-center gap-4">
@@ -156,7 +170,7 @@
                 `;
                 welcomeTitle.innerText = `¡Qué gusto verte, ${name.split(' ')[0]}!`;
             } else {
-                // CORRECCIÓN AQUÍ TAMBIÉN: Enlace dinámico a login.html
+                adminContainer.innerHTML = '';
                 authSection.innerHTML = `
                     <a href="login.html" class="action-link">
                         <i data-lucide="user"></i>
@@ -187,6 +201,4 @@
     </script>
 </body>
 </html>
-
-
 
