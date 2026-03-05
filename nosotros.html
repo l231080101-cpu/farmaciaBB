@@ -7,6 +7,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
@@ -30,9 +31,11 @@
         .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
         .about-section { padding: 80px 0; }
         .about-hero-image { width: 100%; height: 500px; object-fit: cover; border-radius: 20px; margin: 40px 0; }
-        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
+        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; transition: transform 0.2s; }
         
-        /* Efecto de click para botones */
+        /* Botón de salida */
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.2s; }
+        .logout-btn:hover { background: #fee2e2; }
         .cursor-pointer:active { transform: scale(0.95); }
     </style>
 </head>
@@ -44,10 +47,7 @@
                 <div class="top-bar-content">
                     <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
                     <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
-                    <div class="contact-item">
-                        <i data-lucide="clock" size="18"></i>
-                        <span id="live-clock">Cargando hora...</span>
-                    </div>
+                    <div class="contact-item"><i data-lucide="clock" size="18"></i><span id="live-clock">Cargando...</span></div>
                 </div>
             </div>
         </div>
@@ -65,20 +65,22 @@
 
                     <div class="search-bar">
                         <i data-lucide="search" class="search-icon"></i>
-                        <input type="text" id="main-search" placeholder="Buscar medicamentos, productos..." class="search-input" onkeypress="handleSearch(event)" />
+                        <input type="text" id="main-search" placeholder="Buscar productos..." class="search-input" onkeypress="handleSearch(event)" />
                     </div>
 
-                    <div class="flex items-center gap-4">
-                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'" title="Panel de Administración"></i>
+                    <div class="flex items-center gap-4" id="header-actions-area">
+                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'"></i>
                         
                         <div class="relative cursor-pointer" onclick="toggleCart()">
                             <i data-lucide="shopping-cart" class="text-slate-700"></i>
                             <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                         </div>
 
-                        <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
-                            <i data-lucide="user"></i>
-                            <span class="text-sm font-medium">Iniciar Sesión</span>
+                        <div id="user-auth-placeholder">
+                            <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
+                                <i data-lucide="user"></i>
+                                <span class="text-sm font-medium">Iniciar Sesión</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -107,11 +109,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
             <div class="bg-slate-50 p-10 rounded-3xl">
                 <h3 class="text-2xl font-bold mb-4 text-blue-600">Nuestra Misión</h3>
-                <p class="text-slate-600 leading-relaxed">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad, ofreciendo asesoramiento profesional y un servicio excepcional que mejore la vida de las personas.</p>
+                <p class="text-slate-600 leading-relaxed">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad.</p>
             </div>
             <div class="bg-slate-50 p-10 rounded-3xl">
                 <h3 class="text-2xl font-bold mb-4 text-green-600">Nuestra Visión</h3>
-                <p class="text-slate-600 leading-relaxed">Ser la farmacia online líder, reconocida por nuestra excelencia en el servicio, innovación constante y un compromiso inquebrantable con la salud.</p>
+                <p class="text-slate-600 leading-relaxed">Ser la farmacia online líder, reconocida por nuestra excelencia en el servicio.</p>
             </div>
         </div>
     </main>
@@ -122,52 +124,82 @@
     </a>
 
     <script>
+        // CONFIGURACIÓN SUPABASE
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(_url, _key);
+
         lucide.createIcons();
 
-        // 1. RELOJ EN VIVO
+        // 1. VERIFICAR SESIÓN
+        async function checkSession() {
+            const { data: { session } } = await dbClient.auth.getSession();
+            const authPlaceholder = document.getElementById('user-auth-placeholder');
+
+            if (session) {
+                const { data: profile } = await dbClient
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', session.user.id)
+                    .single();
+
+                const name = profile ? profile.full_name : session.user.email;
+
+                authPlaceholder.innerHTML = `
+                    <div class="flex items-center gap-3 ml-2">
+                        <span class="text-slate-700 font-semibold text-xs flex items-center gap-1">
+                            <i data-lucide="user-check" size="14" class="text-blue-600"></i> ${name.split(' ')[0]}
+                        </span>
+                        <button onclick="logout()" class="logout-btn">Salir</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // 2. CERRAR SESIÓN
+        async function logout() {
+            await dbClient.auth.signOut();
+            localStorage.clear();
+            window.location.reload();
+        }
+
+        // Reloj en vivo
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const dayName = days[now.getDay()];
-            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-            h = h < 10 ? '0'+h : h; m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
-            clockElement.textContent = `${dayName}: ${h}:${m}:${s}`;
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
+
         setInterval(updateClock, 1000);
         updateClock();
+        checkSession();
 
-        // 2. FUNCIÓN DE BÚSQUEDA
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                const query = document.getElementById('main-search').value;
-                if(query.trim() !== "") {
-                    alert("Buscando: " + query + "\n(Aquí podrías redirigir a catalog.html?search=" + query + ")");
-                    // window.location.href = 'catalog.html?search=' + query;
-                }
-            }
-        }
-
-        // 3. FUNCIÓN DE CARRITO (SIMULACIÓN)
+        // Carrito y Búsqueda (Tus funciones originales)
         let itemsInCart = 0;
         function addToCart() {
             itemsInCart++;
             document.getElementById('cart-count').textContent = itemsInCart;
-            // Animación pequeña al badge
             const badge = document.getElementById('cart-count');
             badge.style.transform = "scale(1.3)";
             setTimeout(() => badge.style.transform = "scale(1)", 200);
         }
 
         function toggleCart() {
-            if(itemsInCart === 0) {
-                alert("Tu carrito está vacío. ¡Mira nuestro catálogo!");
-            } else {
-                window.location.href = 'carrito.html';
+            if(itemsInCart === 0) alert("Tu carrito está vacío.");
+            else window.location.href = 'carrito.html';
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('main-search').value;
+                if(query.trim() !== "") alert("Buscando: " + query);
             }
         }
     </script>
 </body>
 </html>
+
 
 
