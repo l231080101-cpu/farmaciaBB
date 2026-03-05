@@ -28,8 +28,12 @@
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
         .header-actions { display: flex; align-items: center; gap: 20px; }
         .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
-        .cart-container { position: relative; }
-        .cart-badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; border: 2px solid white; }
+        
+        /* CARRITO ESTILIZADO */
+        .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .cart-container:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
+        .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
         .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
         .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
         .nav-link:hover { color: #2563eb; background: #eff6ff; }
@@ -39,8 +43,6 @@
         #user-auth-section { display: flex; align-items: center; gap: 15px; }
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
         .logout-btn:hover { background: #fee2e2; }
-        
-        /* Estilo para el botón de admin */
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
     </style>
 </head>
@@ -52,18 +54,9 @@
                 <div class="container">
                     <div class="top-bar-content">
                         <div class="contact-info">
-                            <div class="contact-item">
-                                <i data-lucide="phone" size="16"></i>
-                                <span>+52 55 23 69 79 40</span>
-                            </div>
-                            <div class="contact-item">
-                                <i data-lucide="map-pin" size="16"></i>
-                                <span>Calle 67 #16 duplex</span>
-                            </div>
-                            <div class="contact-item">
-                                <i data-lucide="clock" size="16"></i>
-                                <span id="live-clock">Cargando...</span>
-                            </div>
+                            <div class="contact-item"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
+                            <div class="contact-item"><i data-lucide="map-pin" size="16"></i> <span>Calle 67 #16 duplex</span></div>
+                            <div class="contact-item"><i data-lucide="clock" size="16"></i> <span id="live-clock">Cargando...</span></div>
                         </div>
                     </div>
                 </div>
@@ -88,9 +81,9 @@
                         <div class="header-actions">
                             <div id="admin-action-container"></div>
 
-                            <a href="carrito.html" class="cart-container text-slate-700">
-                                <i data-lucide="shopping-cart"></i>
-                                <span class="cart-badge">0</span>
+                            <a href="carrito.html" class="cart-container text-slate-700" title="Ver mi carrito">
+                                <i data-lucide="shopping-basket" size="22"></i>
+                                <span id="cart-count" class="cart-badge">0</span>
                             </a>
 
                             <div id="user-auth-section">
@@ -114,16 +107,20 @@
 
         <main class="container py-12">
             <div class="content-card text-center">
-                <h2 class="text-4xl font-extrabold text-slate-900 mb-4" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                <p class="text-slate-500 text-lg max-w-2xl mx-auto">
-                    Estamos trabajando para ofrecerte los mejores productos para tu salud.
+                <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
+                    Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
                 </p>
+                <div class="flex justify-center gap-4">
+                    <a href="catalog.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-all">Ver Catálogo</a>
+                    <a href="contacto.html" class="bg-white text-slate-600 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Soporte</a>
+                </div>
             </div>
         </main>
 
         <footer class="bg-slate-900 text-white py-12 mt-20">
             <div class="container text-center">
-                <p>© 2026 FarmaPlus. Todos los derechos reservados.</p>
+                <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
             </div>
         </footer>
     </div>
@@ -133,6 +130,16 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
+        // FUNCIÓN PARA ACTUALIZAR EL CONTADOR DEL CARRITO
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
+            const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            const badge = document.getElementById('cart-count');
+            badge.innerText = count;
+            // Ocultar si es cero para que se vea más limpio
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
         async function checkSession() {
             const { data: { session } } = await dbClient.auth.getSession();
             const authSection = document.getElementById('user-auth-section');
@@ -140,7 +147,6 @@
             const welcomeTitle = document.getElementById('welcome-title');
 
             if (session) {
-                // Obtenemos nombre y rol del perfil
                 const { data: profile } = await dbClient
                     .from('profiles')
                     .select('full_name, role')
@@ -150,7 +156,6 @@
                 const name = profile ? profile.full_name : session.user.email;
                 const role = profile ? profile.role : 'usuario';
 
-                // Si es admin, mostramos el acceso al panel
                 if (role === 'admin') {
                     adminContainer.innerHTML = `
                         <a href="admin.html" title="Panel de Control" class="flex items-center gap-2 text-blue-600 hover:opacity-80 transition">
@@ -169,22 +174,13 @@
                     </div>
                 `;
                 welcomeTitle.innerText = `¡Qué gusto verte, ${name.split(' ')[0]}!`;
-            } else {
-                adminContainer.innerHTML = '';
-                authSection.innerHTML = `
-                    <a href="login.html" class="action-link">
-                        <i data-lucide="user"></i>
-                        <span>Iniciar Sesión</span>
-                    </a>
-                `;
-                welcomeTitle.innerText = "Bienvenido a FarmaPlus";
             }
             lucide.createIcons();
         }
 
         async function logout() {
             await dbClient.auth.signOut();
-            localStorage.clear();
+            localStorage.removeItem('farmaCart'); // Opcional: limpiar carrito al salir
             window.location.reload();
         }
 
@@ -198,6 +194,7 @@
         setInterval(updateClock, 1000);
         updateClock();
         checkSession();
+        updateCartBadge(); // Llamar al cargar la página
     </script>
 </body>
 </html>
