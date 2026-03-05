@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - FarmaPlus</title>
+    <title>Panel Admin Pro - FarmaPlus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,9 +11,31 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
     </style>
 </head>
 <body class="text-slate-900">
+
+    <div id="modal-edit" class="modal">
+        <div class="glass-card p-8 rounded-[32px] w-full max-w-md shadow-2xl mx-4">
+            <h2 class="text-2xl font-black mb-6">Editar Producto</h2>
+            <input type="hidden" id="edit-id">
+            <div class="flex flex-col gap-4">
+                <input type="text" id="edit-nombre" class="p-4 rounded-xl border border-slate-200 outline-none" placeholder="Nombre">
+                <input type="number" id="edit-precio" class="p-4 rounded-xl border border-slate-200 outline-none" placeholder="Precio">
+                <select id="edit-categoria" class="p-4 rounded-xl border border-slate-200 outline-none">
+                    <option value="medicamentos">💊 Medicamento</option>
+                    <option value="promos">🔥 Promo</option>
+                    <option value="receta">📋 Receta</option>
+                </select>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="cerrarModal()" class="flex-1 p-4 rounded-xl bg-slate-100 font-bold">Cancelar</button>
+                    <button onclick="actualizarProducto()" class="flex-1 p-4 rounded-xl bg-blue-600 text-white font-bold">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="flex min-h-screen">
         <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col gap-8">
@@ -21,11 +43,11 @@
                 <span class="bg-blue-600 text-white p-1 rounded-lg">⚕️</span> FarmaPlus
             </a>
             <nav class="flex flex-col gap-2">
-                <button class="flex items-center gap-3 p-3 bg-blue-50 text-blue-600 rounded-xl font-bold transition-all">
-                    <i data-lucide="layout-grid" size="20"></i> Inventario
+                <button class="flex items-center gap-3 p-3 bg-blue-50 text-blue-600 rounded-xl font-bold">
+                    <i data-lucide="layout-grid" size="20"></i> Dashboard
                 </button>
-                <button onclick="location.href='index.html'" class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 rounded-xl font-bold transition-all">
-                    <i data-lucide="home" size="20"></i> Volver al Inicio
+                <button onclick="location.href='index.html'" class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 rounded-xl font-bold">
+                    <i data-lucide="home" size="20"></i> Inicio
                 </button>
             </nav>
         </aside>
@@ -33,70 +55,48 @@
         <main class="flex-1 p-10">
             <header class="flex justify-between items-center mb-10">
                 <div>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Panel de Control</h1>
-                    <p class="text-slate-500 font-medium">Gestiona productos, categorías y usuarios.</p>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Panel Admin</h1>
+                    <p class="text-slate-500 font-medium">Control total de inventario y usuarios.</p>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div id="admin-info" class="text-right hidden md:block">
-                        <p id="admin-name" class="font-bold text-slate-800">Admin</p>
-                        <p class="text-xs text-blue-600 font-bold uppercase">Acceso Total</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600">
-                        <i data-lucide="shield-check"></i>
+                <div id="admin-info" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-2xl border border-slate-100">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold" id="admin-initial">A</div>
+                    <div>
+                        <p id="admin-name" class="font-bold text-sm leading-none">Admin</p>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">Nivel: Dios</p>
                     </div>
                 </div>
             </header>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <section class="lg:col-span-2">
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl shadow-slate-200/50 mb-8">
-                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
-                            <i data-lucide="plus-circle" class="text-blue-600"></i> Nuevo Producto
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="flex flex-col gap-2">
-                                <label class="text-sm font-bold text-slate-600 ml-1">Nombre del Medicamento</label>
-                                <input type="text" id="prod-nombre" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white transition-all" placeholder="Ej. Paracetamol 500mg">
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label class="text-sm font-bold text-slate-600 ml-1">Precio Unitario ($)</label>
-                                <input type="number" id="prod-precio" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white transition-all" placeholder="0.00">
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label class="text-sm font-bold text-slate-600 ml-1">Clasificación / Categoría</label>
-                                <select id="prod-categoria" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white transition-all cursor-pointer font-semibold">
-                                    <option value="medicamentos">💊 Medicamento General</option>
-                                    <option value="promos">🔥 Promoción / Oferta</option>
-                                    <option value="receta">📋 Requiere Receta</option>
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label class="text-sm font-bold text-slate-600 ml-1">URL de la Imagen</label>
-                                <input type="text" id="prod-imagen" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white transition-all" placeholder="https://ejemplo.com/foto.jpg">
-                            </div>
+                    <div class="glass-card p-8 rounded-[32px] shadow-xl mb-8">
+                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-600"></i> Nuevo Producto</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="prod-nombre" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white" placeholder="Nombre del medicamento">
+                            <input type="number" id="prod-precio" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white" placeholder="Precio ($)">
+                            <select id="prod-categoria" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white">
+                                <option value="medicamentos">💊 Medicamento General</option>
+                                <option value="promos">🔥 Promoción</option>
+                                <option value="receta">📋 Requiere Receta</option>
+                            </select>
+                            <input type="text" id="prod-imagen" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white" placeholder="URL de la imagen">
                         </div>
-
-                        <button onclick="guardarProducto()" class="mt-8 w-full bg-blue-600 text-white p-5 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-[0.98]">
-                            Publicar Producto en Catálogo
-                        </button>
+                        <button onclick="guardarProducto()" class="mt-6 w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.01] transition-all">Publicar Producto</button>
                     </div>
 
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl shadow-slate-200/50">
-                        <h2 class="text-2xl font-black mb-6">Inventario Actual</h2>
-                        <div id="lista-inventario" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            </div>
+                    <div class="glass-card p-8 rounded-[32px] shadow-xl">
+                        <h2 class="text-2xl font-black mb-6 flex justify-between items-center">
+                            Inventario Actual
+                            <span id="count-prod" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500">0 items</span>
+                        </h2>
+                        <div id="lista-inventario" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                     </div>
                 </section>
 
                 <section>
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl shadow-slate-200/50 sticky top-24">
-                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
-                            <i data-lucide="users" class="text-blue-600"></i> Usuarios Registrados
-                        </h2>
-                        <div id="usuarios-lista" class="flex flex-col gap-4">
-                            <p class="text-slate-400 text-sm animate-pulse">Cargando perfiles...</p>
-                        </div>
+                    <div class="glass-card p-8 rounded-[32px] shadow-xl sticky top-10">
+                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="users" class="text-blue-600"></i> Usuarios</h2>
+                        <div id="usuarios-lista" class="flex flex-col gap-4"></div>
                     </div>
                 </section>
             </div>
@@ -115,16 +115,48 @@
             await checkAdmin();
         }
 
-        async function checkAdmin() {
-            const { data: { session } } = await sb.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
-            const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-            if (profile) {
-                document.getElementById('admin-name').innerText = profile.full_name;
-            }
+        // --- CRUD PRODUCTOS ---
+        async function cargarInventario() {
+            const { data: productos } = await sb.from('productos').select('*').order('created_at', { ascending: false });
+            const container = document.getElementById('lista-inventario');
+            document.getElementById('count-prod').innerText = `${productos.length} items`;
+            
+            container.innerHTML = productos.map(p => `
+                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-300 transition-all">
+                    <img src="${p.imagen_url}" class="w-12 h-12 rounded-lg object-cover bg-white">
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-800 text-sm">${p.nombre}</p>
+                        <p class="text-[10px] text-blue-600 font-bold">$${p.precio} • ${p.categoria}</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="abrirEditar('${p.id}', '${p.nombre}', ${p.precio}, '${p.categoria}')" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="edit-3" size="16"></i></button>
+                        <button onclick="eliminarProducto('${p.id}')" class="p-2 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function abrirEditar(id, nombre, precio, cat) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-nombre').value = nombre;
+            document.getElementById('edit-precio').value = precio;
+            document.getElementById('edit-categoria').value = cat;
+            document.getElementById('modal-edit').classList.add('active');
+        }
+
+        function cerrarModal() { document.getElementById('modal-edit').classList.remove('active'); }
+
+        async function actualizarProducto() {
+            const id = document.getElementById('edit-id').value;
+            const updates = {
+                nombre: document.getElementById('edit-nombre').value,
+                precio: parseFloat(document.getElementById('edit-precio').value),
+                categoria: document.getElementById('edit-categoria').value
+            };
+            const { error } = await sb.from('productos').update(updates).eq('id', id);
+            if(error) alert("Error");
+            else { cerrarModal(); cargarInventario(); }
         }
 
         async function guardarProducto() {
@@ -133,80 +165,72 @@
             const categoria = document.getElementById('prod-categoria').value;
             const imagen_url = document.getElementById('prod-imagen').value;
 
-            if(!nombre || !precio || !imagen_url) {
-                alert("Por favor completa todos los campos");
-                return;
-            }
+            if(!nombre || !precio) return alert("Faltan datos");
 
-            const { error } = await sb.from('productos').insert([{ 
-                nombre, 
-                precio: parseFloat(precio), 
-                categoria, 
-                imagen_url 
-            }]);
+            await sb.from('productos').insert([{ nombre, precio: parseFloat(precio), categoria, imagen_url }]);
+            location.reload();
+        }
 
-            if (error) {
-                console.error(error);
-                alert("Error al guardar: " + error.message);
-            } else {
-                alert("Producto añadido con éxito!");
-                location.reload();
+        async function eliminarProducto(id) {
+            if(confirm("¿Eliminar?")) {
+                await sb.from('productos').delete().eq('id', id);
+                cargarInventario();
             }
         }
 
-        async function cargarInventario() {
-            const { data: productos } = await sb.from('productos').select('*').order('created_at', { ascending: false });
-            const container = document.getElementById('lista-inventario');
+        // --- CRUD USUARIOS (PROFILES) ---
+        async function cargarUsuarios() {
+            const { data: usuarios } = await sb.from('profiles').select('*');
+            const container = document.getElementById('usuarios-lista');
             
-            container.innerHTML = productos.map(p => `
-                <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <img src="${p.imagen_url}" class="w-12 h-12 rounded-lg object-cover bg-white border">
-                    <div class="flex-1">
-                        <p class="font-bold text-slate-800 capitalize text-sm">${p.nombre}</p>
-                        <p class="text-xs text-blue-600 font-bold">$${p.precio} • ${p.categoria}</p>
+            container.innerHTML = usuarios.map(u => `
+                <div class="p-4 bg-white rounded-2xl border border-slate-100 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold uppercase">${u.full_name ? u.full_name[0] : '?'}</div>
+                            <div>
+                                <p class="font-bold text-sm leading-none">${u.full_name || 'Usuario'}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">${u.role || 'usuario'}</p>
+                            </div>
+                        </div>
+                        <button onclick="eliminarUsuario('${u.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="user-minus" size="14"></i></button>
                     </div>
-                    <button onclick="eliminarProducto('${p.id}')" class="p-2 text-red-400 hover:text-red-600 transition-colors">
-                        <i data-lucide="trash-2" size="18"></i>
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="cambiarRol('${u.id}', 'admin')" class="text-[9px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-bold uppercase">Hacer Admin</button>
+                        <button onclick="cambiarRol('${u.id}', 'usuario')" class="text-[9px] bg-slate-50 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Quitar Admin</button>
+                    </div>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        async function eliminarProducto(id) {
-            if(confirm("¿Seguro que quieres eliminar este producto?")) {
-                const { error } = await sb.from('productos').delete().eq('id', id);
-                if (error) alert("No se pudo eliminar");
-                else cargarInventario();
+        async function cambiarRol(id, nuevoRol) {
+            const { error } = await sb.from('profiles').update({ role: nuevoRol }).eq('id', id);
+            if(error) alert("No tienes permisos suficientes en Supabase (Verifica RLS)");
+            else cargarUsuarios();
+        }
+
+        async function eliminarUsuario(id) {
+            if(confirm("¿Eliminar perfil de usuario?")) {
+                await sb.from('profiles').delete().eq('id', id);
+                cargarUsuarios();
             }
         }
 
-        async function cargarUsuarios() {
-            // Nota: Para ver todos los usuarios, asegúrate que en Supabase la tabla 'profiles'
-            // tenga deshabilitado el RLS o una política de lectura pública para admins.
-            const { data: usuarios, error } = await sb.from('profiles').select('*');
-
-            const container = document.getElementById('usuarios-lista');
-            if (error) {
-                container.innerHTML = `<p class="text-red-400 text-xs font-bold">Error de permisos RLS en Supabase</p>`;
-                return;
+        async function checkAdmin() {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
+                const { data: p } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+                if (p) {
+                    document.getElementById('admin-name').innerText = p.full_name;
+                    document.getElementById('admin-initial').innerText = p.full_name[0].toUpperCase();
+                }
             }
-
-            container.innerHTML = usuarios.map(u => `
-                <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 transition-all">
-                    <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-bold">
-                        ${u.full_name ? u.full_name[0].toUpperCase() : '?'}
-                    </div>
-                    <div>
-                        <p class="font-bold text-slate-800 text-sm leading-none">${u.full_name || 'Sin nombre'}</p>
-                        <p class="text-[10px] text-slate-400 mt-1">${u.role || 'usuario'}</p>
-                    </div>
-                </div>
-            `).join('');
         }
 
         window.onload = init;
     </script>
 </body>
 </html>
+
 
