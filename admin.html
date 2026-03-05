@@ -11,11 +11,13 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .tab-btn.active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+        .loader { border-top-color: #2563eb; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-    <nav class="bg-white border-bottom border-slate-200 shadow-sm sticky top-0 z-50">
+    <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
             <div class="flex items-center gap-2 font-bold text-blue-600 text-xl">
                 <i data-lucide="shield-check"></i> FarmaPlus Admin
@@ -34,9 +36,7 @@
     <main class="max-w-7xl mx-auto p-6">
         
         <section id="tab-usuarios" class="tab-content active">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-slate-800">Gestión de Usuarios</h2>
-            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Gestión de Usuarios</h2>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b border-slate-200">
@@ -46,7 +46,9 @@
                             <th class="p-4 font-bold text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="lista-usuarios"></tbody>
+                    <tbody id="lista-usuarios">
+                        <tr><td colspan="3" class="p-10 text-center text-slate-400">Cargando usuarios...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -58,12 +60,16 @@
                     <i data-lucide="plus" size="18"></i> Nuevo Producto
                 </button>
             </div>
-            <div id="grid-productos-admin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="grid-productos-admin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-slate-400">Cargando inventario...</p>
+            </div>
         </section>
 
         <section id="tab-buzon" class="tab-content">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Mensajes Recibidos</h2>
-            <div id="lista-mensajes" class="space-y-4"></div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Buzón de Contacto</h2>
+            <div id="lista-mensajes" class="space-y-4">
+                <p class="text-slate-400">Cargando mensajes...</p>
+            </div>
         </section>
 
     </main>
@@ -73,13 +79,13 @@
             <h3 id="modal-title" class="text-xl font-bold mb-4">Agregar Producto</h3>
             <form id="form-producto" class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="p-nombre" placeholder="Nombre del producto" class="w-full p-2 border rounded-lg focus:ring-2 ring-blue-100 outline-none" required>
-                <input type="number" step="0.01" id="p-precio" placeholder="Precio" class="w-full p-2 border rounded-lg focus:ring-2 ring-blue-100 outline-none" required>
-                <textarea id="p-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg focus:ring-2 ring-blue-100 outline-none"></textarea>
-                <input type="url" id="p-img" placeholder="URL de la imagen (https://...)" class="w-full p-2 border rounded-lg focus:ring-2 ring-blue-100 outline-none">
+                <input type="text" id="p-nombre" placeholder="Nombre del producto" class="w-full p-2 border rounded-lg outline-none focus:border-blue-500" required>
+                <input type="number" step="0.01" id="p-precio" placeholder="Precio" class="w-full p-2 border rounded-lg outline-none focus:border-blue-500" required>
+                <textarea id="p-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg outline-none focus:border-blue-500"></textarea>
+                <input type="url" id="p-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg outline-none focus:border-blue-500">
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeProductModal()" class="flex-1 bg-slate-100 py-2 rounded-lg font-semibold text-slate-600">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold shadow-lg shadow-blue-100">Guardar</button>
+                    <button type="submit" id="btn-save-prod" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold">Guardar</button>
                 </div>
             </form>
         </div>
@@ -87,10 +93,10 @@
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'TU_ANON_KEY_AQUÍ'; 
+        // USA TU LLAVE REAL AQUÍ:
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const sb = supabase.createClient(_url, _key);
 
-        // --- NAVEGACIÓN ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -102,135 +108,115 @@
             if(tabId === 'buzon') loadMessages();
         }
 
-        // --- USUARIOS ---
         async function loadUsers() {
-            const { data: users } = await sb.from('profiles').select('*').order('full_name');
+            const { data: users, error } = await sb.from('profiles').select('*');
+            if(error) return console.error(error);
             const container = document.getElementById('lista-usuarios');
             container.innerHTML = users.map(u => `
-                <tr class="border-b border-slate-100 hover:bg-slate-50">
-                    <td class="p-4 font-medium text-slate-700">${u.full_name || 'Sin nombre'}</td>
-                    <td class="p-4">
-                        <span class="px-2 py-1 rounded text-[10px] font-black uppercase ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">
-                            ${u.role || 'usuario'}
-                        </span>
-                    </td>
+                <tr class="border-b border-slate-100">
+                    <td class="p-4 font-medium">${u.full_name || 'Sin nombre'}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${(u.role || 'usuario').toUpperCase()}</span></td>
                     <td class="p-4 text-right flex justify-end gap-2">
-                        <button onclick="changeRole('${u.id}', '${u.role}')" class="text-blue-600 text-xs font-bold hover:underline">Cambiar Rol</button>
-                        <button onclick="deleteUser('${u.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="18"></i></button>
+                        <button onclick="changeRole('${u.id}', '${u.role}')" class="text-blue-600 text-xs font-bold">Cambiar Rol</button>
+                        <button onclick="deleteUser('${u.id}')" class="text-red-400"><i data-lucide="trash-2" size="18"></i></button>
                     </td>
                 </tr>
             `).join('');
             lucide.createIcons();
         }
 
-        async function changeRole(id, currentRole) {
-            const newRole = currentRole === 'admin' ? 'usuario' : 'admin';
-            const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', id);
-            if(!error) loadUsers();
-        }
-
-        async function deleteUser(id) {
-            if(confirm('¿Eliminar perfil de usuario?')) {
-                await sb.from('profiles').delete().eq('id', id);
-                loadUsers();
-            }
-        }
-
-        // --- PRODUCTOS (CON EDITAR) ---
         async function loadProducts() {
-            const { data: prods } = await sb.from('productos').select('*').order('created_at', {ascending: false});
+            const { data: prods, error } = await sb.from('productos').select('*').order('created_at', {ascending: false});
+            if(error) return console.error(error);
             const container = document.getElementById('grid-productos-admin');
             container.innerHTML = prods.map(p => `
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition">
-                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" class="w-20 h-20 object-cover rounded-lg bg-slate-100">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-center gap-4">
+                    <img src="${p.imagen_url || 'https://via.placeholder.com/150'}" class="w-16 h-16 object-cover rounded-lg bg-slate-100">
                     <div class="flex-grow">
-                        <h4 class="font-bold text-slate-800">${p.nombre}</h4>
-                        <p class="text-blue-600 font-black text-lg">$${p.precio}</p>
+                        <h4 class="font-bold text-slate-800 text-sm">${p.nombre}</h4>
+                        <p class="text-blue-600 font-bold">$${p.precio}</p>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="editProduct('${p.id}')" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"><i data-lucide="edit-3" size="20"></i></button>
-                        <button onclick="deleteProduct('${p.id}')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><i data-lucide="trash-2" size="20"></i></button>
+                    <div class="flex flex-col gap-1">
+                        <button onclick="editProduct('${p.id}')" class="p-1 text-slate-400 hover:text-blue-600"><i data-lucide="edit-3" size="18"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="p-1 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" size="18"></i></button>
                     </div>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        async function editProduct(id) {
-            const { data: p } = await sb.from('productos').select('*').eq('id', id).single();
-            document.getElementById('edit-id').value = p.id;
-            document.getElementById('p-nombre').value = p.nombre;
-            document.getElementById('p-precio').value = p.precio;
-            document.getElementById('p-desc').value = p.descripcion;
-            document.getElementById('p-img').value = p.imagen_url;
-            document.getElementById('modal-title').innerText = "Editar Producto";
-            document.getElementById('modal-producto').classList.remove('hidden');
-        }
-
         document.getElementById('form-producto').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btn-save-prod');
+            btn.disabled = true;
+            btn.innerText = "Guardando...";
+
             const id = document.getElementById('edit-id').value;
             const payload = {
                 nombre: document.getElementById('p-nombre').value,
-                precio: document.getElementById('p-precio').value,
+                precio: parseFloat(document.getElementById('p-precio').value),
                 descripcion: document.getElementById('p-desc').value,
                 imagen_url: document.getElementById('p-img').value
             };
 
-            if(id) { await sb.from('productos').update(payload).eq('id', id); } 
-            else { await sb.from('productos').insert([payload]); }
+            const { error } = id 
+                ? await sb.from('productos').update(payload).eq('id', id)
+                : await sb.from('productos').insert([payload]);
+
+            if(error) alert("Error: " + error.message);
             
+            btn.disabled = false;
+            btn.innerText = "Guardar";
             closeProductModal();
             loadProducts();
         });
 
-        // --- BUZÓN DE CONTACTO (INTERACTIVO) ---
         async function loadMessages() {
-            const { data: msgs } = await sb.from('contacto').select('*').order('created_at', { ascending: false });
+            const { data: msgs, error } = await sb.from('contacto').select('*').order('created_at', { ascending: false });
+            if(error) return console.error(error);
             const container = document.getElementById('lista-mensajes');
             
             if(!msgs?.length) {
-                container.innerHTML = `<div class="bg-white p-10 rounded-xl border border-dashed border-slate-300 text-center text-slate-400 font-medium text-lg">El buzón está vacío</div>`;
+                container.innerHTML = `<p class="text-center text-slate-400 py-10">No hay mensajes en el buzón.</p>`;
                 return;
             }
 
             container.innerHTML = msgs.map(m => `
-                <div class="bg-white p-6 rounded-xl border-l-4 ${m.leido ? 'border-slate-300 opacity-75' : 'border-blue-600'} shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
                         <div>
-                            <span class="block font-bold text-slate-800 text-lg">${m.nombre}</span>
-                            <span class="text-sm text-blue-500 font-semibold">${m.email}</span>
+                            <span class="font-bold text-slate-800">${m.nombre}</span>
+                            <span class="text-xs text-blue-500 block">${m.email}</span>
                         </div>
-                        <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">${new Date(m.created_at).toLocaleDateString()}</span>
+                        <span class="text-[10px] text-slate-400">${new Date(m.created_at).toLocaleDateString()}</span>
                     </div>
-                    <p class="text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100 italic mb-4">"${m.mensaje}"</p>
-                    <div class="flex gap-4">
-                        <button onclick="replyContact('${m.email}')" class="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold hover:bg-blue-700 transition">Responder por Email</button>
-                        <button onclick="deleteMsg('${m.id}')" class="text-sm text-red-500 font-bold hover:bg-red-50 px-2 rounded-lg transition">Eliminar</button>
-                    </div>
+                    <p class="text-sm text-slate-600 italic bg-slate-50 p-3 rounded-lg border border-slate-100 mb-3">"${m.mensaje}"</p>
+                    <button onclick="window.location.href='mailto:${m.email}'" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded font-bold">Responder por Email</button>
                 </div>
             `).join('');
         }
 
-        async function deleteMsg(id) {
-            if(confirm('¿Borrar mensaje del buzón?')) {
-                await sb.from('contacto').delete().eq('id', id);
-                loadMessages();
-            }
-        }
-
-        function replyContact(email) {
-            window.location.href = `mailto:${email}?subject=Respuesta de FarmaPlus`;
-        }
-
+        // Funciones auxiliares
         function openProductModal() { 
             document.getElementById('form-producto').reset();
             document.getElementById('edit-id').value = '';
             document.getElementById('modal-title').innerText = "Agregar Producto";
             document.getElementById('modal-producto').classList.remove('hidden'); 
         }
-
         function closeProductModal() { document.getElementById('modal-producto').classList.add('hidden'); }
+        
+        async function deleteProduct(id) {
+            if(confirm('¿Eliminar producto?')) {
+                await sb.from('productos').delete().eq('id', id);
+                loadProducts();
+            }
+        }
+
+        async function changeRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'usuario' : 'admin';
+            await sb.from('profiles').update({ role: newRole }).eq('id', id);
+            loadUsers();
+        }
 
         window.onload = () => {
             lucide.createIcons();
@@ -239,4 +225,3 @@
     </script>
 </body>
 </html>
-
