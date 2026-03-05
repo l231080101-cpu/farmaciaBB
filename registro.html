@@ -70,25 +70,15 @@
                 <span>Registrarse</span>
             </button>
         </form>
-
-        <div class="text-center mt-8 pt-8 border-t border-slate-100">
-            <p class="text-slate-500 text-sm mb-2">¿Ya tienes cuenta?</p>
-            <a href="inicio%20de%20sesión.html" class="text-blue-600 font-bold hover:underline">
-                Inicia Sesión aquí
-            </a>
-        </div>
     </div>
 
     <script>
-        // Configuración de Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
-        // Inicializar Iconos
         lucide.createIcons();
 
-        // Lógica de Registro
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -98,7 +88,6 @@
             const errorMsg = document.getElementById('reg-error');
             const btn = document.getElementById('reg-btn');
 
-            // Estado de carga
             errorMsg.classList.add('hidden');
             btn.disabled = true;
             btn.innerHTML = "Creando cuenta...";
@@ -118,9 +107,10 @@
                 btn.innerHTML = "Registrarse";
             } else {
                 alert("¡Registro exitoso! Por favor, inicia sesión.");
-                window.location.href = 'inicio%20de%20sesión.html';
+                window.location.href = 'inicio de sesión.html';
             }
         });
     </script>
 </body>
 </html>
+
