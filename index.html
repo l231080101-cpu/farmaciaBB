@@ -7,96 +7,50 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ESTILOS BASE --- */
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #ffffff; 
-            margin: 0;
-        }
-        
-        /* Barra superior con el azul de tu captura */
-        .top-bar { 
-            background: #2563eb; 
-            color: white; 
-            padding: 10px 0; 
-            font-size: 0.85rem; 
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
         .contact-item { display: flex; align-items: center; gap: 6px; }
-
-        /* Header Principal */
         .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
         .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        
-        /* Logo con el icono azul cuadrado */
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
         .logo-subtitle { font-size: 0.85rem; color: #64748b; }
-
-        /* Buscador Moderno */
         .search-bar { flex: 1; position: relative; max-width: 550px; }
-        .search-input { 
-            width: 100%; 
-            padding: 12px 15px 12px 45px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 10px; 
-            background: #f8fafc;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; transition: border-color 0.2s; }
         .search-input:focus { border-color: #2563eb; }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
-
-        /* Acciones (Dashboard, Carrito, Login) */
         .header-actions { display: flex; align-items: center; gap: 20px; }
         .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
         .cart-container { position: relative; }
-        .cart-badge { 
-            position: absolute; -top: 8px; -right: 8px; 
-            background: #ef4444; color: white; 
-            font-size: 0.7rem; padding: 2px 6px; 
-            border-radius: 50px; border: 2px solid white;
-        }
-
-        /* Navegación Desktop */
+        .cart-badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; border: 2px solid white; }
         .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
-        .nav-link { 
-            text-decoration: none; 
-            color: #475569; 
-            font-weight: 600; 
-            padding: 10px 20px; 
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
+        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
         .nav-link:hover { color: #2563eb; background: #eff6ff; }
         .nav-link.active { background: #2563eb; color: white; }
-
-        /* Estilo para las secciones de contenido */
-        .content-card {
-            background: #f8fafc;
-            border-radius: 24px;
-            padding: 40px;
-            border: 1px solid #e2e8f0;
-            margin-top: 40px;
-        }
+        .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
+        
+        /* Estilos para el estado de Login */
+        #user-auth-section { display: flex; align-items: center; gap: 15px; }
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
+        .logout-btn:hover { background: #fee2e2; }
     </style>
 </head>
 
 <body>
     <div id="root">
-
         <header class="site-header">
-
             <div class="top-bar">
                 <div class="container">
                     <div class="top-bar-content">
                         <div class="contact-info">
-                            <a href="tel:+525523697940" class="contact-item">
+                            <a href="tel:+525523697940" class="contact-item text-white decoration-none">
                                 <i data-lucide="phone" size="16"></i>
                                 <span>+52 55 23 69 79 40</span>
                             </a>
@@ -116,8 +70,7 @@
             <div class="main-header">
                 <div class="container">
                     <div class="main-header-content">
-
-                        <a href="home.html" class="logo">
+                        <a href="index.html" class="logo">
                             <div class="logo-box">⚕️</div>
                             <div>
                                 <h1 class="logo-title">FarmaPlus</h1>
@@ -127,11 +80,7 @@
 
                         <div class="search-bar">
                             <i data-lucide="search" class="search-icon"></i>
-                            <input 
-                                type="text" 
-                                placeholder="Buscar medicamentos, productos..." 
-                                class="search-input" 
-                            />
+                            <input type="text" placeholder="Buscar medicamentos, productos..." class="search-input" />
                         </div>
 
                         <div class="header-actions">
@@ -144,12 +93,13 @@
                                 <span class="cart-badge">0</span>
                             </a>
 
-                            <a href="login.html" class="action-link">
-                                <i data-lucide="user"></i>
-                                <span>Iniciar Sesión</span>
-                            </a>
+                            <div id="user-auth-section">
+                                <a href="inicio de sesión.html" class="action-link" id="login-link">
+                                    <i data-lucide="user"></i>
+                                    <span>Iniciar Sesión</span>
+                                </a>
+                            </div>
                         </div>
-
                     </div>
 
                     <nav class="nav-desktop">
@@ -158,16 +108,14 @@
                         <a href="nosotros.html" class="nav-link">Nosotros</a>
                         <a href="contacto.html" class="nav-link">Contacto</a>
                     </nav>
-
                 </div>
             </div>
-
         </header>
 
         <main class="container py-12">
             <div class="content-card text-center">
-                <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Bienvenido a FarmaPlus</h2>
-                <p class="text-slate-500 text-lg max-width-2xl mx-auto">
+                <h2 class="text-4xl font-extrabold text-slate-900 mb-4" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto">
                     Estamos trabajando para ofrecerte los mejores productos para tu salud con la rapidez que necesitas.
                 </p>
             </div>
@@ -178,37 +126,65 @@
                 <p>© 2026 FarmaPlus. Todos los derechos reservados.</p>
             </div>
         </footer>
-
     </div>
 
     <script>
-        // Inicializar Iconos Lucide
+        // CONFIGURACIÓN SUPABASE
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(_url, _key);
+
         lucide.createIcons();
 
-        // Función del Reloj en Tiempo Real
+        // 1. VERIFICAR SESIÓN Y CARGAR PERFIL DE BD
+        async function checkSession() {
+            const { data: { session } } = await dbClient.auth.getSession();
+            const authSection = document.getElementById('user-auth-section');
+            const welcomeTitle = document.getElementById('welcome-title');
+
+            if (session) {
+                const user = session.user;
+                
+                // Consultar nombre en la tabla 'profiles'
+                const { data: profile } = await dbClient
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', user.id)
+                    .single();
+
+                const name = profile ? profile.full_name : user.email;
+
+                // Cambiar el HTML del header
+                authSection.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
+                            <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${name}
+                        </span>
+                        <button onclick="logout()" class="logout-btn">Salir</button>
+                    </div>
+                `;
+                welcomeTitle.innerText = `¡Qué gusto verte, ${name.split(' ')[0]}!`;
+                lucide.createIcons();
+            }
+        }
+
+        // 2. FUNCIÓN PARA CERRAR SESIÓN
+        async function logout() {
+            await dbClient.auth.signOut();
+            window.location.reload();
+        }
+
+        // Reloj en tiempo real
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
-            
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            const dayName = days[now.getDay()];
-            
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-            
-            // Formato 00:00:00
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-            
-            clockElement.textContent = `${dayName}: ${hours}:${minutes}:${seconds}`;
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // Actualizar cada segundo
         setInterval(updateClock, 1000);
-        updateClock(); 
+        updateClock();
+        checkSession(); // Ejecutar al cargar
     </script>
-
 </body>
 </html>
