@@ -1,30 +1,182 @@
-<div style="display: flex; justify-content: center; align-items: center; padding: 4rem 1rem; min-height: 70vh;">
-    <div style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border: 1px solid var(--border);">
-        <h1 style="text-align: center; color: var(--primary); margin-bottom: 2rem;">Iniciar Sesión</h1>
-        
-        <form id="login-form">
-            <div style="margin-bottom: 20px;">
-                <label for="email" style="display: block; font-weight: bold; margin-bottom: 5px;">Correo Electrónico:</label>
-                <input type="email" id="email" name="email" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box;">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label for="password" style="display: block; font-weight: bold; margin-bottom: 5px;">Contraseña:</label>
-                <input type="password" id="password" name="password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box;">
-            </div>
-            <p id="error-message" class="hidden" style="color: var(--destructive); text-align: center; font-weight: bold; margin-bottom: 1rem;">Correo o contraseña incorrectos.</p>
-            
-            <button type="submit" class="button button-primary w-full">Entrar</button>
-        </form>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión - FarmaPlus</title>
 
-        <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
-            <p style="margin-bottom: 15px; color: #666; font-size: 0.9rem;">¿Eres nuevo en FarmaPlus?</p>
-            <button 
-                type="button" 
-                data-page="registro-detallado" 
-                class="button button-outline w-full" 
-                style="border: 2px solid var(--primary); color: var(--primary); font-weight: bold;">
-                Registrar nuevo usuario
-            </button>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Barra superior */
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 8px; }
+
+        /* Header Principal */
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+
+        /* Estilos del Formulario de Login */
+        .login-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .input-group input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        /* Botón de Regreso Flotante */
+        .back-to-index {
+            position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white;
+            padding: 14px 28px; border-radius: 50px; display: flex; align-items: center;
+            gap: 12px; text-decoration: none; font-weight: 600;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                    <div class="contact-item">
+                        <i data-lucide="clock" size="18"></i>
+                        <span id="live-clock">Cargando hora...</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+
+        <div class="main-header">
+            <div class="container">
+                <div class="main-header-content">
+                    <a href="index.html" class="logo">
+                        <div class="logo-box">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="text-slate-500 text-xs font-semibold">Tu farmacia de confianza</p>
+                        </div>
+                    </a>
+                    
+                    <nav class="flex gap-6">
+                        <a href="index.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Inicio</a>
+                        <a href="nosotros.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Nosotros</a>
+                        <a href="contacto.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Contacto</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex justify-center align-center items-center py-20 px-4">
+        <div class="login-card">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
+                    <i data-lucide="lock" size="32"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900">Bienvenido</h2>
+                <p class="text-slate-500 mt-2">Ingresa tus datos para continuar</p>
+            </div>
+            
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-6">
+                <div class="input-group">
+                    <label for="email" class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="password" class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold">
+                    Correo o contraseña incorrectos.
+                </p>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all transform active:scale-95 shadow-lg shadow-blue-100">
+                    Entrar
+                </button>
+            </form>
+
+            <div class="text-center mt-8 pt-8 border-top border-slate-100">
+                <p class="text-slate-500 text-sm mb-4">¿Eres nuevo en FarmaPlus?</p>
+                <button 
+                    onclick="window.location.href='registro.html'"
+                    class="w-full border-2 border-blue-600 text-blue-600 p-3 rounded-xl font-bold hover:bg-blue-50 transition-all">
+                    Registrar nuevo usuario
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <a href="index.html" class="back-to-index">
+        <i data-lucide="arrow-left"></i>
+        <span>Regresar al Inicio</span>
+    </a>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. RELOJ EN TIEMPO REAL
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+            h = h < 10 ? '0'+h : h; m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
+            clockElement.textContent = `${days[now.getDay()]}: ${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. FUNCIÓN DE LOGIN
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Simulación básica: si el correo es admin@admin.com entra
+            if(email === "admin@admin.com" && password === "1234") {
+                alert("¡Bienvenido de nuevo!");
+                window.location.href = 'index.html';
+            } else {
+                const error = document.getElementById('error-message');
+                error.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
