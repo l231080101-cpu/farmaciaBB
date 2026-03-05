@@ -1,60 +1,209 @@
-<div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: sans-serif;">
-    <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px; color: #1a202c;">Contáctanos</h2>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; align-items: start;">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto - FarmaPlus</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
         
-        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7;">
-            <form id="contact-form" style="display: flex; flex-direction: column; gap: 25px;">
-                
-                <div style="display: flex; align-items: center;">
-                    <label style="width: 150px; color: #4a5568; font-weight: 500;">Tu nombre</label>
-                    <input type="text" placeholder="Nombre completo" required 
-                        style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                </div>
+        /* Barra superior */
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 8px; }
 
-                <div style="display: flex; align-items: center;">
-                    <label style="width: 150px; color: #4a5568; font-weight: 500;">Correo electrónico</label>
-                    <input type="email" placeholder="email@ejemplo.com" required 
-                        style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                </div>
+        /* Header Principal */
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
 
-                <div style="display: flex; align-items: flex-start;">
-                    <label style="width: 150px; color: #4a5568; font-weight: 500; margin-top: 10px;">Mensaje</label>
-                    <textarea placeholder="¿En qué podemos ayudarte?" rows="4" 
-                        style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; resize: none;"></textarea>
-                </div>
+        .search-bar { flex: 1; position: relative; max-width: 600px; }
+        .search-input { 
+            width: 100%; padding: 12px 15px 12px 45px; 
+            border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; 
+        }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-                <button type="submit" 
-                    style="width: 100%; background: #2563eb; color: white; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px;">
-                    Enviar Mensaje
-                </button>
-            </form>
-        </div>
+        /* Navegación */
+        .nav-desktop { display: flex; gap: 30px; margin-top: 20px; }
+        .nav-link { 
+            text-decoration: none; color: #475569; font-weight: 500; 
+            padding: 8px 16px; border-radius: 6px; transition: all 0.2s; 
+        }
+        .nav-link.active { background: #2563eb; color: white; }
+        .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
 
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: 350px; border: 4px solid white;">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3764.551843477815!2d-99.0435422!3d19.3452445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1e2da75952d7d%3A0x6b69b62f3a69777!2sCalle%2067%2016%2C%20Santa%20Cruz%20Meyehualco%2C%20Iztapalapa%2C%2009290%20Ciudad%20de%20M%C3%A9xico%2C%20CDMX!5e0!3m2!1ses-419!2smx!4v1715890000000!5m2!1ses-419!2smx" 
-                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
-                </iframe>
-            </div>
-            
-            <div style="background: white; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f7fafc;">
-                <div style="flex: 1;">
-                    <h4 style="margin: 0; color: #2d3748; font-size: 16px;">C. 67 16</h4>
-                    <p style="margin: 5px 0; color: #718096; font-size: 13px; line-height: 1.4;">
-                        C. 67 16, Santa Cruz Meyehualco, Iztapalapa, 09290 Ciudad de México, CDMX
-                    </p>
-                    <a href="https://maps.app.goo.gl/pL2Vz8V8vL2Vz8V8" target="_blank" style="color: #2563eb; font-size: 13px; text-decoration: none; font-weight: 500;">Ampliar el mapa</a>
-                </div>
-                <div style="text-align: center; margin-left: 15px;">
-                    <div style="background: #eff6ff; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+        /* Botón Regreso */
+        .back-to-index {
+            position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white;
+            padding: 14px 28px; border-radius: 50px; display: flex; align-items: center;
+            gap: 12px; text-decoration: none; font-weight: 600;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; transition: transform 0.2s;
+        }
+        .back-to-index:hover { transform: translateY(-5px); }
+        
+        /* Estilos del Mapa y Formulario */
+        .map-container { border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid white; height: 100%; min-height: 400px; }
+        .form-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; }
+        
+        input:focus, textarea:focus { border-color: #2563eb !important; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                    <div class="contact-item">
+                        <i data-lucide="clock" size="18"></i>
+                        <span id="live-clock">Cargando hora...</span>
                     </div>
-                    <span style="font-size: 11px; font-weight: bold; color: #2563eb; text-transform: uppercase;">Cómo llegar</span>
                 </div>
             </div>
         </div>
 
-    </div>
-</div>
+        <div class="main-header">
+            <div class="container">
+                <div class="main-header-content">
+                    <a href="index.html" class="logo">
+                        <div class="logo-box">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="logo-subtitle">Tu farmacia de confianza</p>
+                        </div>
+                    </a>
+
+                    <div class="search-bar">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="main-search" placeholder="Buscar medicamentos, productos..." class="search-input" />
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'"></i>
+                        <div class="relative cursor-pointer" onclick="window.location.href='carrito.html'">
+                            <i data-lucide="shopping-cart" class="text-slate-700"></i>
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
+                            <i data-lucide="user"></i>
+                            <span class="text-sm font-medium">Iniciar Sesión</span>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="nav-desktop">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="catalog.html" class="nav-link">Catálogo</a>
+                    <a href="nosotros.html" class="nav-link">Nosotros</a>
+                    <a href="contacto.html" class="nav-link active">Contacto</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Contáctanos</h2>
+            <p class="text-slate-500 text-lg">Estamos aquí para resolver tus dudas y atender tus necesidades.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+            
+            <div class="form-card">
+                <form id="contact-form" class="flex flex-col gap-6" onsubmit="handleContactSubmit(event)">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-slate-700 font-semibold">Tu nombre</label>
+                        <input type="text" placeholder="Escribe tu nombre completo" required 
+                            class="w-full p-3 border border-slate-200 rounded-xl transition-all">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-slate-700 font-semibold">Correo electrónico</label>
+                        <input type="email" placeholder="email@ejemplo.com" required 
+                            class="w-full p-3 border border-slate-200 rounded-xl transition-all">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-slate-700 font-semibold">Mensaje</label>
+                        <textarea placeholder="¿En qué podemos ayudarte?" rows="4" required
+                            class="w-full p-3 border border-slate-200 rounded-xl transition-all resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all transform active:scale-95 shadow-lg shadow-blue-200">
+                        Enviar Mensaje
+                    </button>
+                </form>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3764.225585358!2d-99.0438!3d19.34!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDIwJzI0LjAiTiA5OcKwMDInMzcuNyJX!5e0!3m2!1ses!2smx!4v1650000000000" 
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
+                    </iframe>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl flex justify-between items-center shadow-sm border border-slate-100">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-800">Ubicación Principal</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed mt-1">
+                            C. 67 16, Santa Cruz Meyehualco, Iztapalapa, 09290 Ciudad de México, CDMX
+                        </p>
+                    </div>
+                    <div class="text-center ml-4">
+                        <div class="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mb-1">
+                            <i data-lucide="navigation" class="text-blue-600"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-600 uppercase">Ruta</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <a href="index.html" class="back-to-index">
+        <i data-lucide="arrow-left"></i>
+        <span>Regresar al Inicio</span>
+    </a>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. RELOJ EN VIVO
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const dayName = days[now.getDay()];
+            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+            h = h < 10 ? '0'+h : h; m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
+            clockElement.textContent = `${dayName}: ${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. FUNCIÓN DE ENVÍO DE FORMULARIO
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            alert("¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.");
+            event.target.reset(); // Limpia el formulario
+        }
+    </script>
+</body>
+</html>
+
