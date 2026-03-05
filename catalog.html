@@ -7,55 +7,68 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .product-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        /* Estilos alineados con tu Admin Panel */
+        .product-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 32px; /* Mismo radio que tu modal de agregar producto */
+        }
+        .product-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+        }
+        .btn-cart-nav {
+            transition: all 0.2s;
+        }
+        .btn-cart-nav:hover { background-color: #eff6ff; color: #2563eb; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl">
-                <span class="bg-blue-600 text-white p-1 rounded-lg">⚕️</span> FarmaPlus
+            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tight">
+                <span class="bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-200">⚕️</span> FarmaPlus
             </a>
-            <div class="flex gap-4">
-                <a href="index.html" class="text-slate-600 font-semibold hover:text-blue-600">Inicio</a>
-                <button class="relative">
-                    <i data-lucide="shopping-cart" class="text-slate-700"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
-                </button>
+            <div class="flex items-center gap-6">
+                <a href="index.html" class="text-slate-600 font-bold hover:text-blue-600 transition-colors">Inicio</a>
+                <a href="carrito.html" class="btn-cart-nav relative p-3 rounded-2xl bg-slate-50 text-slate-700">
+                    <i data-lucide="shopping-cart"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-white shadow-sm">0</span>
+                </a>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
-            <div>
-                <h2 class="text-4xl font-extrabold text-slate-900">Nuestros Productos</h2>
-                <p class="text-slate-500 mt-2">Calidad farmacéutica garantizada en cada pedido.</p>
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div class="max-w-xl">
+                <h2 class="text-5xl font-black text-slate-900 tracking-tight mb-3">Nuestros Productos</h2>
+                <p class="text-slate-500 text-lg">Explora nuestro inventario con calidad farmacéutica garantizada.</p>
             </div>
-            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2">
-                <i data-lucide="search" class="text-slate-400 ml-2"></i>
-                <input type="text" id="search-input" placeholder="Buscar medicina..." class="outline-none bg-transparent p-2 text-sm w-64">
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 w-full md:w-auto">
+                <i data-lucide="search" class="text-slate-400 ml-3"></i>
+                <input type="text" id="search-input" placeholder="¿Qué medicina buscas?" class="outline-none bg-transparent p-3 text-sm w-full md:w-72 font-semibold">
             </div>
         </div>
         
         <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="col-span-full flex flex-col items-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                <p class="mt-4 text-slate-500 font-medium">Conectando con la farmacia...</p>
+            <div class="col-span-full flex flex-col items-center py-32">
+                <div class="animate-spin rounded-full h-14 w-14 border-t-4 border-blue-600 border-r-4 border-blue-100"></div>
+                <p class="mt-6 text-slate-400 font-bold text-lg">Cargando medicinas...</p>
             </div>
         </div>
     </main>
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const _key = 'TU_KEY_REAL'; // Usa tu llave real aquí
         const sb = supabase.createClient(_url, _key);
 
         let todosLosProductos = [];
+        let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
         async function cargarProductos() {
             const { data: productos, error } = await sb
@@ -64,43 +77,47 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error al cargar productos:', error);
+                console.error('Error:', error);
                 return;
             }
 
             todosLosProductos = productos;
             renderizarProductos(productos);
+            updateCartCount();
         }
 
         function renderizarProductos(lista) {
             const grid = document.getElementById('productos-grid');
             
             if (lista.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontraron productos en esta categoría.</p>`;
+                grid.innerHTML = `
+                <div class="col-span-full text-center py-20 bg-white rounded-[32px] border border-dashed border-slate-200">
+                    <p class="text-slate-400 font-bold text-xl">No encontramos esa medicina.</p>
+                </div>`;
                 return;
             }
 
             grid.innerHTML = lista.map(p => `
-                <div class="product-card bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col">
-                    <div class="relative h-56 bg-slate-100">
-                        <img src="${p.imagen_url || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=500'}" 
+                <div class="product-card bg-white border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
+                    <div class="relative h-64 bg-slate-50">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/500'}" 
                              class="w-full h-full object-cover" 
-                             alt="${p.nombre}"
-                             onerror="this.src='https://via.placeholder.com/500x500?text=Medicamento'">
-                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-blue-600 font-bold text-xs">
-                            Disponible
+                             alt="${p.nombre}">
+                        <div class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-wider shadow-lg">
+                            Stock Disponible
                         </div>
                     </div>
-                    <div class="p-6 flex-grow">
-                        <h3 class="font-extrabold text-slate-800 text-lg mb-1 leading-tight">${p.nombre}</h3>
-                        <p class="text-slate-500 text-sm line-clamp-2 mb-4">${p.descripcion || 'Sin descripción disponible.'}</p>
-                        <div class="flex justify-between items-center mt-auto">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="font-black text-slate-800 text-xl mb-2 leading-tight">${p.nombre}</h3>
+                        <p class="text-slate-400 text-sm line-clamp-2 mb-6 font-medium">${p.descripcion || 'Medicamento de alta calidad.'}</p>
+                        
+                        <div class="flex justify-between items-center mt-auto border-t pt-5">
                             <div class="flex flex-col">
-                                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Precio</span>
-                                <span class="text-2xl font-black text-blue-600">$${p.precio}</span>
+                                <span class="text-[10px] text-slate-400 font-black uppercase tracking-widest">Precio</span>
+                                <span class="text-3xl font-black text-blue-600 tracking-tighter">$${p.precio}</span>
                             </div>
-                            <button onclick="addToCart('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 transition-all active:scale-95">
-                                <i data-lucide="plus" size="24"></i>
+                            <button onclick="addToCart('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200 transition-all active:scale-90 group">
+                                <i data-lucide="plus" class="group-hover:rotate-90 transition-transform" size="28"></i>
                             </button>
                         </div>
                     </div>
@@ -109,27 +126,44 @@
             lucide.createIcons();
         }
 
-        // --- FILTRO DE BÚSQUEDA ---
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            const busqueda = e.target.value.toLowerCase();
-            const filtrados = todosLosProductos.filter(p => 
-                p.nombre.toLowerCase().includes(busqueda) || 
-                p.descripcion.toLowerCase().includes(busqueda)
-            );
-            renderizarProductos(filtrados);
-        });
-
-        // --- SIMULACIÓN DE CARRITO ---
+        // --- LÓGICA DEL CARRITO CONEXIÓN ---
         function addToCart(id) {
-            const count = document.getElementById('cart-count');
-            count.innerText = parseInt(count.innerText) + 1;
-            
-            // Animación pequeña
-            count.classList.add('scale-125', 'bg-green-500');
-            setTimeout(() => count.classList.remove('scale-125', 'bg-green-500'), 300);
-            
-            console.log('Producto añadido:', id);
+            const producto = todosLosProductos.find(p => p.id === id);
+            const itemEnCarrito = cart.find(item => item.id === id);
+
+            if (itemEnCarrito) {
+                itemEnCarrito.cantidad++;
+            } else {
+                cart.push({ ...producto, cantidad: 1 });
+            }
+
+            saveCart();
+            animateCartBadge();
         }
+
+        function saveCart() {
+            localStorage.setItem('farmaCart', JSON.stringify(cart));
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const count = document.getElementById('cart-count');
+            const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            count.innerText = totalItems;
+        }
+
+        function animateCartBadge() {
+            const badge = document.getElementById('cart-count');
+            badge.classList.add('scale-150', 'bg-green-500');
+            setTimeout(() => badge.classList.remove('scale-150', 'bg-green-500'), 400);
+        }
+
+        // Buscador
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const b = e.target.value.toLowerCase();
+            const f = todosLosProductos.filter(p => p.nombre.toLowerCase().includes(b));
+            renderizarProductos(f);
+        });
 
         window.onload = () => {
             cargarProductos();
