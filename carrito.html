@@ -13,21 +13,19 @@
         .card-style { background: white; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
-<body class="antialiased text-slate-900">
+<body class="antialiased">
 
     <header class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-        <a href="catolg.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
+        <a href="catalog.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl">
             <span class="bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-200">⚕️</span> FarmaPlus
         </a>
         
         <div class="flex items-center gap-4">
-            <div id="user-profile" class="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-sm">
-                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                    <i data-lucide="user" size="20"></i>
-                </div>
-                <div>
+            <div class="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><i data-lucide="user" size="18"></i></div>
+                <div class="hidden sm:block">
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sesión</p>
-                    <p id="user-email" class="text-xs font-bold text-slate-700 truncate max-w-[150px]">Cargando...</p>
+                    <p id="user-email" class="text-xs font-bold text-slate-700">Invitado</p>
                 </div>
             </div>
             <button onclick="logout()" class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
@@ -38,66 +36,46 @@
 
     <main class="max-w-7xl mx-auto px-6 py-8">
         <div class="mb-10 flex justify-between items-end">
-            <div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Tu Carrito</h1>
-                <p class="text-slate-500">Gestiona tus productos y finaliza tu compra.</p>
-            </div>
-            <a href="catolg.html" class="text-blue-600 font-bold flex items-center gap-2 hover:underline transition-all">
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Tu Carrito</h1>
+            <a href="catalog.html" class="text-blue-600 font-bold flex items-center gap-2 hover:underline">
                 <i data-lucide="arrow-left" size="18"></i> Volver al catálogo
             </a>
         </div>
 
         <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div id="cart-items-container" class="lg:col-span-2 space-y-4">
-                </div>
+            <div id="cart-items-container" class="lg:col-span-2 space-y-4"></div>
 
             <aside id="summary-sidebar" class="hidden">
                 <div class="card-style p-8 sticky top-6">
                     <h3 class="text-xl font-bold mb-6">Resumen</h3>
                     <div class="space-y-4 mb-8">
-                        <div class="flex justify-between text-slate-500">
-                            <span>Subtotal</span>
-                            <span id="subtotal" class="font-bold text-slate-800">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-slate-500">
-                            <span>Envío</span>
-                            <span class="font-bold text-green-600">Gratis</span>
-                        </div>
-                        <div class="border-t pt-4 flex justify-between items-center">
-                            <span class="font-bold text-lg text-slate-900">Total</span>
-                            <span id="total" class="text-3xl font-black text-blue-600">$0.00</span>
-                        </div>
+                        <div class="flex justify-between text-slate-500 font-bold"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+                        <div class="flex justify-between text-slate-500 font-bold"><span>Envío</span><span class="text-green-600">Gratis</span></div>
+                        <div class="border-t pt-4 flex justify-between items-center"><span class="font-black text-lg">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
                     </div>
-
-                    <div class="space-y-3">
-                        <button onclick="procesarPedido('Pago Online')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-                            Pagar Ahora
-                        </button>
-                        <button onclick="window.location.href='catolg.html'" class="w-full border-2 border-slate-100 text-slate-600 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all">
-                            Seguir comprando
-                        </button>
-                    </div>
+                    <button onclick="procesarPedido('Online')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 mb-3">Pagar Ahora</button>
+                    <button onclick="window.location.href='catalog.html'" class="w-full border-2 border-slate-100 text-slate-600 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all">Seguir comprando</button>
                 </div>
             </aside>
         </div>
     </main>
 
     <script>
-        // Configuración Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
-        async function cargarUsuario() {
+        async function init() {
             const { data: { user } } = await sb.auth.getUser();
-            document.getElementById('user-email').innerText = user ? user.email : "Invitado";
+            if (user) document.getElementById('user-email').innerText = user.email;
+            render();
         }
 
         async function logout() {
             await sb.auth.signOut();
-            window.location.href = "catolg.html"; // Redirige al catálogo tras cerrar sesión
+            window.location.href = "catalog.html";
         }
 
         function render() {
@@ -108,81 +86,64 @@
                 sidebar.classList.add('hidden');
                 container.innerHTML = `
                     <div class="card-style py-20 text-center border-2 border-dashed border-slate-200">
-                        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i data-lucide="shopping-basket" class="text-blue-600" size="32"></i>
-                        </div>
-                        <h2 class="text-3xl font-black mb-4">Tu carrito está vacío</h2>
-                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Parece que aún no has añadido ninguna medicina. ¡Explora nuestras ofertas!</p>
-                        <a href="catolg.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg inline-block hover:scale-105 transition-transform">Ver Productos</a>
+                        <i data-lucide="shopping-basket" class="text-blue-600 mx-auto mb-6" size="48"></i>
+                        <h2 class="text-3xl font-black mb-6">Tu carrito está vacío</h2>
+                        <a href="catalog.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg inline-block">Ver Productos</a>
                     </div>`;
-                lucide.createIcons();
-                return;
+            } else {
+                sidebar.classList.remove('hidden');
+                let total = 0;
+                container.innerHTML = cart.map((item, idx) => {
+                    total += item.precio * item.cantidad;
+                    return `
+                        <div class="card-style p-6 flex items-center gap-6">
+                            <img src="${item.imagen_url}" class="w-20 h-20 object-cover rounded-2xl bg-slate-50">
+                            <div class="flex-grow">
+                                <h4 class="font-black text-xl">${item.nombre}</h4>
+                                <p class="text-blue-600 font-bold">$${item.precio}</p>
+                            </div>
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border">
+                                <button onclick="changeQty(${idx}, -1)" class="px-3 font-black text-slate-500 hover:text-blue-600">-</button>
+                                <span class="font-bold px-2">${item.cantidad}</span>
+                                <button onclick="changeQty(${idx}, 1)" class="px-3 font-black text-slate-500 hover:text-blue-600">+</button>
+                            </div>
+                            <button onclick="remove(${idx})" class="p-2 text-slate-300 hover:text-red-500"><i data-lucide="trash-2" size="20"></i></button>
+                        </div>`;
+                }).join('');
+                document.getElementById('total').innerText = `$${total.toFixed(2)}`;
+                document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
             }
-
-            sidebar.classList.remove('hidden');
-            let totalValue = 0;
-            container.innerHTML = cart.map((item, index) => {
-                totalValue += item.precio * item.cantidad;
-                return `
-                    <div class="card-style p-6 flex items-center gap-6">
-                        <img src="${item.imagen_url}" class="w-24 h-24 object-cover rounded-2xl bg-slate-50 border border-slate-100">
-                        <div class="flex-grow">
-                            <h4 class="font-black text-xl text-slate-800 capitalize">${item.nombre}</h4>
-                            <p class="text-blue-600 font-extrabold text-lg">$${item.precio}</p>
-                        </div>
-                        <div class="flex items-center bg-slate-100 rounded-xl p-1 px-2 border border-slate-200">
-                            <button onclick="changeQty(${index}, -1)" class="p-2 font-black text-slate-500 hover:text-blue-600">-</button>
-                            <span class="px-4 font-bold text-slate-700">${item.cantidad}</span>
-                            <button onclick="changeQty(${index}, 1)" class="p-2 font-black text-slate-500 hover:text-blue-600">+</button>
-                        </div>
-                        <button onclick="remove(${index})" class="p-3 text-slate-300 hover:text-red-500 transition-colors">
-                            <i data-lucide="trash-2" size="20"></i>
-                        </button>
-                    </div>`;
-            }).join('');
-            
-            document.getElementById('total').innerText = `$${totalValue.toFixed(2)}`;
-            document.getElementById('subtotal').innerText = `$${totalValue.toFixed(2)}`;
             lucide.createIcons();
         }
 
         async function procesarPedido(metodo) {
             const { data: { user } } = await sb.auth.getUser();
-            const totalValue = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
-            
-            // Verificamos si la tabla existe o si hay error de inserción
             const { error } = await sb.from('pedidos').insert({
                 usuario_email: user ? user.email : "Invitado",
                 items: cart,
-                total: totalValue,
-                metodo_pago: metodo,
-                fecha: new Date().toISOString()
+                total: cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0),
+                metodo_pago: metodo
             });
 
-            if (error) {
-                console.error("Error Supabase:", error);
-                alert("Error al procesar el pago. Asegúrate de que la tabla 'pedidos' esté creada en Supabase.");
-            } else {
-                alert("¡Pedido realizado con éxito!");
+            if (error) alert("Error al guardar pedido. Verifica la tabla 'pedidos' en Supabase.");
+            else {
+                alert("¡Compra exitosa!");
                 localStorage.removeItem('farmaCart');
-                window.location.href = "catolg.html";
+                window.location.href = "catalog.html";
             }
         }
 
         window.changeQty = (idx, d) => {
             cart[idx].cantidad += d;
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
-            save();
-        };
+            localStorage.setItem('farmaCart', JSON.stringify(cart));
+            render();
+        }
 
-        window.remove = (idx) => { cart.splice(idx, 1); save(); };
-        function save() { localStorage.setItem('farmaCart', JSON.stringify(cart)); render(); }
-        
-        window.onload = () => { 
-            cargarUsuario(); 
-            render(); 
-            lucide.createIcons(); 
-        };
+        window.remove = (idx) => { cart.splice(idx, 1); localStorage.setItem('farmaCart', JSON.stringify(cart)); render(); }
+
+        window.onload = init;
     </script>
 </body>
 </html>
+
