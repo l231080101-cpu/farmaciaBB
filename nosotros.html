@@ -11,77 +11,29 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
-        
-        /* Barra superior con tu color azul original */
-        .top-bar { 
-            background: #2563eb; 
-            color: white; 
-            padding: 10px 0; 
-            font-size: 0.9rem; 
-        }
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
         .contact-item { display: flex; align-items: center; gap: 8px; }
-
-        /* Header Principal */
         .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
         .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
         .logo-subtitle { font-size: 0.85rem; color: #64748b; }
-
         .search-bar { flex: 1; position: relative; max-width: 600px; }
-        .search-input { 
-            width: 100%; 
-            padding: 12px 15px 12px 45px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 8px; 
-            background: #f8fafc;
-        }
+        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-
-        /* Navegación */
         .nav-desktop { display: flex; gap: 30px; margin-top: 20px; }
-        .nav-link { 
-            text-decoration: none; 
-            color: #475569; 
-            font-weight: 500; 
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: all 0.2s; 
-        }
+        .nav-link { text-decoration: none; color: #475569; font-weight: 500; padding: 8px 16px; border-radius: 6px; transition: all 0.2s; }
         .nav-link.active { background: #2563eb; color: white; }
         .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
-
-        /* Sección Contenido */
         .about-section { padding: 80px 0; }
-        .about-hero-image { 
-            width: 100%; 
-            height: 500px; 
-            object-fit: cover; 
-            border-radius: 20px; 
-            margin: 40px 0; 
-        }
-
-        /* Botón Regreso */
-        .back-to-index {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #2563eb;
-            color: white;
-            padding: 14px 28px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-            z-index: 100;
-        }
+        .about-hero-image { width: 100%; height: 500px; object-fit: cover; border-radius: 20px; margin: 40px 0; }
+        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
+        
+        /* Efecto de click para botones */
+        .cursor-pointer:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -113,16 +65,18 @@
 
                     <div class="search-bar">
                         <i data-lucide="search" class="search-icon"></i>
-                        <input type="text" placeholder="Buscar medicamentos, productos..." class="search-input" />
+                        <input type="text" id="main-search" placeholder="Buscar medicamentos, productos..." class="search-input" onkeypress="handleSearch(event)" />
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer"></i>
-                        <div class="relative">
-                            <i data-lucide="shopping-cart" class="text-slate-700 cursor-pointer"></i>
-                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'" title="Panel de Administración"></i>
+                        
+                        <div class="relative cursor-pointer" onclick="toggleCart()">
+                            <i data-lucide="shopping-cart" class="text-slate-700"></i>
+                            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                         </div>
-                        <div class="flex items-center gap-2 text-slate-700 cursor-pointer">
+
+                        <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
                             <i data-lucide="user"></i>
                             <span class="text-sm font-medium">Iniciar Sesión</span>
                         </div>
@@ -131,9 +85,9 @@
 
                 <nav class="nav-desktop">
                     <a href="index.html" class="nav-link">Inicio</a>
-                    <a href="#" class="nav-link">Catálogo</a>
-                    <a href="#" class="nav-link active">Nosotros</a>
-                    <a href="#" class="nav-link">Contacto</a>
+                    <a href="catalog.html" class="nav-link">Catálogo</a>
+                    <a href="nosotros.html" class="nav-link active">Nosotros</a>
+                    <a href="contacto.html" class="nav-link">Contacto</a>
                 </nav>
             </div>
         </div>
@@ -143,6 +97,9 @@
         <div class="text-center">
             <h2 class="text-5xl font-extrabold text-slate-900 mb-4">Nuestra Identidad</h2>
             <p class="text-slate-500 text-xl">Cuidando de ti y de los tuyos desde el primer día.</p>
+            <button onclick="addToCart()" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">
+                Simular Compra de Prueba
+            </button>
         </div>
 
         <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?auto=format&fit=crop&q=80&w=1200" alt="Equipo" class="about-hero-image">
@@ -165,33 +122,52 @@
     </a>
 
     <script>
-        // Inicializar Iconos
         lucide.createIcons();
 
-        // Función del Reloj en Vivo
+        // 1. RELOJ EN VIVO
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
-            
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             const dayName = days[now.getDay()];
-            
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-            
-            // Formato 00:00:00
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-            
-            clockElement.textContent = `${dayName}: ${hours}:${minutes}:${seconds}`;
+            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+            h = h < 10 ? '0'+h : h; m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
+            clockElement.textContent = `${dayName}: ${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. FUNCIÓN DE BÚSQUEDA
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('main-search').value;
+                if(query.trim() !== "") {
+                    alert("Buscando: " + query + "\n(Aquí podrías redirigir a catalog.html?search=" + query + ")");
+                    // window.location.href = 'catalog.html?search=' + query;
+                }
+            }
         }
 
-        // Actualizar cada segundo
-        setInterval(updateClock, 1000);
-        updateClock(); // Llamada inicial
+        // 3. FUNCIÓN DE CARRITO (SIMULACIÓN)
+        let itemsInCart = 0;
+        function addToCart() {
+            itemsInCart++;
+            document.getElementById('cart-count').textContent = itemsInCart;
+            // Animación pequeña al badge
+            const badge = document.getElementById('cart-count');
+            badge.style.transform = "scale(1.3)";
+            setTimeout(() => badge.style.transform = "scale(1)", 200);
+        }
+
+        function toggleCart() {
+            if(itemsInCart === 0) {
+                alert("Tu carrito está vacío. ¡Mira nuestro catálogo!");
+            } else {
+                window.location.href = 'carrito.html';
+            }
+        }
     </script>
 </body>
 </html>
+
 
