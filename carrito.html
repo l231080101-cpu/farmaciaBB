@@ -3,165 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrito de Compras - FarmaPlus</title>
+    <title>Mi Pedido - FarmaPlus</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .cart-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
-        @media (max-width: 900px) { .cart-grid { grid-template-columns: 1fr; } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .cart-grid { display: grid; grid-template-columns: 1fr 380px; gap: 32px; }
+        @media (max-width: 1024px) { .cart-grid { grid-template-columns: 1fr; } }
         
-        .summary-card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: sticky; top: 100px; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: #64748b; }
-        .summary-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.5rem; color: #1e293b; border-top: 1px solid #f1f5f9; pt-4; }
-        
-        .button-primary { background: #2563eb; color: white; padding: 15px; border-radius: 15px; font-weight: 700; text-align: center; transition: all 0.2s; }
-        .button-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
-        .button-outline { border: 2px solid #e2e8f0; color: #64748b; padding: 15px; border-radius: 15px; font-weight: 700; text-align: center; margin-top: 10px; }
+        .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        .empty-state-bounce { animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
-<body>
+<body class="antialiased text-slate-900">
 
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <div class="mb-10">
-            <h1 class="text-4xl font-black text-slate-900">Carrito de Compras</h1>
-            <p class="text-slate-500 mt-2">Revisa tus productos antes de finalizar la compra</p>
+    <main class="max-w-7xl mx-auto px-6 py-16">
+        <div class="flex flex-col mb-12">
+            <h1 class="text-5xl font-extrabold tracking-tight mb-3">Tu Carrito</h1>
+            <p class="text-slate-500 text-lg">Gestiona tus productos y finaliza tu compra de forma segura.</p>
         </div>
 
         <div class="cart-grid">
-            <div id="cart-items-container" class="space-y-4">
-                <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
-                    <p class="text-slate-400">Cargando tu pedido...</p>
+            <div id="cart-items-container" class="space-y-6">
                 </div>
-            </div>
 
-            <div class="order-summary">
-                <div class="summary-card">
-                    <h3 class="text-xl font-bold mb-6">Resumen del Pedido</h3>
+            <aside id="order-summary-aside" class="relative">
+                <div class="bg-white p-8 rounded-[32px] border border-slate-100 card-shadow sticky top-10">
+                    <h3 class="text-2xl font-bold mb-8">Resumen de compra</h3>
                     
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span id="cart-subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Envío</span>
-                        <span id="cart-shipping">$0.00</span>
-                    </div>
-                    
-                    <div class="summary-total mt-4 pt-4 border-t">
-                        <span>Total</span>
-                        <span id="cart-total" class="text-blue-600">$0.00</span>
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between text-slate-500 font-medium">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal" class="text-slate-900 font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500 font-medium">
+                            <span>Envío</span>
+                            <span id="cart-shipping" class="text-green-600 font-bold">$0.00</span>
+                        </div>
+                        <div class="border-t border-slate-100 pt-6 flex justify-between items-end">
+                            <span class="text-slate-900 font-bold">Total a pagar</span>
+                            <span id="cart-total" class="text-4xl font-black text-blue-600">$0.00</span>
+                        </div>
                     </div>
 
-                    <div class="mt-8 space-y-3">
-                        <button onclick="openPaymentModal()" class="button-primary w-full block">Proceder al Pago</button>
-                        <a href="catalogo.html" class="button-outline w-full block">Seguir Comprando</a>
+                    <div class="space-y-4">
+                        <button onclick="openPaymentModal()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-extrabold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 flex items-center justify-center gap-3">
+                            <i data-lucide="credit-card"></i> Pagar Ahora
+                        </button>
+                        <a href="catalogo.html" class="w-full border-2 border-slate-100 text-slate-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all">
+                            <i data-lucide="arrow-left" size="18"></i> Seguir comprando
+                        </a>
                     </div>
                 </div>
-            </div>
+            </aside>
         </div>
-    </div>
+    </main>
 
-    <div id="payment-modal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
-            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <i data-lucide="x"></i>
+    <div id="payment-modal" class="fixed inset-0 bg-slate-900/60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white rounded-[40px] p-10 w-full max-w-md shadow-2xl relative">
+            <button onclick="closePaymentModal()" class="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition">
+                <i data-lucide="x" class="text-slate-400"></i>
             </button>
             
-            <h2 class="text-2xl font-black mb-2 text-slate-900">Finalizar Compra</h2>
-            <p class="text-slate-500 text-sm mb-8">Selecciona tu método de pago preferido</p>
+            <h2 class="text-3xl font-black mb-2">Finalizar Pago</h2>
+            <p class="text-slate-500 mb-8">Selecciona el método de tu preferencia.</p>
 
-            <div class="space-y-4">
-                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Pago con Tarjeta</label>
-                    <input type="text" placeholder="Número de Tarjeta" class="w-full p-3 rounded-xl border border-slate-200 mb-3 outline-none focus:border-blue-500 transition">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" placeholder="MM/AA" class="p-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500">
-                        <input type="text" placeholder="CVC" class="p-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500">
+            <div class="space-y-5">
+                <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-2xl text-white shadow-lg mb-6">
+                    <div class="flex justify-between mb-10"><i data-lucide="cpu" size="32"></i> <span class="font-black italic text-xl tracking-tighter">FarmaPlus Pay</span></div>
+                    <p class="text-xl tracking-[0.2em] mb-4">**** **** **** ****</p>
+                    <div class="flex justify-between text-[10px] uppercase font-bold opacity-60"><span>Titular</span><span>Vencimiento</span></div>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" placeholder="Número de Tarjeta" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 ring-blue-100">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="MM/AA" class="p-4 rounded-xl border border-slate-200 outline-none">
+                        <input type="text" placeholder="CVV" class="p-4 rounded-xl border border-slate-200 outline-none">
                     </div>
                 </div>
                 
-                <button onclick="procesarPagoSimple()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition shadow-lg">
-                    <i data-lucide="shield-check" size="20"></i> Pagar con Tarjeta
+                <button onclick="procesarPago()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg hover:bg-black transition-all">
+                    Confirmar Compra
                 </button>
 
-                <div class="relative py-4 flex items-center">
-                    <div class="flex-grow border-t border-slate-200"></div>
-                    <span class="px-3 text-slate-400 text-[10px] font-bold uppercase tracking-widest">O usa Mercado Pago</span>
-                    <div class="flex-grow border-t border-slate-200"></div>
+                <div class="text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">O paga con Mercado Pago</span>
+                    <div id="walletCheckout" class="mt-4"></div>
                 </div>
-
-                <div id="walletCheckout"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
+        // CONFIGURACIÓN
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const _key = 'TU_ANON_KEY_REAL'; // Pon tu llave aquí
         const sb = supabase.createClient(_url, _key);
-
-        // INICIALIZAR MERCADO PAGO
-        const mp = new MercadoPago('TU_PUBLIC_KEY_AQUI', { locale: 'es-MX' });
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
         function renderCart() {
             const container = document.getElementById('cart-items-container');
+            const summaryAside = document.getElementById('order-summary-aside');
             const subtotalEl = document.getElementById('cart-subtotal');
             const shippingEl = document.getElementById('cart-shipping');
             const totalEl = document.getElementById('cart-total');
 
+            // --- CASO 1: CARRITO VACÍO ---
             if (cart.length === 0) {
+                summaryAside.classList.add('hidden'); // Ocultamos el resumen
+                container.classList.remove('lg:col-span-1'); // Expandimos el contenedor
                 container.innerHTML = `
-                    <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
-                        <div class="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                             <i data-lucide="shopping-cart" class="text-slate-300" size="32"></i>
+                    <div class="flex flex-col items-center justify-center py-20 bg-white rounded-[40px] border-2 border-dashed border-slate-200 text-center px-6 card-shadow">
+                        <div class="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-8 empty-state-bounce">
+                             <i data-lucide="shopping-basket" class="text-blue-600" size="48"></i>
                         </div>
-                        <p class="text-slate-500 font-bold text-xl">Tu carrito está vacío</p>
-                        <a href="catalogo.html" class="text-blue-600 font-bold hover:underline mt-2 inline-block">Volver al catálogo</a>
+                        <h2 class="text-4xl font-black text-slate-900 mb-4">Tu carrito está vacío</h2>
+                        <p class="text-slate-500 mb-10 max-w-sm text-lg">Parece que aún no has añadido ninguna medicina o producto a tu pedido. ¡Explora nuestro catálogo!</p>
+                        <a href="catalogo.html" class="bg-blue-600 text-white px-12 py-5 rounded-2xl font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center gap-3">
+                            <i data-lucide="plus-circle"></i> Ir al Catálogo
+                        </a>
                     </div>`;
-                subtotalEl.innerText = "$0.00";
-                shippingEl.innerText = "$0.00";
-                totalEl.innerText = "$0.00";
+                lucide.createIcons();
                 return;
             }
 
+            // --- CASO 2: CARRITO CON PRODUCTOS ---
+            summaryAside.classList.remove('hidden');
             let subtotal = 0;
+            
             container.innerHTML = cart.map((item, index) => {
-                const itemTotal = item.precio * item.cantidad;
-                subtotal += itemTotal;
+                const sub = item.precio * item.cantidad;
+                subtotal += sub;
                 return `
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-6 group transition hover:shadow-md">
-                        <img src="${item.imagen_url || 'https://via.placeholder.com/150'}" class="w-24 h-24 object-cover rounded-2xl bg-slate-50">
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-slate-800 text-lg">${item.nombre}</h3>
-                            <p class="text-slate-400 text-sm line-clamp-1 mb-3">${item.descripcion || 'Sin descripción'}</p>
-                            <div class="flex items-center gap-6">
-                                <div class="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100">
-                                    <button onclick="updateQty(${index}, -1)" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition">-</button>
-                                    <span class="w-10 text-center font-bold text-sm">${item.cantidad}</span>
-                                    <button onclick="updateQty(${index}, 1)" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition">+</button>
+                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 card-shadow flex flex-col sm:flex-row items-center gap-8 transition-all hover:border-blue-100">
+                        <img src="${item.imagen_url}" class="w-32 h-32 object-cover rounded-[24px] bg-slate-50 border border-slate-50">
+                        <div class="flex-grow text-center sm:text-left">
+                            <h3 class="font-extrabold text-2xl text-slate-900 mb-1">${item.nombre}</h3>
+                            <p class="text-slate-400 text-sm mb-6 line-clamp-1">${item.descripcion || 'Sin descripción'}</p>
+                            
+                            <div class="flex items-center justify-center sm:justify-start gap-6">
+                                <div class="flex items-center bg-slate-50 rounded-2xl p-1.5 border border-slate-100">
+                                    <button onclick="updateQty(${index}, -1)" class="w-10 h-10 flex items-center justify-center hover:bg-white rounded-xl transition shadow-sm">-</button>
+                                    <span class="w-12 text-center font-black text-lg">${item.cantidad}</span>
+                                    <button onclick="updateQty(${index}, 1)" class="w-10 h-10 flex items-center justify-center hover:bg-white rounded-xl transition shadow-sm">+</button>
                                 </div>
-                                <span class="font-black text-blue-600">$${item.precio} c/u</span>
+                                <span class="text-blue-600 font-black text-xl">$${item.precio}</span>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="font-black text-slate-900 text-lg mb-2">$${itemTotal.toFixed(2)}</p>
-                            <button onclick="removeItem(${index})" class="text-red-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition">
-                                <i data-lucide="trash-2" size="20"></i>
+                        <div class="flex flex-col items-center sm:items-end gap-4 min-w-[120px]">
+                            <span class="text-2xl font-black text-slate-900">$${sub.toFixed(2)}</span>
+                            <button onclick="removeItem(${index})" class="text-red-400 hover:text-red-600 p-3 hover:bg-red-50 rounded-2xl transition">
+                                <i data-lucide="trash-2" size="24"></i>
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            const shipping = subtotal > 1000 ? 0 : 99; // Envío gratis a partir de $1000
+            const shipping = subtotal > 1500 ? 0 : 150; // Envío gratis sobre 1500
             subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
             shippingEl.innerText = shipping === 0 ? "¡Gratis!" : `$${shipping.toFixed(2)}`;
             totalEl.innerText = `$${(subtotal + shipping).toFixed(2)}`;
@@ -176,10 +182,8 @@
         };
 
         window.removeItem = (index) => {
-            if(confirm('¿Eliminar producto del pedido?')) {
-                cart.splice(index, 1);
-                save();
-            }
+            cart.splice(index, 1);
+            save();
         };
 
         function save() {
@@ -187,28 +191,18 @@
             renderCart();
         }
 
-        // CONTROL DE MODAL Y PAGOS
         function openPaymentModal() {
-            if(cart.length === 0) return alert("Agrega productos primero.");
             document.getElementById('payment-modal').classList.remove('hidden');
-            initMercadoPago();
         }
 
         function closePaymentModal() {
             document.getElementById('payment-modal').classList.add('hidden');
         }
 
-        async function procesarPagoSimple() {
-            // Aquí podrías guardar el pedido en Supabase antes de limpiar
-            alert("¡Gracias por tu compra! Tu pedido está en camino.");
+        function procesarPago() {
+            alert("✅ ¡Pedido realizado con éxito! Gracias por confiar en FarmaPlus.");
             localStorage.removeItem('farmaCart');
             window.location.href = 'index.html';
-        }
-
-        async function initMercadoPago() {
-            // Nota: El botón de Mercado Pago requiere un preferenceId generado por un servidor
-            // Este es el contenedor donde aparecerá el botón oficial
-            console.log("Iniciando Bricks de Mercado Pago...");
         }
 
         window.onload = () => {
