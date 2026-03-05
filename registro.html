@@ -70,6 +70,10 @@
                 <span>Registrarse</span>
             </button>
         </form>
+
+        <div class="text-center mt-6">
+            <a href="login.html" class="text-blue-600 text-sm font-semibold hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
     </div>
 
     <script>
@@ -106,9 +110,10 @@
                 btn.disabled = false;
                 btn.innerHTML = "Registrarse";
             } else {
-                // Dentro del else del registro exitoso:
-alert("¡Registro exitoso! Por favor, inicia sesión.");
-window.location.href = 'inicio%20de%20sesión.html';
+                // Registro exitoso
+                alert("¡Registro exitoso! Ya puedes iniciar sesión.");
+                // CORRECCIÓN: Redirigir a login.html
+                window.location.href = 'login.html';
             }
         });
     </script>
