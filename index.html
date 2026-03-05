@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FarmaPlus - Tu Farmacia de Confianza</title>
+
+    <link rel="stylesheet" href="stylefarma.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div id="root">
+
+        <!-- HEADER -->
+        <header class="site-header">
+
+            <!-- Barra superior -->
+            <div class="top-bar">
+                <div class="container">
+                    <div class="top-bar-content">
+                        <div class="contact-info">
+
+                            <a href="tel:+525523697940" class="contact-item">
+                                <i data-lucide="phone"></i>
+                                <span>+52 55 23 69 79 40</span>
+                            </a>
+
+                            <div class="contact-item">
+                                <i data-lucide="map-pin"></i>
+                                <span>Calle 67 #16 duplex</span>
+                            </div>
+
+                            <div class="contact-item">
+                                <i data-lucide="clock"></i>
+                                <span>Lun-Sáb: 9:00 - 22:00</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header principal -->
+            <div class="main-header">
+                <div class="container">
+                    <div class="main-header-content">
+
+                        <!-- Logo -->
+                        <a href="home.html" class="logo">
+                            <div class="logo-icon">⚕️</div>
+                            <div>
+                                <h1 class="logo-title">FarmaPlus</h1>
+                                <p class="logo-subtitle">Tu farmacia de confianza</p>
+                            </div>
+                        </a>
+
+                        <!-- Buscador -->
+                        <div class="search-bar">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input 
+                                type="text" 
+                                placeholder="Buscar medicamentos, productos..." 
+                                class="search-input" 
+                            />
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="header-actions">
+
+                            <a href="admin.html" 
+                               class="icon-button admin-button" 
+                               title="Panel de Control" 
+                               style="color: #2563eb;">
+                                <i data-lucide="layout-dashboard"></i>
+                            </a>
+
+                            <a href="carrito.html" class="icon-button cart-button">
+                                <i data-lucide="shopping-cart"></i>
+                                <span class="cart-badge">0</span>
+                            </a>
+
+                            <a href="login.html" class="login-button">
+                                <i data-lucide="user"></i>
+                                <span>Iniciar Sesión</span>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Navegación Desktop -->
+                    <nav class="nav-desktop">
+                        <a href="home.html" class="nav-link active">Inicio</a>
+                        <a href="catalog.html" class="nav-link">Catálogo</a>
+                        <a href="nosotros.html" class="nav-link">Nosotros</a>
+                        <a href="contacto.html" class="nav-link">Contacto</a>
+                    </nav>
+
+                </div>
+            </div>
+
+        </header>
+
+        <!-- CONTENIDO -->
+        <main class="flex-1">
+            <!-- Aquí puedes insertar contenido si lo necesitas -->
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <!-- Tu footer aquí -->
+        </footer>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
