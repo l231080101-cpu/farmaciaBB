@@ -3,44 +3,35 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Iniciar Sesión - FarmaPlus</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Registro - FarmaPlus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; width: 100%; max-width: 450px; }
-        .input-group input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; outline: none; }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen bg-slate-50">
 
-    <div class="login-card">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl font-extrabold text-slate-900">Bienvenido</h2>
-            <p class="text-slate-500 mt-2">Ingresa a FarmaPlus</p>
-        </div>
+    <div class="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md border border-slate-200">
+        <h2 class="text-3xl font-black text-center text-slate-900 mb-8">Crear Cuenta</h2>
         
-        <form id="login-form" class="space-y-6">
-            <div class="input-group">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
-                <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+        <form id="register-form" class="space-y-5">
+            <div>
+                <label class="block text-sm font-bold mb-1">Nombre</label>
+                <input type="text" id="reg-name" class="w-full p-3 border rounded-xl bg-slate-50" required>
             </div>
-            <div class="input-group">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+            <div>
+                <label class="block text-sm font-bold mb-1">Correo</label>
+                <input type="email" id="reg-email" class="w-full p-3 border rounded-xl bg-slate-50" required>
             </div>
-            <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold"></p>
-            <button type="submit" id="btn-submit" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition-all">Entrar</button>
+            <div>
+                <label class="block text-sm font-bold mb-1">Contraseña</label>
+                <input type="password" id="reg-password" class="w-full p-3 border rounded-xl bg-slate-50" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold">Registrarse</button>
         </form>
 
-        <div class="text-center mt-8 pt-8 border-t border-slate-100">
-            <p class="text-slate-500 text-sm mb-4">¿Eres nuevo?</p>
-            <a href="registro.html" class="block w-full border-2 border-blue-600 text-blue-600 p-3 rounded-xl font-bold text-center">
-                Registrar nuevo usuario
-            </a>
-        </div>
+        <p class="text-center mt-6">
+            ¿Ya tienes cuenta? 
+            <a href="inicio%20de%20sesión.html" class="text-blue-600 font-bold">Inicia Sesión</a>
+        </p>
     </div>
 
     <script>
@@ -48,20 +39,21 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-message');
-            
-            const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+
+            const { data, error } = await dbClient.auth.signUp({
+                email, password, options: { data: { full_name: name } }
+            });
 
             if (error) {
-                errorMsg.textContent = "Error: " + error.message;
-                errorMsg.classList.remove('hidden');
+                alert("Error: " + error.message);
             } else {
-                // Redirige a índice.html (con tilde como tu archivo)
-                window.location.href = 'índice.html';
+                alert("¡Usuario creado!");
+                window.location.href = 'inicio%20de%20sesión.html';
             }
         });
     </script>
