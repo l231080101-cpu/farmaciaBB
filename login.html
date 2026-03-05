@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,62 +14,20 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; }
-        
-        /* Barra superior */
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
         .contact-item { display: flex; align-items: center; gap: 8px; }
-
-        /* Header Principal */
         .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
         .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
-
-        /* Ajuste del contenedor principal para centrado perfecto */
-        .login-wrapper {
-            min-height: calc(100vh - 160px); /* Resta altura de headers */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .login-card { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
-            border: 1px solid #e2e8f0;
-            width: 100%;
-            max-width: 450px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.2s;
-            background: #f8fafc;
-            outline: none;
-        }
-
-        .input-group input:focus {
-            border-color: #2563eb;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        .back-to-index {
-            position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white;
-            padding: 14px 28px; border-radius: 50px; display: flex; align-items: center;
-            gap: 12px; text-decoration: none; font-weight: 600;
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100;
-        }
+        .login-wrapper { min-height: calc(100vh - 160px); display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; width: 100%; max-width: 450px; }
+        .input-group input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; background: #f8fafc; outline: none; }
+        .input-group input:focus { border-color: #2563eb; background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
     </style>
 </head>
 <body>
@@ -78,14 +38,10 @@
                 <div class="top-bar-content">
                     <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
                     <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
-                    <div class="contact-item">
-                        <i data-lucide="clock" size="18"></i>
-                        <span id="live-clock">Cargando hora...</span>
-                    </div>
+                    <div class="contact-item"><i data-lucide="clock" size="18"></i><span id="live-clock">Cargando...</span></div>
                 </div>
             </div>
         </div>
-
         <div class="main-header">
             <div class="container">
                 <div class="main-header-content">
@@ -96,11 +52,8 @@
                             <p class="text-slate-500 text-xs font-semibold">Tu farmacia de confianza</p>
                         </div>
                     </a>
-                    
                     <nav class="flex gap-6">
                         <a href="index.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Inicio</a>
-                        <a href="nosotros.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Nosotros</a>
-                        <a href="contacto.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Contacto</a>
                     </nav>
                 </div>
             </div>
@@ -122,17 +75,12 @@
                     <label for="email" class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
                     <input type="email" id="email" placeholder="ejemplo@correo.com" required>
                 </div>
-
                 <div class="input-group">
                     <label for="password" class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-
-                <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold">
-                    Correo o contraseña incorrectos.
-                </p>
-                
-                <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all transform active:scale-95 shadow-lg shadow-blue-100 flex justify-center items-center gap-2">
+                <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold"></p>
+                <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2">
                     <span>Entrar</span>
                 </button>
             </form>
@@ -152,26 +100,23 @@
     </a>
 
     <script>
-        // --- CONFIGURACIÓN DE SUPABASE ---
-        const _supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const supabase = window.supabase.createClient(_supabaseUrl, _supabaseKey);
+        // --- CORRECCIÓN DE CONEXIÓN ---
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        
+        // Aquí estaba el error: cambiamos el nombre de la variable para no chocar con la librería
+        const supabaseClient = window.supabase.createClient(_url, _key);
 
         lucide.createIcons();
 
-        // 1. RELOJ EN TIEMPO REAL
         function updateClock() {
-            const clockElement = document.getElementById('live-clock');
+            const clock = document.getElementById('live-clock');
             const now = new Date();
-            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-            h = h < 10 ? '0'+h : h; m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
-            clockElement.textContent = `${days[now.getDay()]}: ${h}:${m}:${s}`;
+            clock.textContent = now.toLocaleTimeString();
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 2. FUNCIÓN DE LOGIN REAL CON SUPABASE
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -180,10 +125,11 @@
             const btn = document.getElementById('btn-submit');
 
             errorMsg.classList.add('hidden');
-            btn.innerHTML = "Iniciando sesión...";
+            btn.innerHTML = "Validando...";
             btn.disabled = true;
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            // Usamos supabaseClient aquí también
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -194,11 +140,10 @@
                 btn.innerHTML = "Entrar";
                 btn.disabled = false;
             } else {
-                alert("¡Bienvenido de nuevo!");
+                alert("¡Bienvenido!");
                 window.location.href = 'index.html';
             }
         });
     </script>
 </body>
 </html>
-
