@@ -9,65 +9,95 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .product-card:hover { transform: translateY(-8px); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .product-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .product-card:hover { transform: translateY(-12px); shadow-color: rgba(37, 99, 235, 0.1); }
+        .filter-btn { transition: all 0.3s ease; }
+        .filter-btn.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
+        
+        /* Animación para la carga de productos */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="text-slate-900">
 
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <a href="catalog.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
+            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
                 <span class="bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-200">⚕️</span> FarmaPlus
             </a>
 
             <div class="flex items-center gap-6">
                 <nav class="hidden md:flex gap-8">
+                    <a href="index.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Inicio</a>
                     <a href="catalog.html" class="text-blue-600 font-bold">Catálogo</a>
                     <a href="nosotros.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Nosotros</a>
                 </nav>
                 
-                <a href="carrito.html" class="relative p-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all">
-                    <i data-lucide="shopping-cart"></i>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-white">0</span>
+                <a href="carrito.html" class="relative p-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all border border-transparent hover:border-blue-100">
+                    <i data-lucide="shopping-basket"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[20px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white">0</span>
                 </a>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-8">
             <div>
-                <h1 class="text-5xl font-black text-slate-900 tracking-tight mb-2">Nuestros Productos</h1>
-                <p class="text-slate-500 font-medium">Calidad farmacéutica a un clic de distancia.</p>
+                <h1 class="text-6xl font-black text-slate-900 tracking-tight mb-3">Catálogo</h1>
+                <p class="text-slate-500 font-medium text-lg">Encuentra todo lo que necesitas para tu salud.</p>
             </div>
             
-            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 w-full md:w-auto">
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 w-full lg:w-96 focus-within:border-blue-400 transition-all">
                 <i data-lucide="search" class="text-slate-400 ml-3"></i>
-                <input type="text" id="search-input" placeholder="Buscar medicina..." class="outline-none p-2 text-sm w-full md:w-64 bg-transparent">
+                <input type="text" id="search-input" placeholder="Buscar por nombre o síntoma..." class="outline-none p-2 text-sm w-full bg-transparent">
             </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mb-12">
+            <button onclick="filtrarCategoria('todos')" class="filter-btn active px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-todos">Todos</button>
+            <button onclick="filtrarCategoria('medicamentos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-medicamentos">💊 Medicamentos</button>
+            <button onclick="filtrarCategoria('promos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-promos">🔥 Promos</button>
+            <button onclick="filtrarCategoria('receta')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-receta">📋 Con Receta</button>
         </div>
 
         <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             </div>
+
+        <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="bg-blue-50 p-6 rounded-full mb-4">
+                <i data-lucide="package-search" size="48" class="text-blue-500"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">No encontramos lo que buscas</h3>
+            <p class="text-slate-500 max-w-xs mx-auto mt-2">Intenta con otro término o revisa otra categoría.</p>
+        </div>
     </main>
 
+    <footer class="bg-white border-t border-slate-100 py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-slate-400 font-medium">© 2026 FarmaPlus. Calidad y salud para tu familia.</p>
+        </div>
+    </footer>
+
     <script>
-        // Configuración de Supabase (Credenciales del usuario)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
         const sb = supabase.createClient(_url, _key);
 
         let todosLosProductos = [];
+        let categoriaActual = 'todos';
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
-        // Cargar productos desde la base de datos
         async function cargarProductos() {
             const { data, error } = await sb.from('productos').select('*').order('nombre', { ascending: true });
             
             if (error) {
-                console.error("Error al obtener productos:", error);
+                console.error("Error:", error);
                 return;
             }
             
@@ -76,30 +106,49 @@
             updateCount();
         }
 
-        // Mostrar productos en el HTML
         function renderizar(lista) {
             const grid = document.getElementById('productos-grid');
+            const noResults = document.getElementById('no-results');
             
-            if (lista.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold">No se encontraron resultados para tu búsqueda.</div>';
+            // Filtrar por categoría seleccionada
+            let filtrados = lista;
+            if (categoriaActual !== 'todos') {
+                filtrados = lista.filter(p => p.categoria?.toLowerCase() === categoriaActual);
+            }
+
+            if (filtrados.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                noResults.classList.add('flex');
                 return;
             }
 
-            grid.innerHTML = lista.map(p => `
-                <div class="product-card bg-white p-6 rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
-                    <div class="aspect-square w-full mb-4 overflow-hidden rounded-2xl bg-slate-50 border border-slate-50">
-                        <img src="${p.imagen_url}" class="w-full h-full object-contain p-4" alt="${p.nombre}">
+            noResults.classList.add('hidden');
+            noResults.classList.remove('flex');
+
+            grid.innerHTML = filtrados.map((p, index) => `
+                <div class="product-card bg-white p-6 rounded-[35px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col animate-fade-in" style="animation-delay: ${index * 0.05}s">
+                    <div class="relative aspect-square w-full mb-6 overflow-hidden rounded-[25px] bg-slate-50 group">
+                        <img src="${p.imagen_url}" class="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110" alt="${p.nombre}">
+                        ${p.categoria === 'promos' ? '<span class="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">OFERTA</span>' : ''}
                     </div>
-                    <div class="flex-grow">
-                        <h3 class="font-black text-xl mb-1 text-slate-800 capitalize">${p.nombre}</h3>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-4">Disponible</p>
-                    </div>
-                    <div class="flex justify-between items-center mt-4">
-                        <div class="flex flex-col">
-                            <span class="text-3xl font-black text-blue-600">$${p.precio}</span>
+                    
+                    <div class="flex-grow px-2">
+                        <div class="flex items-center gap-2 mb-2">
+                             <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-tighter">${p.categoria || 'General'}</span>
                         </div>
-                        <button onclick="addToCart('${p.id}')" class="bg-blue-600 text-white p-4 rounded-2xl hover:bg-blue-700 transition-all active:scale-90 shadow-lg shadow-blue-100">
-                            <i data-lucide="plus"></i>
+                        <h3 class="font-extrabold text-xl mb-1 text-slate-800 capitalize leading-tight">${p.nombre}</h3>
+                        <p class="text-slate-400 text-xs font-bold mb-4 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Disponible para entrega
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-4 bg-slate-50 p-3 rounded-2xl">
+                        <div class="flex flex-col">
+                            <span class="text-2xl font-black text-blue-600">$${p.precio}</span>
+                        </div>
+                        <button onclick="addToCart('${p.id}')" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
+                            <i data-lucide="plus" class="group-hover/btn:rotate-90 transition-transform"></i>
                         </button>
                     </div>
                 </div>
@@ -107,14 +156,25 @@
             lucide.createIcons();
         }
 
-        // Buscador reactivo
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtrados = todosLosProductos.filter(p => p.nombre.toLowerCase().includes(term));
-            renderizar(filtrados);
-        });
+        function filtrarCategoria(cat) {
+            categoriaActual = cat;
+            
+            // Actualizar botones UI
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${cat}`).classList.add('active');
+            
+            // Aplicar búsqueda actual + filtro de categoría
+            aplicarBusquedaYFiltro();
+        }
 
-        // Añadir al carrito (Local Storage)
+        function aplicarBusquedaYFiltro() {
+            const term = document.getElementById('search-input').value.toLowerCase();
+            const resultados = todosLosProductos.filter(p => p.nombre.toLowerCase().includes(term));
+            renderizar(resultados);
+        }
+
+        document.getElementById('search-input').addEventListener('input', aplicarBusquedaYFiltro);
+
         function addToCart(id) {
             const producto = todosLosProductos.find(x => x.id === id);
             const itemExistente = cart.find(x => x.id === id);
@@ -128,21 +188,25 @@
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             updateCount();
             
-            // Animación/Feedback visual
-            const btn = event.currentTarget;
-            btn.classList.replace('bg-blue-600', 'bg-green-500');
-            setTimeout(() => btn.classList.replace('bg-green-500', 'bg-blue-600'), 800);
+            // Notificación simple
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-10 right-10 bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold shadow-2xl animate-fade-in z-[100]';
+            toast.innerHTML = `✅ ${producto.nombre} añadido`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
         }
 
-        // Actualizar número en el icono del carrito
         function updateCount() {
             const total = cart.reduce((acc, item) => acc + item.cantidad, 0);
-            document.getElementById('cart-count').innerText = total;
+            const badge = document.getElementById('cart-count');
+            badge.innerText = total;
+            badge.style.display = total > 0 ? 'flex' : 'none';
         }
 
         window.onload = cargarProductos;
     </script>
 </body>
 </html>
+
 
 
