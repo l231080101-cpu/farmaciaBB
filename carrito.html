@@ -21,12 +21,18 @@
         <a href="catalogo.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
             <span class="bg-blue-600 text-white p-1 rounded-lg">⚕️</span> FarmaPlus
         </a>
-        <div id="user-profile" class="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-sm">
-            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><i data-lucide="user"></i></div>
-            <div>
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Sesión</p>
-                <p id="user-email" class="text-sm font-bold text-slate-700">Invitado</p>
+        
+        <div class="flex items-center gap-4">
+            <div id="user-profile" class="flex items-center gap-3 bg-white p-2 pr-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><i data-lucide="user"></i></div>
+                <div>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Sesión</p>
+                    <p id="user-email" class="text-sm font-bold text-slate-700 italic">Invitado</p>
+                </div>
             </div>
+            <button onclick="logout()" class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm group" title="Cerrar Sesión">
+                <i data-lucide="log-out" size="20"></i>
+            </button>
         </div>
     </header>
 
@@ -78,6 +84,14 @@
             if (user) document.getElementById('user-email').innerText = user.email;
         }
 
+        async function logout() {
+            const { error } = await sb.auth.signOut();
+            if (!error) {
+                alert("Sesión cerrada correctamente");
+                window.location.href = "catalogo.html"; // O a tu login
+            }
+        }
+
         function render() {
             const container = document.getElementById('cart-items-container');
             const sidebar = document.getElementById('summary-sidebar');
@@ -90,7 +104,7 @@
                     <div class="card-style py-20 text-center max-w-2xl mx-auto border-2 border-dashed">
                         <i data-lucide="shopping-basket" class="text-blue-600 mx-auto mb-6" size="48"></i>
                         <h2 class="text-2xl font-black mb-6">Tu carrito está vacío</h2>
-                        <a href="catalogo.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg inline-block">Ver Productos</a>
+                        <a href="catalogo.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg inline-block hover:scale-105 transition-transform">Ir al Catálogo</a>
                     </div>`;
                 lucide.createIcons();
                 return;
@@ -109,13 +123,13 @@
                             <div class="flex items-center gap-4">
                                 <span class="text-blue-600 font-bold">$${item.precio}</span>
                                 <div class="flex items-center bg-slate-100 rounded-lg p-1">
-                                    <button onclick="changeQty(${index}, -1)" class="px-2 font-bold">-</button>
+                                    <button onclick="changeQty(${index}, -1)" class="px-2 font-bold hover:text-blue-600">-</button>
                                     <span class="px-2 text-sm font-bold">${item.cantidad}</span>
-                                    <button onclick="changeQty(${index}, 1)" class="px-2 font-bold">+</button>
+                                    <button onclick="changeQty(${index}, 1)" class="px-2 font-bold hover:text-blue-600">+</button>
                                 </div>
                             </div>
                         </div>
-                        <button onclick="remove(${index})" class="text-slate-300 hover:text-red-500"><i data-lucide="trash-2"></i></button>
+                        <button onclick="remove(${index})" class="text-slate-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2"></i></button>
                     </div>`;
             }).join('');
             document.getElementById('total').innerText = `$${total.toFixed(2)}`;
@@ -124,8 +138,9 @@
         }
 
         async function procesarPedido(metodo) {
+            const { data: { user } } = await sb.auth.getUser();
             const total = cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
-            const userEmail = document.getElementById('user-email').innerText;
+            const userEmail = user ? user.email : "Invitado";
 
             const { error } = await sb.from('pedidos').insert({
                 usuario_email: userEmail,
@@ -135,9 +150,10 @@
             });
 
             if (error) {
-                alert("Error al guardar el pedido");
+                alert("Error al procesar pedido. Revisa que la tabla 'pedidos' exista en Supabase.");
+                console.error(error);
             } else {
-                alert("¡Pedido registrado con éxito via " + metodo + "!");
+                alert("¡Pedido realizado con éxito!");
                 localStorage.removeItem('farmaCart');
                 window.location.href = "catalogo.html";
             }
@@ -146,7 +162,6 @@
         window.changeQty = (idx, d) => { cart[idx].cantidad += d; if(cart[idx].cantidad < 1) cart[idx].cantidad = 1; save(); };
         window.remove = (idx) => { cart.splice(idx, 1); save(); };
         function save() { localStorage.setItem('farmaCart', JSON.stringify(cart)); render(); }
-        
         window.onload = () => { cargarUsuario(); render(); lucide.createIcons(); };
     </script>
 </body>
