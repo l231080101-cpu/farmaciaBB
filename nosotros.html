@@ -10,63 +10,77 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- TUS ESTILOS EXISTENTES ADAPTADOS --- */
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
         
-        .top-bar { background: #1e293b; color: white; padding: 8px 0; font-size: 0.85rem; }
+        /* Barra superior con tu color azul original */
+        .top-bar { 
+            background: #2563eb; 
+            color: white; 
+            padding: 10px 0; 
+            font-size: 0.9rem; 
+        }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .top-bar-content, .contact-info { display: flex; gap: 20px; align-items: center; }
-        .contact-item { display: flex; align-items: center; gap: 6px; }
+        .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 8px; }
 
-        .main-header { background: white; border-bottom: 1px solid #e2e8f0; padding: 20px 0; }
+        /* Header Principal */
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
         .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
         
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .logo-icon { font-size: 2rem; }
-        .logo-title { font-size: 1.5rem; font-weight: 800; color: #1e293b; line-height: 1; }
-        .logo-subtitle { font-size: 0.8rem; color: #64748b; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
 
-        .search-bar { flex: 1; position: relative; max-width: 500px; }
-        .search-input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
+        .search-bar { flex: 1; position: relative; max-width: 600px; }
+        .search-input { 
+            width: 100%; 
+            padding: 12px 15px 12px 45px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            background: #f8fafc;
+        }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        .header-actions { display: flex; align-items: center; gap: 15px; }
-        .nav-desktop { display: flex; gap: 25px; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
-        .nav-link { text-decoration: none; color: #64748b; font-weight: 600; transition: color 0.2s; }
-        .nav-link:hover, .nav-link.active { color: #2563eb; }
+        /* Navegación */
+        .nav-desktop { display: flex; gap: 30px; margin-top: 20px; }
+        .nav-link { 
+            text-decoration: none; 
+            color: #475569; 
+            font-weight: 500; 
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s; 
+        }
+        .nav-link.active { background: #2563eb; color: white; }
+        .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
 
-        /* --- ESTILOS DE LA SECCIÓN NOSOTROS --- */
-        .about-section { padding: 60px 0; }
-        .about-hero-image { width: 100%; height: 400px; object-fit: cover; border-radius: 24px; margin: 40px 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .about-card { background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; margin-bottom: 30px; }
-        
-        .mission-vision-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-        .blue-box { background: #eff6ff; color: #2563eb; }
-        .green-box { background: #f0fdf4; color: #16a34a; }
+        /* Sección Contenido */
+        .about-section { padding: 80px 0; }
+        .about-hero-image { 
+            width: 100%; 
+            height: 500px; 
+            object-fit: cover; 
+            border-radius: 20px; 
+            margin: 40px 0; 
+        }
 
-        /* --- BOTÓN DE REGRESO FLOTANTE --- */
+        /* Botón Regreso */
         .back-to-index {
             position: fixed;
             bottom: 30px;
             right: 30px;
             background: #2563eb;
             color: white;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 50px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             text-decoration: none;
             font-weight: 600;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
             z-index: 100;
-        }
-        .back-to-index:hover {
-            transform: translateY(-5px);
-            background: #1d4ed8;
-            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
         }
     </style>
 </head>
@@ -76,9 +90,11 @@
         <div class="top-bar">
             <div class="container">
                 <div class="top-bar-content">
-                    <div class="contact-info">
-                        <div class="contact-item"><i data-lucide="phone" size="16"></i><span>+52 55 23 69 79 40</span></div>
-                        <div class="contact-item"><i data-lucide="map-pin" size="16"></i><span>Calle 67 #16 duplex</span></div>
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                    <div class="contact-item">
+                        <i data-lucide="clock" size="18"></i>
+                        <span id="live-clock">Cargando hora...</span>
                     </div>
                 </div>
             </div>
@@ -88,7 +104,7 @@
             <div class="container">
                 <div class="main-header-content">
                     <a href="index.html" class="logo">
-                        <div class="logo-icon">⚕️</div>
+                        <div class="logo-box">⚕️</div>
                         <div>
                             <h1 class="logo-title">FarmaPlus</h1>
                             <p class="logo-subtitle">Tu farmacia de confianza</p>
@@ -97,11 +113,19 @@
 
                     <div class="search-bar">
                         <i data-lucide="search" class="search-icon"></i>
-                        <input type="text" placeholder="Buscar medicamentos..." class="search-input" />
+                        <input type="text" placeholder="Buscar medicamentos, productos..." class="search-input" />
                     </div>
 
-                    <div class="header-actions">
-                        <a href="index.html" class="nav-link">Volver</a>
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer"></i>
+                        <div class="relative">
+                            <i data-lucide="shopping-cart" class="text-slate-700 cursor-pointer"></i>
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-700 cursor-pointer">
+                            <i data-lucide="user"></i>
+                            <span class="text-sm font-medium">Iniciar Sesión</span>
+                        </div>
                     </div>
                 </div>
 
@@ -116,29 +140,21 @@
     </header>
 
     <main class="container about-section">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Nuestra Identidad</h2>
-            <p class="text-slate-500 text-lg">Cuidando de ti y de los tuyos desde el primer día.</p>
+        <div class="text-center">
+            <h2 class="text-5xl font-extrabold text-slate-900 mb-4">Nuestra Identidad</h2>
+            <p class="text-slate-500 text-xl">Cuidando de ti y de los tuyos desde el primer día.</p>
         </div>
 
-        <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?auto=format&fit=crop&q=80&w=1080" alt="Equipo" class="about-hero-image">
-
-        <div class="about-card">
-            <h3 class="text-2xl font-bold mb-4 text-slate-800">Nuestra Historia</h3>
-            <p class="text-slate-600 mb-4">FarmaPlus nació en 2010 con una visión clara: hacer que el cuidado de la salud sea accesible para todos. Desde nuestros humildes comienzos, hemos crecido hasta convertirnos en una de las farmacias online más confiables.</p>
-            <p class="text-slate-600">Hoy servimos a miles de clientes, manteniendo los mismos valores que nos inspiraron: confianza y dedicación.</p>
-        </div>
-
-        <div class="mission-vision-grid">
-            <div class="about-card">
-                <div class="icon-box blue-box"><i data-lucide="target"></i></div>
-                <h4 class="text-xl font-bold mb-2">Misión</h4>
-                <p class="text-slate-500">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad y asesoramiento profesional.</p>
+        <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?auto=format&fit=crop&q=80&w=1200" alt="Equipo" class="about-hero-image">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+            <div class="bg-slate-50 p-10 rounded-3xl">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Nuestra Misión</h3>
+                <p class="text-slate-600 leading-relaxed">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad, ofreciendo asesoramiento profesional y un servicio excepcional que mejore la vida de las personas.</p>
             </div>
-            <div class="about-card">
-                <div class="icon-box green-box"><i data-lucide="award"></i></div>
-                <h4 class="text-xl font-bold mb-2">Visión</h4>
-                <p class="text-slate-500">Ser la farmacia líder reconocida por nuestra excelencia en el servicio y compromiso con la salud.</p>
+            <div class="bg-slate-50 p-10 rounded-3xl">
+                <h3 class="text-2xl font-bold mb-4 text-green-600">Nuestra Visión</h3>
+                <p class="text-slate-600 leading-relaxed">Ser la farmacia online líder, reconocida por nuestra excelencia en el servicio, innovación constante y un compromiso inquebrantable con la salud.</p>
             </div>
         </div>
     </main>
@@ -149,7 +165,32 @@
     </a>
 
     <script>
+        // Inicializar Iconos
         lucide.createIcons();
+
+        // Función del Reloj en Vivo
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const dayName = days[now.getDay()];
+            
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            
+            // Formato 00:00:00
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            clockElement.textContent = `${dayName}: ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateClock, 1000);
+        updateClock(); // Llamada inicial
     </script>
 </body>
 </html>
