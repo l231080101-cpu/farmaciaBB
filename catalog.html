@@ -1,47 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
     <title>Catálogo - FarmaPlus</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="stylefarma.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body>
-
-<header>
-    <!-- Puedes copiar aquí el mismo header de index.html -->
-</header>
-
-<div class="catalog-page">
-    <div class="container">
-        <div class="page-header">
-            <h1 class="page-title">Catálogo de Productos</h1>
-            <p class="page-description">
-                Encuentra todos nuestros medicamentos genéricos y productos de salud
-            </p>
+    <main class="container py-12">
+        <h2 class="text-3xl font-extrabold mb-8">Nuestros Productos</h2>
+        
+        <div id="productos-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <p class="text-slate-500">Cargando medicinas...</p>
         </div>
+    </main>
 
-        <div class="filter-section">
-            <div class="filter-header">
-                <i data-lucide="filter"></i>
-                <h3>Filtrar por categoría</h3>
-            </div>
-            <div class="filter-buttons"></div>
-        </div>
+    <script type="module">
+        import { supabase } from './supabase-config.js'
 
-        <div class="products-grid" id="catalog-products-grid"></div>
+        async function cargarProductos() {
+            // 1. Pedir datos a la tabla 'productos' de Supabase
+            const { data: productos, error } = await supabase
+                .from('productos')
+                .select('*')
 
-        <div class="product-count"></div>
-    </div>
-</div>
+            if (error) {
+                console.error('Error:', error)
+                return;
+            }
 
-<script>
-    lucide.createIcons();
-</script>
+            const grid = document.getElementById('productos-grid');
+            grid.innerHTML = ''; // Limpiar cargando
 
+            // 2. Dibujar cada producto
+            productos.forEach(prod => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="h-40 bg-slate-100 rounded-xl mb-4 flex items-center justify-center text-4xl">
+                            ${prod.categoria === 'medicina' ? '💊' : '🧴'}
+                        </div>
+                        <h3 class="font-bold text-slate-800">${prod.nombre}</h3>
+                        <p class="text-slate-500 text-sm mb-4">${prod.descripcion}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-extrabold">$${prod.precio}</span>
+                            <button onclick="addToCart(${prod.id})" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+                                <i data-lucide="shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        window.onload = cargarProductos;
+    </script>
 </body>
 </html>
