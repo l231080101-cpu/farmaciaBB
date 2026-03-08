@@ -44,9 +44,10 @@
         .logout-btn:hover { background: #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
-        /* ESTILOS EXTRA CHATBOT */
+        /* ESTILOS ESPECÍFICOS DEL CHATBOT */
+        #chat-window { transition: all 0.3s ease; transform-origin: bottom right; }
         #chat-messages::-webkit-scrollbar { width: 4px; }
-        #chat-messages::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 
@@ -122,23 +123,28 @@
         </main>
 
         <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform">
+            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
                 <i data-lucide="message-circle" id="chat-icon"></i>
             </button>
 
-            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col scale-in-center">
+            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
                 <div class="bg-blue-600 p-4 text-white">
-                    <h4 class="font-bold text-sm">Asistente FarmaPlus ⚕️</h4>
-                    <p class="text-[10px] opacity-80">Estamos para ayudarte 24/7</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                    </div>
+                    <p class="text-[10px] opacity-80">En línea para ayudarte</p>
                 </div>
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                        ¡Hola! 👋 Soy el asistente de FarmaPlus. ¿Tienes alguna duda sobre nuestros productos o envíos?
+                    <div class="flex justify-start">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
+                            ¡Hola! 👋 Bienvenido a FarmaPlus. ¿Tienes alguna duda sobre productos, envíos o pagos?
+                        </div>
                     </div>
                 </div>
                 <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" placeholder="Escribe tu duda..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="if(event.key === 'Enter') sendMessage()">
-                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    <input id="chat-input" type="text" placeholder="Escribe aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
+                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700">
                         <i data-lucide="send" size="16"></i>
                     </button>
                 </div>
@@ -157,6 +163,7 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
+        // --- FUNCIONES DE INTERFAZ ---
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
@@ -218,11 +225,15 @@
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // LÓGICA DEL CHATBOT
+        // --- LÓGICA DEL CHATBOT ---
         function toggleChat() {
             const chatWin = document.getElementById('chat-window');
             chatWin.classList.toggle('hidden');
             lucide.createIcons();
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendMessage();
         }
 
         function sendMessage() {
@@ -232,10 +243,10 @@
 
             if (!text) return;
 
-            // Mensaje de usuario
+            // Mensaje del usuario (Derecha)
             msgContainer.innerHTML += `
                 <div class="flex justify-end">
-                    <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-sm">
+                    <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">
                         ${text}
                     </div>
                 </div>
@@ -244,32 +255,35 @@
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
 
-            // Respuesta automática simulada
+            // Respuesta automática (Izquierda)
             setTimeout(() => {
-                let reply = "No estoy seguro de entenderte, pero puedo informarte sobre envíos, horarios o pagos.";
+                let reply = "No estoy seguro, pero puedo informarte sobre envíos, horarios o pagos con PayPal.";
                 const lowText = text.toLowerCase();
 
-                if(lowText.includes("hola")) reply = "¡Hola! ¿Cómo puedo ayudarte con tu salud hoy?";
-                else if(lowText.includes("envío") || lowText.includes("domicilio")) reply = "Hacemos envíos a todo México. Si tu compra es mayor a $500, ¡el envío es gratis!";
-                else if(lowText.includes("horario")) reply = "Nuestra tienda en línea opera 24/7. Nuestra sucursal física abre de 7:00 AM a 11:00 PM.";
-                else if(lowText.includes("pago") || lowText.includes("paypal")) reply = "Aceptamos pagos seguros vía PayPal con cualquier tarjeta de crédito o débito.";
-                else if(lowText.includes("gracias")) reply = "¡De nada! En FarmaPlus estamos para servirte.";
+                if(lowText.includes("hola")) reply = "¡Hola! Bienvenido a FarmaPlus. ¿Buscas algún medicamento o apoyo con tu compra?";
+                else if(lowText.includes("envío") || lowText.includes("domicilio")) reply = "Hacemos envíos a todo México. En CDMX entregamos en menos de 24 horas.";
+                else if(lowText.includes("horario")) reply = "Nuestra tienda web funciona 24/7. El soporte humano es de 9 AM a 9 PM.";
+                else if(lowText.includes("pago") || lowText.includes("paypal")) reply = "Aceptamos PayPal y todas las tarjetas. El proceso es 100% seguro.";
+                else if(lowText.includes("gracias")) reply = "¡Es un placer ayudarte! Cuida tu salud.";
 
                 msgContainer.innerHTML += `
                     <div class="flex justify-start">
-                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[80%]">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">
                             ${reply}
                         </div>
                     </div>
                 `;
                 msgContainer.scrollTop = msgContainer.scrollHeight;
-            }, 700);
+                lucide.createIcons();
+            }, 800);
         }
 
+        // --- INICIALIZACIÓN ---
         setInterval(updateClock, 1000);
         updateClock();
         checkSession();
         updateCartBadge();
+        lucide.createIcons();
     </script>
 </body>
 </html>
