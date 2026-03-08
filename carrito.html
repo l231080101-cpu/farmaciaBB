@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -87,13 +87,13 @@
                     <div class="card-style p-5 flex items-center gap-6">
                         <img src="${item.imagen_url}" class="w-20 h-20 object-contain">
                         <div class="flex-grow">
-                            <h4 class="font-bold">${item.nombre}</h4>
-                            <p class="text-blue-600 font-black">$${item.precio}</p>
+                            <h4 class="font-bold text-slate-800">${item.nombre}</h4>
+                            <p class="text-blue-600 font-black text-lg">$${item.precio}</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-slate-100 rounded-lg">-</button>
-                            <span class="font-bold">${item.cantidad}</span>
-                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-slate-100 rounded-lg">+</button>
+                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
+                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">-</button>
+                            <span class="font-bold w-4 text-center text-slate-800">${item.cantidad}</span>
+                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">+</button>
                         </div>
                     </div>
                 `).join('');
@@ -103,20 +103,29 @@
             }
         }
 
-        // LÓGICA DE PAYPAL CONECTADA A SUPABASE
+        // LÓGICA DE PAYPAL PERSONALIZADA
         function initPayPal() {
             const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
             paypal.Buttons({
-                style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+                // CAMBIO 2: Estilo personalizado (Azul, Forma Píldora, Altura ajustada)
+                style: { 
+                    layout: 'vertical', 
+                    color: 'blue', 
+                    shape: 'pill', 
+                    label: 'pay',
+                    height: 45
+                },
                 createOrder: (data, actions) => {
                     return actions.order.create({
-                        purchase_units: [{ amount: { value: total.toFixed(2) } }]
+                        purchase_units: [{ 
+                            description: "Compra en FarmaPlus",
+                            amount: { value: total.toFixed(2) } 
+                        }]
                     });
                 },
                 onApprove: (data, actions) => {
                     return actions.order.capture().then(async (details) => {
-                        // AQUÍ GUARDAMOS EN TU BASE DE DATOS
                         const { data: { user } } = await sb.auth.getUser();
                         
                         const { error } = await sb.from('pedidos').insert([{
@@ -128,12 +137,12 @@
                         }]);
 
                         if (!error) {
-                            alert("¡Pago exitoso! Tu pedido ha sido registrado.");
+                            alert("¡Pago exitoso! Tu pedido ha sido registrado en español.");
                             localStorage.removeItem('farmaCart');
                             window.location.href = "catalog.html";
                         } else {
                             console.error(error);
-                            alert("Pago capturado pero error al guardar reporte.");
+                            alert("Error al guardar el reporte.");
                         }
                     });
                 }
@@ -144,7 +153,7 @@
             cart[idx].cantidad += d;
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            location.reload(); // Recargamos para refrescar PayPal con el nuevo total
+            location.reload(); 
         }
 
         window.onload = init;
