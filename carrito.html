@@ -7,14 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .card-style { background: white; border-radius: 20px; border: 1px solid #edf2f7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .method-card { cursor: pointer; border: 2px solid #f1f5f9; transition: all 0.2s; }
-        .method-card:hover { border-color: #2563eb; background: #eff6ff; }
-        .method-card.active { border-color: #2563eb; background: #eff6ff; position: relative; }
-        .method-card.active::after { content: '✓'; position: absolute; top: 10px; right: 10px; background: #2563eb; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
     </style>
 </head>
 <body class="antialiased">
@@ -28,66 +25,33 @@
                     <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Tu farmacia de confianza</p>
                 </div>
             </a>
-            
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100">
-                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm"><i data-lucide="user" size="18"></i></div>
-                    <div class="hidden sm:block">
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Usuario</p>
-                        <p id="user-email" class="text-xs font-bold text-slate-700 italic">Cargando...</p>
-                    </div>
-                </div>
+            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm"><i data-lucide="user" size="18"></i></div>
+                <p id="user-email" class="text-xs font-bold text-slate-700 italic">Cargando...</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 mb-20">
         <div class="mb-8">
-            <a href="catalog.html" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 font-semibold transition-colors">
-                <i data-lucide="chevron-left" size="20"></i>
-                Volver al catálogo
-            </a>
-            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight">Finalizar Compra</h1>
+            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight">Tu Carrito</h1>
         </div>
 
-        <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div id="cart-items-container" class="lg:col-span-2 space-y-4"></div>
 
             <aside id="summary-sidebar" class="hidden">
                 <div class="card-style p-8 sticky top-6">
-                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                        <i data-lucide="credit-card" class="text-blue-600"></i> Método de Pago
-                    </h3>
+                    <h3 class="text-xl font-bold mb-6">Resumen de Compra</h3>
                     
-                    <div class="grid grid-cols-1 gap-3 mb-8">
-                        <div onclick="selectPayment('Tarjeta')" id="pay-tarjeta" class="method-card p-4 rounded-xl flex items-center gap-4">
-                            <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center"><i data-lucide="credit-card"></i></div>
-                            <div>
-                                <p class="font-bold text-sm">Tarjeta de Crédito/Débito</p>
-                                <p class="text-[10px] text-slate-500">Visa, Mastercard, Amex</p>
-                            </div>
-                        </div>
-
-                        <div onclick="selectPayment('Mercado Pago')" id="pay-mercadopago" class="method-card p-4 rounded-xl flex items-center gap-4">
-                            <img src="https://logotiposenvector.com/wp-content/uploads/2021/08/mercado-pago-logo-vector.png" class="w-10 h-10 object-contain">
-                            <div>
-                                <p class="font-bold text-sm">Mercado Pago</p>
-                                <p class="text-[10px] text-slate-500">Paga de forma rápida y segura</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="space-y-4 border-t pt-6 mb-8">
                         <div class="flex justify-between text-slate-500 font-bold"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
-                        <div class="flex justify-between text-slate-500 font-bold"><span>Envío</span><span class="text-green-600">Gratis</span></div>
-                        <div class="pt-4 flex justify-between items-center"><span class="font-black text-xl text-slate-900">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
+                        <div class="flex justify-between items-center"><span class="font-black text-xl text-slate-900">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
                     </div>
 
-                    <button id="btn-finalizar" onclick="procesarPedido()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Pagar Ahora
-                    </button>
+                    <div id="paypal-button-container"></div>
                     
-                    <p class="text-center text-[10px] text-slate-400 mt-4 px-4">Al hacer clic en pagar, aceptas nuestros términos y condiciones de salud y privacidad.</p>
+                    <p class="text-center text-[10px] text-slate-400 mt-4 italic">Pago seguro procesado por PayPal Inc.</p>
                 </div>
             </aside>
         </div>
@@ -99,21 +63,13 @@
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-        let selectedMethod = null;
 
         async function init() {
+            lucide.createIcons();
             const { data: { user } } = await sb.auth.getUser();
             document.getElementById('user-email').innerText = user ? user.email : "Invitado";
             render();
-        }
-
-        function selectPayment(method) {
-            selectedMethod = method;
-            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
-            if(method === 'Tarjeta') document.getElementById('pay-tarjeta').classList.add('active');
-            if(method === 'Mercado Pago') document.getElementById('pay-mercadopago').classList.add('active');
-            
-            document.getElementById('btn-finalizar').disabled = false;
+            if(cart.length > 0) initPayPal();
         }
 
         function render() {
@@ -122,78 +78,76 @@
 
             if (cart.length === 0) {
                 sidebar.classList.add('hidden');
-                container.innerHTML = `
-                    <div class="card-style py-24 text-center border-2 border-dashed border-slate-200 bg-slate-50/50">
-                        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                            <i data-lucide="shopping-basket" class="text-blue-600" size="32"></i>
-                        </div>
-                        <h2 class="text-3xl font-black text-slate-900 mb-2">Tu carrito está vacío</h2>
-                        <p class="text-slate-500 mb-8">Parece que aún no has añadido medicinas a tu pedido.</p>
-                        <a href="catalog.html" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 inline-block hover:scale-105 transition-transform">Ir al catálogo</a>
-                    </div>`;
+                container.innerHTML = `<div class="card-style py-20 text-center"><h2>Carrito vacío</h2></div>`;
             } else {
                 sidebar.classList.remove('hidden');
-                let total = 0;
-                container.innerHTML = cart.map((item, idx) => {
-                    total += item.precio * item.cantidad;
-                    return `
-                        <div class="card-style p-5 flex items-center gap-6 group">
-                            <div class="w-24 h-24 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0">
-                                <img src="${item.imagen_url}" class="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform">
-                            </div>
-                            <div class="flex-grow">
-                                <h4 class="font-black text-slate-800 text-lg">${item.nombre}</h4>
-                                <p class="text-blue-600 font-extrabold">$${item.precio}</p>
-                            </div>
-                            <div class="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-200">
-                                <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 flex items-center justify-center font-black text-slate-400 hover:text-blue-600">-</button>
-                                <span class="font-bold px-4 text-slate-700">${item.cantidad}</span>
-                                <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 flex items-center justify-center font-black text-slate-400 hover:text-blue-600">+</button>
-                            </div>
-                            <button onclick="remove(${idx})" class="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><i data-lucide="trash-2" size="20"></i></button>
-                        </div>`;
-                }).join('');
+                let total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+                
+                container.innerHTML = cart.map((item, idx) => `
+                    <div class="card-style p-5 flex items-center gap-6">
+                        <img src="${item.imagen_url}" class="w-20 h-20 object-contain">
+                        <div class="flex-grow">
+                            <h4 class="font-bold">${item.nombre}</h4>
+                            <p class="text-blue-600 font-black">$${item.precio}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-slate-100 rounded-lg">-</button>
+                            <span class="font-bold">${item.cantidad}</span>
+                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-slate-100 rounded-lg">+</button>
+                        </div>
+                    </div>
+                `).join('');
+
                 document.getElementById('total').innerText = `$${total.toFixed(2)}`;
                 document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
             }
-            lucide.createIcons();
         }
 
-        async function procesarPedido() {
-            if(!selectedMethod) return alert("Por favor selecciona un método de pago");
+        // LÓGICA DE PAYPAL CONECTADA A SUPABASE
+        function initPayPal() {
+            const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
-            const { data: { user } } = await sb.auth.getUser();
-            const { error } = await sb.from('pedidos').insert({
-                usuario_email: user ? user.email : "Invitado",
-                items: cart,
-                total: cart.reduce((acc, i) => acc + (i.precio * i.cantidad), 0),
-                metodo_pago: selectedMethod
-            });
+            paypal.Buttons({
+                style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+                createOrder: (data, actions) => {
+                    return actions.order.create({
+                        purchase_units: [{ amount: { value: total.toFixed(2) } }]
+                    });
+                },
+                onApprove: (data, actions) => {
+                    return actions.order.capture().then(async (details) => {
+                        // AQUÍ GUARDAMOS EN TU BASE DE DATOS
+                        const { data: { user } } = await sb.auth.getUser();
+                        
+                        const { error } = await sb.from('pedidos').insert([{
+                            user_id: user ? user.id : null,
+                            productos: cart,
+                            total: total,
+                            paypal_id: details.id,
+                            estado: 'pagado'
+                        }]);
 
-            if (error) {
-                alert("Error al procesar el pago. Por favor intenta de nuevo.");
-            } else {
-                alert(`¡Pago exitoso con ${selectedMethod}!\nTu pedido llegará en un lapso de 30-60 min.`);
-                localStorage.removeItem('farmaCart');
-                window.location.href = "catalog.html";
-            }
+                        if (!error) {
+                            alert("¡Pago exitoso! Tu pedido ha sido registrado.");
+                            localStorage.removeItem('farmaCart');
+                            window.location.href = "catalog.html";
+                        } else {
+                            console.error(error);
+                            alert("Pago capturado pero error al guardar reporte.");
+                        }
+                    });
+                }
+            }).render('#paypal-button-container');
         }
 
         window.changeQty = (idx, d) => {
             cart[idx].cantidad += d;
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            render();
-        }
-
-        window.remove = (idx) => { 
-            cart.splice(idx, 1); 
-            localStorage.setItem('farmaCart', JSON.stringify(cart)); 
-            render(); 
+            location.reload(); // Recargamos para refrescar PayPal con el nuevo total
         }
 
         window.onload = init;
     </script>
 </body>
 </html>
-
