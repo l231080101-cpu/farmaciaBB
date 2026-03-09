@@ -131,7 +131,7 @@
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Hola! 👋 Soy tu asistente de FarmaPlus. ¿Buscas algún medicamento o tuviste algún problema con tu pago?
+                            ¡Hola! 👋 Soy tu asistente de FarmaPlus. ¿Buscas algún medicamento o necesitas ayuda con los pasos para comprar?
                         </div>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // --- LÓGICA DEL CHATBOT INFALIBLE ---
+        // --- LÓGICA DEL CHATBOT CON INDICACIONES ---
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
 
@@ -198,12 +198,10 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // Mostrar mensaje del usuario
             msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
 
-            // Mostrar "escribiendo..."
             typing.classList.remove('hidden');
 
             setTimeout(() => {
@@ -211,39 +209,31 @@
                 const lowText = text.toLowerCase();
                 let reply = "";
 
-                // BANCO DE RESPUESTAS MEJORADO
                 const responses = {
-                    saludos: ["¡Hola! Es un gusto saludarte. ¿Cómo va tu salud hoy?", "¡Hola! Bienvenido a FarmaPlus. ¿Te ayudo a buscar algún medicamento?"],
-                    precios: ["Todos los precios actualizados están en la pestaña 'Catálogo'. ¿Buscas algo en especial?", "Nuestros precios son de farmacia líder. ¡Revisa el catálogo para ver las ofertas!"],
-                    envios: ["¡Enviamos a todo México! 🚀 Gratis en compras mayores a $500. ¿A dónde enviamos hoy?"],
-                    pagos: ["Aceptamos PayPal. Es lo más seguro porque protege tu dinero. 💳"],
-                    errores_pago: [
-                        "Lamento el problema con PayPal. 😟 A veces es la conexión o el saldo. ¿Gustas que contactemos a soporte humano?",
-                        "Si PayPal te marca error, intenta refrescar la página o verifica que tu cuenta tenga saldo suficiente. ¿Quieres ayuda personalizada?"
-                    ],
+                    saludos: ["¡Hola! Es un gusto saludarte. ¿Cómo puedo ayudarte con tu salud hoy?"],
+                    instrucciones: "Para comprar en FarmaPlus sigue estos 3 pasos: 1️⃣ Ve a **Catálogo** y elige tus productos. 2️⃣ Haz clic en el **Carrito** (arriba a la derecha) para revisar tu pedido. 3️⃣ Pulsa en **Pagar con PayPal** para finalizar. ¡Es súper seguro! ✅",
+                    ayuda_paypal: "Si PayPal te da problemas: 1️⃣ Revisa que tu tarjeta tenga fondos. 2️⃣ Verifica que tu sesión no haya caducado. 3️⃣ Si ves un error de 'teléfono', intenta desde una pestaña de incógnito. ¿Deseas el número de soporte humano? 🛠️",
+                    ubicacion: "Estamos en **Calle 67 #16 duplex**. Atendemos de Lunes a Sábado. ¿Vienes a visitarnos o prefieres envío a domicilio? 📍",
+                    recetas: "Medicamentos como Clonazepam requieren receta física. 1️⃣ Súbela al sistema al comprar. 2️⃣ Nuestro farmacéutico la validará al entregar. Sin receta no podemos completar la entrega por ley. ⚕️",
                     medicamentos: {
-                        paracetamol: "¡Sí tenemos Paracetamol! Es ideal para dolor y fiebre. Lo encuentras en el catálogo. 💊",
-                        clonazepam: "El Clonazepam es medicamento controlado. Requerimos tu receta original física al entregar. ⚕️",
-                        genericos: "Manejamos una amplia línea de genéricos de alta calidad a precios muy bajos."
+                        paracetamol: "¡Sí tenemos Paracetamol! Ideal para dolor y fiebre. Está disponible en el catálogo ahora mismo. 💊",
+                        clonazepam: "Contamos con Clonazepam, pero recuerda que es de receta obligatoria. ¿Ya tienes la tuya lista? 📄"
                     },
-                    empatia: ["Siento mucho que te sientas mal. Por favor, no olvides consultar a un médico antes de medicarte."],
-                    soporte_humano: ["Parece que necesitas ayuda específica. Puedes escribirnos a WhatsApp al +52 55 23 69 79 40 para atención inmediata. 📱"],
-                    default: ["No estoy seguro de entender, pero puedo ayudarte con envíos, pagos o disponibilidad de medicinas. ¿Deseas hablar con un humano?"]
+                    soporte_humano: "Entiendo que es importante. Llama o escribe al WhatsApp **+52 55 23 69 79 40** para hablar con un experto. 📱",
+                    default: "No estoy seguro de entender, pero puedo darte **instrucciones** de compra, ayudarte con **PayPal**, o decirte nuestra **ubicación**. ¿Qué prefieres?"
                 };
 
-                const getRnd = (arr) => arr[Math.floor(Math.random() * arr.length)];
+                const getRnd = (arr) => Array.isArray(arr) ? arr[Math.floor(Math.random() * arr.length)] : arr;
 
-                // Lógica de detección inteligente (Fuzzy)
-                if (lowText.match(/(hola|buenos días|saludos|que tal)/)) reply = getRnd(responses.saludos);
-                else if (lowText.match(/(paretam|paracet|acetamin|dolor|fiebre)/)) reply = responses.medicamentos.paracetamol;
-                else if (lowText.match(/(clona|receta|controlado)/)) reply = responses.medicamentos.clonazepam;
-                else if (lowText.match(/(error|no sirve|falla|no puedo pagar|problema con paypal)/)) reply = getRnd(responses.errores_pago);
-                else if (lowText.match(/(humano|persona|asesor|whatsapp|telefono|hablar con alguien)/)) reply = getRnd(responses.soporte_humano);
-                else if (lowText.match(/(precio|costo|cuanto)/)) reply = getRnd(responses.precios);
-                else if (lowText.match(/(envio|domicilio|entrega)/)) reply = getRnd(responses.envios);
-                else if (lowText.match(/(pago|paypal|tarjeta)/)) reply = getRnd(responses.pagos);
-                else if (lowText.match(/(mal|enfermo|siento)/)) reply = getRnd(responses.empatia);
-                else if (lowText.match(/(gracias|adios|bye)/)) reply = "¡Fue un placer! Cuida mucho tu salud. 👋";
+                // DETECCIÓN DE INTENCIONES
+                if (lowText.match(/(hola|buenos días|saludos)/)) reply = getRnd(responses.saludos);
+                else if (lowText.match(/(instrucciones|pasos|como comprar|que hago|guia)/)) reply = responses.instrucciones;
+                else if (lowText.match(/(error|paypal|pago|falla|no puedo pagar)/)) reply = responses.ayuda_paypal;
+                else if (lowText.match(/(donde|ubicacion|direccion|sucursal|donde estan)/)) reply = responses.ubicacion;
+                else if (lowText.match(/(receta|doctor|medico|prescripcion)/)) reply = responses.recetas;
+                else if (lowText.match(/(paretam|paracet|acetamin)/)) reply = responses.medicamentos.paracetamol;
+                else if (lowText.match(/(clona)/)) reply = responses.medicamentos.clonazepam;
+                else if (lowText.match(/(humano|persona|asesor|whatsapp|telefono)/)) reply = responses.soporte_humano;
                 else reply = getRnd(responses.default);
 
                 msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
