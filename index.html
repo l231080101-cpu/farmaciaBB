@@ -40,9 +40,10 @@
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
         /* ESTILOS CHATBOT */
-        #chat-window { transition: all 0.3s ease; transform-origin: bottom right; }
+        #chat-window { transition: all 0.3s ease; transform-origin: bottom right; z-index: 1000; }
         #chat-messages::-webkit-scrollbar { width: 4px; }
         #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
     </style>
 </head>
 
@@ -130,10 +131,11 @@
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Hola! 👋 Bienvenido a FarmaPlus. Soy tu asistente virtual. ¿Cómo te encuentras hoy?
+                            ¡Hola! 👋 Soy tu asistente de FarmaPlus. ¿Buscas algún medicamento o tuviste algún problema con tu pago?
                         </div>
                     </div>
                 </div>
+                <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está escribiendo...</div>
                 <div class="p-3 border-t bg-white flex gap-2">
                     <input id="chat-input" type="text" placeholder="Escribe aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
                     <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
@@ -185,47 +187,69 @@
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // --- LÓGICA DEL CHATBOT HUMANO ---
+        // --- LÓGICA DEL CHATBOT INFALIBLE ---
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
 
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
+            const typing = document.getElementById('typing');
             const text = input.value.trim();
             if (!text) return;
 
+            // Mostrar mensaje del usuario
             msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
 
+            // Mostrar "escribiendo..."
+            typing.classList.remove('hidden');
+
             setTimeout(() => {
+                typing.classList.add('hidden');
                 const lowText = text.toLowerCase();
                 let reply = "";
+
+                // BANCO DE RESPUESTAS MEJORADO
                 const responses = {
-                    saludos: ["¡Hola! Es un gusto saludarte. ¿En qué puedo apoyarte hoy?", "¡Hola! Bienvenido a FarmaPlus. ¿Buscas algo para sentirte mejor?", "¡Hola! Espero que estés muy bien. ¿Cómo te puedo servir?"],
-                    precios: ["Puedes ver todos los precios en nuestro catálogo. ¿Buscas algo específico?", "Manejamos excelentes ofertas. ¡Dime qué necesitas y te ayudo!", "Nuestros precios son los mejores. ¡Revisa la sección de catálogo!"],
-                    envios: ["¡Hacemos envíos rápidos! Si compras más de $500, ¡el envío es GRATIS! 🚀", "Llegamos a tu domicilio en tiempo récord. ¿En qué zona te encuentras?", "Contamos con servicio a domicilio seguro y discreto."],
-                    pagos: ["Usamos PayPal para que tu pago sea 100% seguro. 💳", "Puedes pagar con cualquier tarjeta mediante PayPal. ¡Sin riesgos!", "Aceptamos pagos protegidos con PayPal. ¡Tus datos están a salvo!"],
-                    empatia: ["Lamento mucho que te sientas mal. Recuerda consultar a tu médico. ¿Buscas algún medicamento?", "Entiendo, la salud es lo primero. Déjame ayudarte a encontrar lo que necesitas."],
-                    despedida: ["¡De nada! Aquí estaré si necesitas algo más. Cuídate.", "Fue un placer. ¡Que tengas un excelente día!", "Gracias por confiar en FarmaPlus. ¡Hasta luego! 👋"],
-                    default: ["Vaya, no estoy seguro de haber entendido. ¿Me preguntas sobre envíos, pagos o precios?", "Aún estoy aprendiendo, pero puedo ayudarte con el proceso de compra.", "No tengo esa información exacta, pero puedo ayudarte a navegar el catálogo."]
+                    saludos: ["¡Hola! Es un gusto saludarte. ¿Cómo va tu salud hoy?", "¡Hola! Bienvenido a FarmaPlus. ¿Te ayudo a buscar algún medicamento?"],
+                    precios: ["Todos los precios actualizados están en la pestaña 'Catálogo'. ¿Buscas algo en especial?", "Nuestros precios son de farmacia líder. ¡Revisa el catálogo para ver las ofertas!"],
+                    envios: ["¡Enviamos a todo México! 🚀 Gratis en compras mayores a $500. ¿A dónde enviamos hoy?"],
+                    pagos: ["Aceptamos PayPal. Es lo más seguro porque protege tu dinero. 💳"],
+                    errores_pago: [
+                        "Lamento el problema con PayPal. 😟 A veces es la conexión o el saldo. ¿Gustas que contactemos a soporte humano?",
+                        "Si PayPal te marca error, intenta refrescar la página o verifica que tu cuenta tenga saldo suficiente. ¿Quieres ayuda personalizada?"
+                    ],
+                    medicamentos: {
+                        paracetamol: "¡Sí tenemos Paracetamol! Es ideal para dolor y fiebre. Lo encuentras en el catálogo. 💊",
+                        clonazepam: "El Clonazepam es medicamento controlado. Requerimos tu receta original física al entregar. ⚕️",
+                        genericos: "Manejamos una amplia línea de genéricos de alta calidad a precios muy bajos."
+                    },
+                    empatia: ["Siento mucho que te sientas mal. Por favor, no olvides consultar a un médico antes de medicarte."],
+                    soporte_humano: ["Parece que necesitas ayuda específica. Puedes escribirnos a WhatsApp al +52 55 23 69 79 40 para atención inmediata. 📱"],
+                    default: ["No estoy seguro de entender, pero puedo ayudarte con envíos, pagos o disponibilidad de medicinas. ¿Deseas hablar con un humano?"]
                 };
 
-                const getReply = (cat) => responses[cat][Math.floor(Math.random() * responses[cat].length)];
+                const getRnd = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-                if (lowText.match(/(hola|buenos días|buenas tardes|saludos)/)) reply = getReply('saludos');
-                else if (lowText.match(/(precio|costo|cuanto cuesta|valor)/)) reply = getReply('precios');
-                else if (lowText.match(/(envio|domicilio|entrega|donde)/)) reply = getReply('envios');
-                else if (lowText.match(/(pago|paypal|tarjeta|seguro|comprar)/)) reply = getReply('pagos');
-                else if (lowText.match(/(mal|enfermo|duele|ayuda|siento)/)) reply = getReply('empatia');
-                else if (lowText.match(/(gracias|adios|chao|bye|listo)/)) reply = getReply('despedida');
-                else reply = getReply('default');
+                // Lógica de detección inteligente (Fuzzy)
+                if (lowText.match(/(hola|buenos días|saludos|que tal)/)) reply = getRnd(responses.saludos);
+                else if (lowText.match(/(paretam|paracet|acetamin|dolor|fiebre)/)) reply = responses.medicamentos.paracetamol;
+                else if (lowText.match(/(clona|receta|controlado)/)) reply = responses.medicamentos.clonazepam;
+                else if (lowText.match(/(error|no sirve|falla|no puedo pagar|problema con paypal)/)) reply = getRnd(responses.errores_pago);
+                else if (lowText.match(/(humano|persona|asesor|whatsapp|telefono|hablar con alguien)/)) reply = getRnd(responses.soporte_humano);
+                else if (lowText.match(/(precio|costo|cuanto)/)) reply = getRnd(responses.precios);
+                else if (lowText.match(/(envio|domicilio|entrega)/)) reply = getRnd(responses.envios);
+                else if (lowText.match(/(pago|paypal|tarjeta)/)) reply = getRnd(responses.pagos);
+                else if (lowText.match(/(mal|enfermo|siento)/)) reply = getRnd(responses.empatia);
+                else if (lowText.match(/(gracias|adios|bye)/)) reply = "¡Fue un placer! Cuida mucho tu salud. 👋";
+                else reply = getRnd(responses.default);
 
                 msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
                 msgContainer.scrollTop = msgContainer.scrollHeight;
                 lucide.createIcons();
-            }, 1000);
+            }, 1200);
         }
 
         setInterval(updateClock, 1000);
