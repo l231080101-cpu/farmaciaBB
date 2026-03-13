@@ -39,11 +39,15 @@
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
-        /* ESTILOS CHATBOT */
-        #chat-window { transition: all 0.3s ease; transform-origin: bottom right; z-index: 1000; }
+        /* ESTILOS CHATBOT MEJORADOS */
+        #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
         #chat-messages::-webkit-scrollbar { width: 4px; }
         #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
+        .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .animate-pop { animation: popIn 0.3s ease-out; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 
@@ -103,7 +107,7 @@
         </header>
 
         <main class="container py-12">
-            <div class="content-card text-center">
+            <div class="content-card text-center animate-pop">
                 <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
                 <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
                     Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
@@ -126,16 +130,25 @@
                         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                         <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
                     </div>
-                    <p class="text-[10px] opacity-80">En línea para ayudarte</p>
+                    <p class="text-[10px] opacity-80" id="chat-status">En línea para ayudarte</p>
                 </div>
+                
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Hola! 👋 Soy tu asistente de FarmaPlus. ¿Buscas algún medicamento o tuviste algún problema con tu pago?
+                            ¡Hola! 👋 Soy tu asistente. ¿Cómo puedo ayudarte a cuidar tu salud hoy?
                         </div>
                     </div>
                 </div>
+
+                <div id="quick-replies" class="px-4 py-2 flex flex-wrap gap-2 bg-slate-50">
+                    <button onclick="sendQuickReply('¿Cómo comprar?')" class="quick-reply-btn">¿Cómo comprar?</button>
+                    <button onclick="sendQuickReply('Error en pago')" class="quick-reply-btn">Error en pago</button>
+                    <button onclick="sendQuickReply('Ubicación')" class="quick-reply-btn">Ubicación</button>
+                </div>
+
                 <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está escribiendo...</div>
+                
                 <div class="p-3 border-t bg-white flex gap-2">
                     <input id="chat-input" type="text" placeholder="Escribe aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
                     <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
@@ -157,6 +170,8 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
+        let userName = ""; // Para saludo personalizado
+
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
@@ -168,12 +183,17 @@
             const { data: { session } } = await dbClient.auth.getSession();
             if (session) {
                 const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-                const name = profile ? profile.full_name : session.user.email;
+                userName = profile ? profile.full_name.split(' ')[0] : "amigo";
+                
                 if (profile?.role === 'admin') {
                     document.getElementById('admin-action-container').innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
                 }
-                document.getElementById('user-auth-section').innerHTML = `<div class="flex items-center gap-4"><span class="text-slate-700 font-semibold text-sm">${name.split(' ')[0]}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
-                document.getElementById('welcome-title').innerText = `¡Qué gusto verte, ${name.split(' ')[0]}!`;
+                document.getElementById('user-auth-section').innerHTML = `<div class="flex items-center gap-4"><span class="text-slate-700 font-semibold text-sm">${userName}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
+                document.getElementById('welcome-title').innerText = `¡Qué gusto verte, ${userName}!`;
+                
+                // Actualizar saludo del bot si hay sesión
+                const msgContainer = document.getElementById('chat-messages');
+                msgContainer.innerHTML = `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">¡Hola de nuevo, ${userName}! 👋 ¿En qué puedo apoyarte hoy?</div></div>`;
             }
             lucide.createIcons();
         }
@@ -187,9 +207,18 @@
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // --- LÓGICA DEL CHATBOT INFALIBLE ---
-        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
+        // --- LÓGICA DEL CHATBOT EXPERTO ---
+        function toggleChat() { 
+            document.getElementById('chat-window').classList.toggle('hidden'); 
+            lucide.createIcons(); 
+        }
+
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+
+        function sendQuickReply(text) {
+            document.getElementById('chat-input').value = text;
+            sendMessage();
+        }
 
         async function sendMessage() {
             const input = document.getElementById('chat-input');
@@ -199,11 +228,10 @@
             if (!text) return;
 
             // Mostrar mensaje del usuario
-            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
+            msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
 
-            // Mostrar "escribiendo..."
             typing.classList.remove('hidden');
 
             setTimeout(() => {
@@ -211,45 +239,37 @@
                 const lowText = text.toLowerCase();
                 let reply = "";
 
-                // BANCO DE RESPUESTAS MEJORADO
+                // RESPUESTAS INTELIGENTES
                 const responses = {
-                    saludos: ["¡Hola! Es un gusto saludarte. ¿Cómo va tu salud hoy?", "¡Hola! Bienvenido a FarmaPlus. ¿Te ayudo a buscar algún medicamento?"],
-                    precios: ["Todos los precios actualizados están en la pestaña 'Catálogo'. ¿Buscas algo en especial?", "Nuestros precios son de farmacia líder. ¡Revisa el catálogo para ver las ofertas!"],
-                    envios: ["¡Enviamos a todo México! 🚀 Gratis en compras mayores a $500. ¿A dónde enviamos hoy?"],
-                    pagos: ["Aceptamos PayPal. Es lo más seguro porque protege tu dinero. 💳"],
-                    errores_pago: [
-                        "Lamento el problema con PayPal. 😟 A veces es la conexión o el saldo. ¿Gustas que contactemos a soporte humano?",
-                        "Si PayPal te marca error, intenta refrescar la página o verifica que tu cuenta tenga saldo suficiente. ¿Quieres ayuda personalizada?"
-                    ],
-                    medicamentos: {
-                        paracetamol: "¡Sí tenemos Paracetamol! Es ideal para dolor y fiebre. Lo encuentras en el catálogo. 💊",
-                        clonazepam: "El Clonazepam es medicamento controlado. Requerimos tu receta original física al entregar. ⚕️",
-                        genericos: "Manejamos una amplia línea de genéricos de alta calidad a precios muy bajos."
-                    },
-                    empatia: ["Siento mucho que te sientas mal. Por favor, no olvides consultar a un médico antes de medicarte."],
-                    soporte_humano: ["Parece que necesitas ayuda específica. Puedes escribirnos a WhatsApp al +52 55 23 69 79 40 para atención inmediata. 📱"],
-                    default: ["No estoy seguro de entender, pero puedo ayudarte con envíos, pagos o disponibilidad de medicinas. ¿Deseas hablar con un humano?"]
+                    saludos: `¡Hola ${userName}! Es un placer saludarte. ✨`,
+                    instrucciones: "¡Comprar es muy fácil! 1️⃣ Agrega productos al carrito, 2️⃣ Ve al ícono de la canasta arriba a la derecha y 3️⃣ Finaliza tu pago con PayPal. 🛒",
+                    errores_pago: `Lamento mucho que tengas problemas con el pago, ${userName}. 😟 A veces se soluciona abriendo la página en **modo incógnito** o verificando tu saldo. ¿Te gustaría hablar con un asesor humano?`,
+                    ubicacion: "¡Claro! Estamos en **Calle 67 #16 duplex**. Nuestro horario es de Lunes a Sábado. 📍",
+                    soporte: "Puedes contactarnos vía WhatsApp al **+52 55 23 69 79 40** para una atención más rápida y humana. 📱",
+                    empatia: "Siento mucho que te sientas mal. 🌸 Recuerda que en FarmaPlus nos importa tu bienestar. No olvides consultar a tu médico.",
+                    default: "No estoy seguro de entenderte del todo, pero puedo informarte sobre cómo comprar, nuestra ubicación o ayudarte con problemas de pago. 😊"
                 };
 
-                const getRnd = (arr) => arr[Math.floor(Math.random() * arr.length)];
+                // Lógica de detección (Fuzzy Match)
+                if (lowText.match(/(hola|buenos días|que tal)/)) reply = responses.saludos;
+                else if (lowText.match(/(como comprar|pasos|instrucciones|guia)/)) reply = responses.instrucciones;
+                else if (lowText.match(/(error|paypal|pago|falla|no puedo)/)) reply = responses.errores_pago;
+                else if (lowText.match(/(donde|ubicacion|direccion|sucursal)/)) reply = responses.ubicacion;
+                else if (lowText.match(/(humano|persona|asesor|whatsapp|ayuda)/)) reply = responses.soporte;
+                else if (lowText.match(/(mal|enfermo|duele|gripe|tos)/)) reply = responses.empatia;
+                else if (lowText.match(/(gracias|ok|entendido|perfecto)/)) reply = "¡De nada! Aquí sigo por si necesitas algo más. ✨";
+                else reply = responses.default;
 
-                // Lógica de detección inteligente (Fuzzy)
-                if (lowText.match(/(hola|buenos días|saludos|que tal)/)) reply = getRnd(responses.saludos);
-                else if (lowText.match(/(paretam|paracet|acetamin|dolor|fiebre)/)) reply = responses.medicamentos.paracetamol;
-                else if (lowText.match(/(clona|receta|controlado)/)) reply = responses.medicamentos.clonazepam;
-                else if (lowText.match(/(error|no sirve|falla|no puedo pagar|problema con paypal)/)) reply = getRnd(responses.errores_pago);
-                else if (lowText.match(/(humano|persona|asesor|whatsapp|telefono|hablar con alguien)/)) reply = getRnd(responses.soporte_humano);
-                else if (lowText.match(/(precio|costo|cuanto)/)) reply = getRnd(responses.precios);
-                else if (lowText.match(/(envio|domicilio|entrega)/)) reply = getRnd(responses.envios);
-                else if (lowText.match(/(pago|paypal|tarjeta)/)) reply = getRnd(responses.pagos);
-                else if (lowText.match(/(mal|enfermo|siento)/)) reply = getRnd(responses.empatia);
-                else if (lowText.match(/(gracias|adios|bye)/)) reply = "¡Fue un placer! Cuida mucho tu salud. 👋";
-                else reply = getRnd(responses.default);
-
-                msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
+                msgContainer.innerHTML += `
+                    <div class="flex justify-start animate-pop">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">
+                            ${reply}
+                        </div>
+                    </div>`;
+                
                 msgContainer.scrollTop = msgContainer.scrollHeight;
                 lucide.createIcons();
-            }, 1200);
+            }, 1000);
         }
 
         setInterval(updateClock, 1000);
