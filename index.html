@@ -136,7 +136,7 @@
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Hola! 👋 Soy tu asistente. ¿Cómo puedo ayudarte a cuidar tu salud hoy?
+                            ¡Muy buen día! 👋 Soy tu asistente de FarmaPlus. ¿Con quién tengo el honor de hablar hoy?
                         </div>
                     </div>
                 </div>
@@ -170,7 +170,7 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
-        let userName = ""; // Para saludo personalizado
+        let userName = ""; 
 
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
@@ -183,17 +183,16 @@
             const { data: { session } } = await dbClient.auth.getSession();
             if (session) {
                 const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-                userName = profile ? profile.full_name.split(' ')[0] : "amigo";
+                userName = profile ? profile.full_name.split(' ')[0] : "estimado usuario";
                 
                 if (profile?.role === 'admin') {
                     document.getElementById('admin-action-container').innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
                 }
                 document.getElementById('user-auth-section').innerHTML = `<div class="flex items-center gap-4"><span class="text-slate-700 font-semibold text-sm">${userName}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
-                document.getElementById('welcome-title').innerText = `¡Qué gusto verte, ${userName}!`;
+                document.getElementById('welcome-title').innerText = `¡Qué gusto saludarle, ${userName}!`;
                 
-                // Actualizar saludo del bot si hay sesión
                 const msgContainer = document.getElementById('chat-messages');
-                msgContainer.innerHTML = `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">¡Hola de nuevo, ${userName}! 👋 ¿En qué puedo apoyarte hoy?</div></div>`;
+                msgContainer.innerHTML = `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">Es un honor volver a verle, **${userName}**. ✨ ¿En qué puedo apoyarle hoy?</div></div>`;
             }
             lucide.createIcons();
         }
@@ -207,7 +206,6 @@
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
         }
 
-        // --- LÓGICA DEL CHATBOT EXPERTO ---
         function toggleChat() { 
             document.getElementById('chat-window').classList.toggle('hidden'); 
             lucide.createIcons(); 
@@ -227,7 +225,6 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // Mostrar mensaje del usuario
             msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
@@ -239,26 +236,38 @@
                 const lowText = text.toLowerCase();
                 let reply = "";
 
-                // RESPUESTAS INTELIGENTES
-                const responses = {
-                    saludos: `¡Hola ${userName}! Es un placer saludarte. ✨`,
-                    instrucciones: "¡Comprar es muy fácil! 1️⃣ Agrega productos al carrito, 2️⃣ Ve al ícono de la canasta arriba a la derecha y 3️⃣ Finaliza tu pago con PayPal. 🛒",
-                    errores_pago: `Lamento mucho que tengas problemas con el pago, ${userName}. 😟 A veces se soluciona abriendo la página en **modo incógnito** o verificando tu saldo. ¿Te gustaría hablar con un asesor humano?`,
-                    ubicacion: "¡Claro! Estamos en **Calle 67 #16 duplex**. Nuestro horario es de Lunes a Sábado. 📍",
-                    soporte: "Puedes contactarnos vía WhatsApp al **+52 55 23 69 79 40** para una atención más rápida y humana. 📱",
-                    empatia: "Siento mucho que te sientas mal. 🌸 Recuerda que en FarmaPlus nos importa tu bienestar. No olvides consultar a tu médico.",
-                    default: "No estoy seguro de entenderte del todo, pero puedo informarte sobre cómo comprar, nuestra ubicación o ayudarte con problemas de pago. 😊"
-                };
+                // LÓGICA DE DETECCIÓN DE NOMBRE (NUEVA)
+                const nameMatch = lowText.match(/(me llamo|soy|mi nombre es) ([a-zñáéíóú]+)/);
 
-                // Lógica de detección (Fuzzy Match)
-                if (lowText.match(/(hola|buenos días|que tal)/)) reply = responses.saludos;
-                else if (lowText.match(/(como comprar|pasos|instrucciones|guia)/)) reply = responses.instrucciones;
-                else if (lowText.match(/(error|paypal|pago|falla|no puedo)/)) reply = responses.errores_pago;
-                else if (lowText.match(/(donde|ubicacion|direccion|sucursal)/)) reply = responses.ubicacion;
-                else if (lowText.match(/(humano|persona|asesor|whatsapp|ayuda)/)) reply = responses.soporte;
-                else if (lowText.match(/(mal|enfermo|duele|gripe|tos)/)) reply = responses.empatia;
-                else if (lowText.match(/(gracias|ok|entendido|perfecto)/)) reply = "¡De nada! Aquí sigo por si necesitas algo más. ✨";
-                else reply = responses.default;
+                if (nameMatch && nameMatch[2]) {
+                    userName = nameMatch[2].charAt(0).toUpperCase() + nameMatch[2].slice(1);
+                    reply = `Es un verdadero placer conocerle, **${userName}**. ✨ ¿En qué puedo servirle el día de hoy con respecto a su salud?`;
+                } 
+                else if (lowText.match(/(hola|buenos días|que tal|buenas tardes)/)) {
+                    const saludoBase = userName ? `Estimado(a) **${userName}**` : "Estimado usuario";
+                    reply = `¡Muy buen día! ${saludoBase}, es un privilegio atenderle. ¿Desea consultar nuestro catálogo o tiene alguna duda sobre un pedido?`;
+                }
+                else if (lowText.match(/(como comprar|pasos|instrucciones|guia)/)) {
+                    reply = `Con gusto le asisto, **${userName || "estimado cliente"}**. Para realizar su compra: 1️⃣ Elija sus productos, 2️⃣ Acceda a su carrito de compras y 3️⃣ Realice su pago seguro vía PayPal. 🛒`;
+                }
+                else if (lowText.match(/(error|paypal|pago|falla|no puedo)/)) {
+                    reply = `Lamento profundamente el inconveniente con su pago, **${userName || "amigo/a"}**. 😟 Para su seguridad, intente verificar su conexión o saldo. ¿Desea que le comunique con un asesor humano para apoyo inmediato?`;
+                }
+                else if (lowText.match(/(donde|ubicacion|direccion|sucursal)/)) {
+                    reply = "Nos encontramos ubicados en la **Calle 67 #16 duplex**. Será un placer recibirle personalmente. 📍";
+                }
+                else if (lowText.match(/(humano|persona|asesor|whatsapp|ayuda)/)) {
+                    reply = "Le proporciono nuestro contacto directo de WhatsApp: **+52 55 23 69 79 40**. Un asesor le atenderá con gusto. 📱";
+                }
+                else if (lowText.match(/(mal|enfermo|duele|gripe|tos)/)) {
+                    reply = "Siento mucho que se encuentre con malestar. 🌸 En FarmaPlus nos preocupamos por su salud. Le recordamos la importancia de no automedicarse y consultar a su médico de confianza.";
+                }
+                else if (lowText.match(/(gracias|ok|entendido|perfecto)/)) {
+                    reply = `Ha sido un placer ayudarle, **${userName || "estimado cliente"}**. Quedo a sus órdenes. 👋`;
+                }
+                else {
+                    reply = `Le pido una disculpa, **${userName || "estimado usuario"}**, no he podido comprender su solicitud. ¿Desea información sobre compras, pagos o nuestra ubicación?`;
+                }
 
                 msgContainer.innerHTML += `
                     <div class="flex justify-start animate-pop">
