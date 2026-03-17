@@ -136,7 +136,7 @@
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Muy buen día! 👋 Soy tu asistente de FarmaPlus. ¿Con quién tengo el honor de hablar hoy?
+                            ¡Muy buen día! 👋 Soy el asistente de FarmaPlus. ¿Con quién tengo el honor de hablar hoy?
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
                 <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está escribiendo...</div>
                 
                 <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" placeholder="Escribe aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
+                    <input id="chat-input" type="text" placeholder="Escribe su consulta aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
                     <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
                         <i data-lucide="send" size="16"></i>
                     </button>
@@ -183,16 +183,23 @@
             const { data: { session } } = await dbClient.auth.getSession();
             if (session) {
                 const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-                userName = profile ? profile.full_name.split(' ')[0] : "estimado usuario";
+                
+                // FILTRO DE SEGURIDAD PARA EL NOMBRE
+                let rawName = profile?.full_name || "";
+                if (rawName.toLowerCase().includes("bellakat") || rawName.length < 2) {
+                    userName = "Estimado Usuario";
+                } else {
+                    userName = rawName.split(' ')[0];
+                }
                 
                 if (profile?.role === 'admin') {
                     document.getElementById('admin-action-container').innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
                 }
                 document.getElementById('user-auth-section').innerHTML = `<div class="flex items-center gap-4"><span class="text-slate-700 font-semibold text-sm">${userName}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
-                document.getElementById('welcome-title').innerText = `¡Qué gusto saludarle, ${userName}!`;
+                document.getElementById('welcome-title').innerText = `Es un placer saludarle, ${userName}`;
                 
                 const msgContainer = document.getElementById('chat-messages');
-                msgContainer.innerHTML = `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">Es un honor volver a verle, **${userName}**. ✨ ¿En qué puedo apoyarle hoy?</div></div>`;
+                msgContainer.innerHTML = `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">Es un privilegio asistirle de nuevo, **${userName}**. ✨ ¿En qué podemos apoyarle con su salud el día de hoy?</div></div>`;
             }
             lucide.createIcons();
         }
@@ -236,37 +243,44 @@
                 const lowText = text.toLowerCase();
                 let reply = "";
 
-                // LÓGICA DE DETECCIÓN DE NOMBRE (NUEVA)
+                // DETECCIÓN DE NOMBRE CON FILTRO DE LENGUAJE
                 const nameMatch = lowText.match(/(me llamo|soy|mi nombre es) ([a-zñáéíóú]+)/);
 
                 if (nameMatch && nameMatch[2]) {
-                    userName = nameMatch[2].charAt(0).toUpperCase() + nameMatch[2].slice(1);
-                    reply = `Es un verdadero placer conocerle, **${userName}**. ✨ ¿En qué puedo servirle el día de hoy con respecto a su salud?`;
+                    const detected = nameMatch[2].toLowerCase();
+                    // Filtro de palabras no deseadas
+                    if (detected === "bellakat" || detected.length < 3) {
+                        userName = "Estimado Cliente";
+                        reply = "Es un honor saludarle. ✨ ¿Cómo podemos asistirle en su búsqueda de bienestar hoy?";
+                    } else {
+                        userName = nameMatch[2].charAt(0).toUpperCase() + nameMatch[2].slice(1);
+                        reply = `Es un verdadero privilegio conocerle, **${userName}**. ✨ ¿En qué podemos servirle con respecto a su salud?`;
+                    }
                 } 
                 else if (lowText.match(/(hola|buenos días|que tal|buenas tardes)/)) {
-                    const saludoBase = userName ? `Estimado(a) **${userName}**` : "Estimado usuario";
-                    reply = `¡Muy buen día! ${saludoBase}, es un privilegio atenderle. ¿Desea consultar nuestro catálogo o tiene alguna duda sobre un pedido?`;
+                    const saludoBase = (userName && userName !== "Estimado Cliente") ? `Estimado(a) **${userName}**` : "Estimado cliente";
+                    reply = `¡Muy buen día! ${saludoBase}, es un privilegio atenderle. ¿Desea consultar nuestro catálogo de medicamentos o requiere apoyo con un pedido?`;
                 }
                 else if (lowText.match(/(como comprar|pasos|instrucciones|guia)/)) {
-                    reply = `Con gusto le asisto, **${userName || "estimado cliente"}**. Para realizar su compra: 1️⃣ Elija sus productos, 2️⃣ Acceda a su carrito de compras y 3️⃣ Realice su pago seguro vía PayPal. 🛒`;
+                    reply = `Con gusto le asisto. Para realizar su compra en FarmaPlus: 1️⃣ Seleccione sus productos, 2️⃣ Acceda al carrito de compras y 3️⃣ Finalice su pago mediante nuestra plataforma segura. 🛒`;
                 }
                 else if (lowText.match(/(error|paypal|pago|falla|no puedo)/)) {
-                    reply = `Lamento profundamente el inconveniente con su pago, **${userName || "amigo/a"}**. 😟 Para su seguridad, intente verificar su conexión o saldo. ¿Desea que le comunique con un asesor humano para apoyo inmediato?`;
+                    reply = `Lamentamos cualquier inconveniente con su transacción. 😟 Le sugerimos verificar su conexión o, si lo prefiere, podemos comunicarle con un asesor especializado para asistirle de inmediato.`;
                 }
                 else if (lowText.match(/(donde|ubicacion|direccion|sucursal)/)) {
-                    reply = "Nos encontramos ubicados en la **Calle 67 #16 duplex**. Será un placer recibirle personalmente. 📍";
+                    reply = "Nuestra sucursal se encuentra ubicada en **Calle 67 #16 duplex**. Será un honor recibirle personalmente en nuestras instalaciones. 📍";
                 }
                 else if (lowText.match(/(humano|persona|asesor|whatsapp|ayuda)/)) {
-                    reply = "Le proporciono nuestro contacto directo de WhatsApp: **+52 55 23 69 79 40**. Un asesor le atenderá con gusto. 📱";
+                    reply = "Para una atención personalizada, puede contactarnos vía WhatsApp al: **+52 55 23 69 79 40**. Un profesional de la salud le atenderá.";
                 }
                 else if (lowText.match(/(mal|enfermo|duele|gripe|tos)/)) {
-                    reply = "Siento mucho que se encuentre con malestar. 🌸 En FarmaPlus nos preocupamos por su salud. Le recordamos la importancia de no automedicarse y consultar a su médico de confianza.";
+                    reply = "Lamentamos que presente malestar. 🌸 Su salud es nuestra prioridad; le recordamos que la opinión de un profesional médico es fundamental para su recuperación.";
                 }
                 else if (lowText.match(/(gracias|ok|entendido|perfecto)/)) {
-                    reply = `Ha sido un placer ayudarle, **${userName || "estimado cliente"}**. Quedo a sus órdenes. 👋`;
+                    reply = `Estamos para servirle. Quedamos a su entera disposición. 👋`;
                 }
                 else {
-                    reply = `Le pido una disculpa, **${userName || "estimado usuario"}**, no he podido comprender su solicitud. ¿Desea información sobre compras, pagos o nuestra ubicación?`;
+                    reply = `Le ofrecemos una disculpa, no hemos podido interpretar su solicitud. ¿Desea información sobre nuestro catálogo, formas de pago o ubicación?`;
                 }
 
                 msgContainer.innerHTML += `
