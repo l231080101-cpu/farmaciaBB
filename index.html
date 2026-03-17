@@ -30,8 +30,6 @@
         .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
-        .nav-link.active { background: #2563eb; color: white; }
         .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
 
         /* ESTILOS CHATBOT */
@@ -82,9 +80,9 @@
                                 <span id="cart-count" class="cart-badge">0</span>
                             </a>
                             <div id="user-auth-section">
-                                <a href="login.html" class="action-link">
-                                    <i data-lucide="user"></i>
-                                    <span>Iniciar Sesión</span>
+                                <a href="login.html" class="action-link flex items-center gap-1">
+                                    <i data-lucide="user" size="18"></i>
+                                    <span class="text-sm font-semibold">Iniciar Sesión</span>
                                 </a>
                             </div>
                         </div>
@@ -119,9 +117,9 @@
                     <button onclick="sendQuickReply('¿Cómo comprar?')" class="quick-reply-btn">🛒 Comprar</button>
                     <button onclick="sendQuickReply('Estado de mi pedido')" class="quick-reply-btn">📦 Mi Pedido</button>
                     <button onclick="sendQuickReply('Subir receta')" class="quick-reply-btn">📄 Receta</button>
-                    <button onclick="sendQuickReply('Facturación')" class="quick-reply-btn">💳 Factura</button>
                     <button onclick="sendQuickReply('Horarios')" class="quick-reply-btn">⏰ Horarios</button>
                     <button onclick="sendQuickReply('Ubicación')" class="quick-reply-btn">📍 Ubicación</button>
+                    <button onclick="sendQuickReply('Adiós')" class="quick-reply-btn">👋 Salir</button>
                 </div>
 
                 <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está analizando...</div>
@@ -155,17 +153,14 @@
             if (session) {
                 const { data: profile } = await dbClient.from('profiles').select('full_name').eq('id', session.user.id).single();
                 let rawName = profile?.full_name || "";
-                if (rawName.toLowerCase().includes("bellakat") || rawName.length < 2) {
-                    userName = "Estimado Cliente";
-                } else {
-                    userName = rawName.split(' ')[0];
-                }
+                userName = (rawName.length < 2) ? "Estimado Cliente" : rawName.split(' ')[0];
                 document.getElementById('welcome-title').innerText = `Es un honor saludarle, ${userName}`;
             }
         }
 
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+        
         function sendQuickReply(text) { 
             document.getElementById('chat-input').value = text; 
             sendMessage(); 
@@ -179,7 +174,6 @@
             
             if (!originalText) return;
 
-            // Mostrar mensaje del usuario
             msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${originalText}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
@@ -189,41 +183,44 @@
             setTimeout(() => {
                 typing.classList.add('hidden');
                 
-                // --- NORMALIZACIÓN DE TEXTO (SOLUCIÓN A TU PROBLEMA) ---
+                // --- NORMALIZACIÓN ---
                 const lowText = originalText.toLowerCase()
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos
-                    .replace(/[¿?¡!.,]/g, ""); // Quita signos
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                    .replace(/[¿?¡!.,]/g, "");
 
                 let reply = "";
 
-                // LÓGICA DE RESPUESTAS SIN "PRETEXTOS"
-                if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("pasos")) {
-                    reply = `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre su envío y 4️⃣ Realice su pago seguro. 🛒`;
+                // --- DETECCIÓN DE DESPEDIDAS ---
+                const despedidas = ["adios", "hasta luego", "bye", "chao", "nos vemos", "luego hablamos", "cerrar chat", "terminar", "gracias adios", "es todo"];
+                const esDespedida = despedidas.some(p => lowText.includes(p));
+
+                if (esDespedida) {
+                    const nombre = (userName) ? `, ${userName}` : "";
+                    reply = `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
+                }
+                else if (lowText.includes("como comprar") || lowText.includes("comprar")) {
+                    reply = `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre su envío y 4️⃣ Pague de forma segura. 🛒`;
                 }
                 else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
-                    reply = `Para conocer el estado de su pedido, verifique la sección **"Mis Pedidos"** en su perfil. El tiempo estimado es de 30 a 90 minutos. 📦`;
-                }
-                else if (lowText.includes("receta") || lowText.includes("controlado") || lowText.includes("antibiotico")) {
-                    reply = `Para medicamentos controlados o antibióticos, es indispensable adjuntar su receta vigente al finalizar la compra o enviarla por WhatsApp. 📄`;
-                }
-                else if (lowText.includes("factura") || lowText.includes("facturacion") || lowText.includes("fiscal")) {
-                    reply = `Puede solicitar su factura enviando su constancia fiscal y número de pedido a nuestro contacto oficial. 💳`;
+                    reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
                 }
                 else if (lowText.includes("horario") || lowText.includes("abierto")) {
-                    reply = `Le atendemos de **Lunes a Sábado de 8:00 AM a 10:00 PM** y **Domingos de 9:00 AM a 8:00 PM**. ⏰`;
+                    reply = `Abrimos de **Lunes a Sábado de 8 AM a 10 PM** y **Domingos de 9 AM a 8 PM**. ⏰`;
                 }
-                else if (lowText.includes("ubicacion") || lowText.includes("sucursal") || lowText.includes("donde")) {
-                    reply = `Nos encontramos en la **Calle 67 #16 duplex**. ¡Será un privilegio recibirle! 📍`;
+                else if (lowText.includes("ubicacion") || lowText.includes("donde")) {
+                    reply = `Estamos en la **Calle 67 #16 duplex**. ¡Esperamos su visita! 📍`;
                 }
-                else if (lowText.match(/(hola|buenos dias|buenas tardes)/)) {
-                    reply = `¡Muy buen día! Es un honor atenderle. ¿Desea consultar el catálogo o necesita ayuda con un pedido? ✨`;
+                else if (lowText.includes("receta") || lowText.includes("controlado")) {
+                    reply = `Para controlados, adjunte su receta al finalizar la compra o envíela a nuestro WhatsApp. 📄`;
                 }
-                else if (lowText.includes("gracias") || lowText.includes("adios")) {
-                    reply = `Estamos para servirle. ¡Que tenga un excelente día! 👋`;
+                else if (lowText.includes("hola") || lowText.includes("buenos dias")) {
+                    reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
+                }
+                else if (lowText.includes("gracias")) {
+                    reply = `¡De nada! Estamos para apoyarle en su salud. ¿Algo más en lo que pueda ayudarle? 😊`;
                 }
                 else {
-                    // Respuesta de auxilio en lugar de "no entiendo"
-                    reply = `Para brindarle una mejor atención, ¿podría indicarme si su duda es sobre la **ubicación**, el proceso de **compra**, o prefiere hablar con un **especialista**?`;
+                    reply = `Para ayudarle mejor, ¿su duda es sobre la **ubicación**, el proceso de **compra** o sus **pedidos**?`;
                 }
 
                 msgContainer.innerHTML += `
