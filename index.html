@@ -33,6 +33,8 @@
         .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
         .nav-link.active { background: #2563eb; color: white; }
         .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
+        
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; }
 
         /* ESTILOS CHATBOT */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
@@ -145,7 +147,7 @@
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'TU_KEY_REAL_AQUI'; 
+        const _key = 'TU_KEY_AQUI'; // Asegúrate de colocar tu key real
         const dbClient = supabase.createClient(_url, _key);
 
         let userName = ""; 
@@ -155,32 +157,30 @@
             if (session) {
                 const { data: profile } = await dbClient.from('profiles').select('full_name').eq('id', session.user.id).single();
                 let rawName = profile?.full_name || "";
+                
+                // FILTRO PROFESIONAL
                 if (rawName.toLowerCase().includes("bellakat") || rawName.length < 2) {
                     userName = "Estimado Cliente";
                 } else {
                     userName = rawName.split(' ')[0];
                 }
+                
                 document.getElementById('welcome-title').innerText = `Es un honor saludarle, ${userName}`;
             }
         }
 
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
-        function sendQuickReply(text) { 
-            document.getElementById('chat-input').value = text; 
-            sendMessage(); 
-        }
+        function sendQuickReply(text) { document.getElementById('chat-input').value = text; sendMessage(); }
 
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
             const typing = document.getElementById('typing');
-            const originalText = input.value.trim();
-            
-            if (!originalText) return;
+            const text = input.value.trim();
+            if (!text) return;
 
-            // Mostrar mensaje del usuario
-            msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${originalText}</div></div>`;
+            msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
 
@@ -188,44 +188,43 @@
 
             setTimeout(() => {
                 typing.classList.add('hidden');
-                
-                // --- NORMALIZACIÓN DE TEXTO (SOLUCIÓN A TU PROBLEMA) ---
-                const lowText = originalText.toLowerCase()
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos
-                    .replace(/[¿?¡!.,]/g, ""); // Quita signos
-
+                const lowText = text.toLowerCase();
                 let reply = "";
 
-                // LÓGICA DE RESPUESTAS SIN "PRETEXTOS"
-                if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("pasos")) {
-                    reply = `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre su envío y 4️⃣ Realice su pago seguro. 🛒`;
+                // --- LÓGICA DE EFICIENCIA MEJORADA ---
+                
+                if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envío")) {
+                    reply = `Para conocer el estado de su pedido, por favor verifique la sección **"Mis Pedidos"** en su perfil o proporciónenos su número de guía. 📦 El tiempo estimado de entrega es de 30 a 90 minutos.`;
                 }
-                else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
-                    reply = `Para conocer el estado de su pedido, verifique la sección **"Mis Pedidos"** en su perfil. El tiempo estimado es de 30 a 90 minutos. 📦`;
+                else if (lowText.includes("receta") || lowText.includes("antibiótico") || lowText.includes("controlado")) {
+                    reply = `Para adquirir medicamentos controlados o antibióticos, es indispensable adjuntar su receta médica vigente al finalizar la compra o enviarla vía WhatsApp. 📄`;
                 }
-                else if (lowText.includes("receta") || lowText.includes("controlado") || lowText.includes("antibiotico")) {
-                    reply = `Para medicamentos controlados o antibióticos, es indispensable adjuntar su receta vigente al finalizar la compra o enviarla por WhatsApp. 📄`;
+                else if (lowText.includes("comprar") || lowText.includes("pasos")) {
+                    reply = `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre sus datos de envío y 4️⃣ Realice su pago seguro. 🛒`;
                 }
-                else if (lowText.includes("factura") || lowText.includes("facturacion") || lowText.includes("fiscal")) {
-                    reply = `Puede solicitar su factura enviando su constancia fiscal y número de pedido a nuestro contacto oficial. 💳`;
+                else if (lowText.includes("factura") || lowText.includes("fiscal") || lowText.includes("xml")) {
+                    reply = `Claro que sí. Puede solicitar su factura enviando su constancia de situación fiscal y número de pedido a nuestro contacto oficial dentro del mes de compra. 💳`;
                 }
                 else if (lowText.includes("horario") || lowText.includes("abierto")) {
-                    reply = `Le atendemos de **Lunes a Sábado de 8:00 AM a 10:00 PM** y **Domingos de 9:00 AM a 8:00 PM**. ⏰`;
+                    reply = `Le atendemos con gusto de **Lunes a Sábado de 8:00 AM a 10:00 PM** y **Domingos de 9:00 AM a 8:00 PM**. ⏰`;
                 }
-                else if (lowText.includes("ubicacion") || lowText.includes("sucursal") || lowText.includes("donde")) {
+                else if (lowText.includes("ubicación") || lowText.includes("sucursal") || lowText.includes("donde")) {
                     reply = `Nos encontramos en la **Calle 67 #16 duplex**. ¡Será un privilegio recibirle! 📍`;
                 }
-                else if (lowText.match(/(hola|buenos dias|buenas tardes)/)) {
-                    reply = `¡Muy buen día! Es un honor atenderle. ¿Desea consultar el catálogo o necesita ayuda con un pedido? ✨`;
+                else if (lowText.includes("especialista") || lowText.includes("farmacéutico") || lowText.includes("humano")) {
+                    reply = `Le comunicaremos con un profesional. Puede llamarnos o escribirnos directamente al **+52 55 23 69 79 40**. 👨‍⚕️`;
                 }
-                else if (lowText.includes("gracias") || lowText.includes("adios")) {
-                    reply = `Estamos para servirle. ¡Que tenga un excelente día! 👋`;
+                else if (lowText.match(/(hola|buenos días|buenas tardes)/)) {
+                    reply = `¡Muy buen día! Es un privilegio atenderle. ¿Desea conocer nuestras ofertas del día o tiene alguna consulta específica? ✨`;
+                }
+                else if (lowText.includes("gracias") || lowText.includes("adiós")) {
+                    reply = `Ha sido un honor servirle. En FarmaPlus, su salud es nuestra prioridad. ¡Hasta pronto! 👋`;
                 }
                 else {
-                    // Respuesta de auxilio en lugar de "no entiendo"
-                    reply = `Para brindarle una mejor atención, ¿podría indicarme si su duda es sobre la **ubicación**, el proceso de **compra**, o prefiere hablar con un **especialista**?`;
+                    reply = `Le ofrezco una disculpa, no he comprendido su solicitud. ¿Desea hablar sobre pedidos, recetas, facturación o nuestros horarios de atención?`;
                 }
 
+                // Renderizar respuesta
                 msgContainer.innerHTML += `
                     <div class="flex justify-start animate-pop">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">
@@ -235,7 +234,7 @@
                 
                 msgContainer.scrollTop = msgContainer.scrollHeight;
                 lucide.createIcons();
-            }, 800);
+            }, 1000);
         }
 
         checkSession();
