@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FarmaPlus - Eficiencia Farmacéutica</title>
+    <title>FarmaPlus - Tu Farmacia de Confianza</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,10 +27,23 @@
         .search-input:focus { border-color: #2563eb; }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
         
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
+        
         .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .cart-container:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
+        .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
+        .nav-link:hover { color: #2563eb; background: #eff6ff; }
+        .nav-link.active { background: #2563eb; color: white; }
         .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
+
+        #user-auth-section { display: flex; align-items: center; gap: 15px; }
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
+        .logout-btn:hover { background: #fee2e2; }
+        .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
         /* ESTILOS CHATBOT */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
@@ -71,22 +84,28 @@
                         </a>
                         <div class="search-bar">
                             <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" placeholder="Buscar medicamentos..." class="search-input" />
+                            <input type="text" placeholder="Buscar productos..." class="search-input" />
                         </div>
                         <div class="header-actions">
                             <div id="admin-action-container"></div>
-                            <a href="carrito.html" class="cart-container text-slate-700">
+                            <a href="carrito.html" class="cart-container text-slate-700" title="Ver mi carrito">
                                 <i data-lucide="shopping-basket" size="22"></i>
                                 <span id="cart-count" class="cart-badge">0</span>
                             </a>
                             <div id="user-auth-section">
-                                <a href="login.html" class="action-link flex items-center gap-1">
-                                    <i data-lucide="user" size="18"></i>
-                                    <span class="text-sm font-semibold">Iniciar Sesión</span>
+                                <a href="login.html" class="action-link">
+                                    <i data-lucide="user"></i>
+                                    <span>Iniciar Sesión</span>
                                 </a>
                             </div>
                         </div>
                     </div>
+                    <nav class="nav-desktop">
+                        <a href="index.html" class="nav-link active">Inicio</a>
+                        <a href="catalog.html" class="nav-link">Catálogo</a>
+                        <a href="nosotros.html" class="nav-link">Nosotros</a>
+                        <a href="contacto.html" class="nav-link">Contacto</a>
+                    </nav>
                 </div>
             </div>
         </header>
@@ -135,108 +154,146 @@
 
         <main class="container py-12">
             <div class="content-card text-center">
-                <h2 class="text-4xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                <p class="text-slate-500 text-lg">Su salud, atendida por profesionales.</p>
+                <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
+                    Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <a href="catalog.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-all">Ver Catálogo</a>
+                    <a href="contacto.html" class="bg-white text-slate-600 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Soporte</a>
+                </div>
             </div>
         </main>
+
+        <footer class="bg-slate-900 text-white py-12 mt-20">
+            <div class="container text-center">
+                <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
+            </div>
+        </footer>
     </div>
 
     <script>
+        // CONFIGURACIÓN SUPABASE
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'TU_KEY_REAL_AQUI'; 
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         let userName = ""; 
 
-        async function checkSession() {
-            const { data: { session } } = await dbClient.auth.getSession();
-            if (session) {
-                const { data: profile } = await dbClient.from('profiles').select('full_name').eq('id', session.user.id).single();
-                let rawName = profile?.full_name || "";
-                userName = (rawName.length < 2) ? "Estimado Cliente" : rawName.split(' ')[0];
-                document.getElementById('welcome-title').innerText = `Es un honor saludarle, ${userName}`;
-            }
+        // GESTIÓN DE CARRITO
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
+            const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            const badge = document.getElementById('cart-count');
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
         }
 
+        // SESIÓN Y USUARIO
+        async function checkSession() {
+            const { data: { session } } = await dbClient.auth.getSession();
+            const authSection = document.getElementById('user-auth-section');
+            const adminContainer = document.getElementById('admin-action-container');
+            const welcomeTitle = document.getElementById('welcome-title');
+
+            if (session) {
+                const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
+                
+                const fullName = profile ? profile.full_name : session.user.email;
+                userName = (fullName.length < 2) ? "Cliente" : fullName.split(' ')[0];
+                const role = profile ? profile.role : 'usuario';
+
+                if (role === 'admin') {
+                    adminContainer.innerHTML = `
+                        <a href="admin.html" title="Panel de Control" class="flex items-center gap-2 text-blue-600 hover:opacity-80 transition">
+                            <span class="admin-badge">ADMIN</span>
+                            <i data-lucide="layout-grid"></i>
+                        </a>`;
+                }
+
+                authSection.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
+                            <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
+                        </span>
+                        <button onclick="logout()" class="logout-btn">Salir</button>
+                    </div>`;
+                
+                welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
+            }
+            lucide.createIcons();
+        }
+
+        async function logout() {
+            await dbClient.auth.signOut();
+            localStorage.removeItem('farmaCart');
+            window.location.reload();
+        }
+
+        // LÓGICA DEL CHATBOT (SIN CAMBIOS)
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
-        
-        function sendQuickReply(text) { 
-            document.getElementById('chat-input').value = text; 
-            sendMessage(); 
-        }
+        function sendQuickReply(text) { document.getElementById('chat-input').value = text; sendMessage(); }
 
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
             const typing = document.getElementById('typing');
             const originalText = input.value.trim();
-            
             if (!originalText) return;
 
             msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${originalText}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
-
             typing.classList.remove('hidden');
 
             setTimeout(() => {
                 typing.classList.add('hidden');
-                
-                // --- NORMALIZACIÓN ---
-                const lowText = originalText.toLowerCase()
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-                    .replace(/[¿?¡!.,]/g, "");
-
+                const lowText = originalText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!.,]/g, "");
                 let reply = "";
 
-                // --- DETECCIÓN DE DESPEDIDAS ---
                 const despedidas = ["adios", "hasta luego", "bye", "chao", "nos vemos", "luego hablamos", "cerrar chat", "terminar", "gracias adios", "es todo"];
                 const esDespedida = despedidas.some(p => lowText.includes(p));
 
                 if (esDespedida) {
                     const nombre = (userName) ? `, ${userName}` : "";
                     reply = `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
-                }
-                else if (lowText.includes("como comprar") || lowText.includes("comprar")) {
+                } else if (lowText.includes("como comprar") || lowText.includes("comprar")) {
                     reply = `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre su envío y 4️⃣ Pague de forma segura. 🛒`;
-                }
-                else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
+                } else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
                     reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
-                }
-                else if (lowText.includes("horario") || lowText.includes("abierto")) {
+                } else if (lowText.includes("horario") || lowText.includes("abierto")) {
                     reply = `Abrimos de **Lunes a Sábado de 8 AM a 10 PM** y **Domingos de 9 AM a 8 PM**. ⏰`;
-                }
-                else if (lowText.includes("ubicacion") || lowText.includes("donde")) {
+                } else if (lowText.includes("ubicacion") || lowText.includes("donde")) {
                     reply = `Estamos en la **Calle 67 #16 duplex**. ¡Esperamos su visita! 📍`;
-                }
-                else if (lowText.includes("receta") || lowText.includes("controlado")) {
+                } else if (lowText.includes("receta") || lowText.includes("controlado")) {
                     reply = `Para controlados, adjunte su receta al finalizar la compra o envíela a nuestro WhatsApp. 📄`;
-                }
-                else if (lowText.includes("hola") || lowText.includes("buenos dias")) {
+                } else if (lowText.includes("hola") || lowText.includes("buenos dias")) {
                     reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
-                }
-                else if (lowText.includes("gracias")) {
-                    reply = `¡De nada! Estamos para apoyarle en su salud. ¿Algo más en lo que pueda ayudarle? 😊`;
-                }
-                else {
+                } else if (lowText.includes("gracias")) {
+                    reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
+                } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la **ubicación**, el proceso de **compra** o sus **pedidos**?`;
                 }
 
-                msgContainer.innerHTML += `
-                    <div class="flex justify-start animate-pop">
-                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">
-                            ${reply}
-                        </div>
-                    </div>`;
-                
+                msgContainer.innerHTML += `<div class="flex justify-start animate-pop"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
                 msgContainer.scrollTop = msgContainer.scrollHeight;
                 lucide.createIcons();
             }, 800);
         }
 
+        // RELOJ Y CARGA INICIAL
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
         checkSession();
-        lucide.createIcons();
+        updateCartBadge();
     </script>
 </body>
 </html>
