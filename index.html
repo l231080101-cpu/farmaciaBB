@@ -264,11 +264,11 @@
                     reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
                 } else if (lowText.includes("horario") || lowText.includes("abierto")) {
                     reply = `Abrimos de **Lunes a Sábado de 8 AM a 10 PM** y **Domingos de 9 AM a 8 PM**. ⏰`;
-                } else if (lowText.includes("ubicacion") || lowText.includes("donde")) {
+                } else if (lowText.includes("ubicacion") || lowText.includes("donde") || lowText.includes("lugar") || lowText.includes("sitio"))  {
                     reply = `Estamos en la **Calle 67 #16 duplex**. ¡Esperamos su visita! 📍`;
-                } else if (lowText.includes("receta") || lowText.includes("controlado")) {
+                } else if (lowText.includes("receta") || lowText.includes("controlado") || lowText.includes("medicamento")) || lowText.includes("medicina") {
                     reply = `Para controlados, adjunte su receta al finalizar la compra o envíela a nuestro WhatsApp  55 23 69 79 40.📄`;
-                } else if (lowText.includes("hola") || lowText.includes("buenos dias")) {
+                } else if (lowText.includes("hola") || lowText.includes("buenos dias")) || lowText.includes("informacion") {
                     reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
                 } else if (lowText.includes("gracias")) {
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
