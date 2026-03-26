@@ -284,8 +284,12 @@
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
                 } else if (lowText.includes("consulta") || lowText.includes("consultas") || lowText.includes("citas") || lowText.includes("citas medicas")) {
                     reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `;
-                   } else if (lowText.includes("como pido a domicilio") || lowText.includes("envios") || lowText.includes("entregas") || lowText.includes("citas medicas")) {
+                } else if (lowText.includes("como pido a domicilio") || lowText.includes("envios") || lowText.includes("entregas") || lowText.includes("citas medicas")) {
                     reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `; 
+                } else if (lowText.includes("metodos de pago") || lowText.includes("modos de pago") || lowText.includes("pagos") || lowText.includes("aceptas efectivo") || lowText.includes("aceptas tarjeta")|| lowText.includes("pago")|| lowText.includes("como pago")) {
+                    reply = `Pudes pagar con tarjeta atravez de tu tarjeta de credito o paypal, tambien puedes pagar en efectivo al momento de recibir tus productos `;
+                } else if (lowText.includes("carrito") || lowText.includes("carrito de compras") || lowText.includes("como uso el carrito de compras") || lowText.includes("no se usar el carrito de compras") || lowText.includes("donde veo lo que compre en liena")|| lowText.includes("como compro atraves de la pagina")|| lowText.includes("como veo lo que compre")) {
+                    reply = `en icono del carrito de compras te aparecera los articulos que hayas seleccionado y continar para seleccionar el metodo de pago `;
                 } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
                     , de nuestros *horarios*?`;
