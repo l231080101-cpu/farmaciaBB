@@ -272,7 +272,7 @@
                     reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
                 } else if (lowText.includes("gracias")) {
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
-                } else if (lowText.includes("productos") || lowText.includes("mercancia")) {
+                } else if (lowText.includes("productos") || lowText.includes("mercancia") || lowText.includes("catalogo")) {
                     reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
                 } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan") || lowText.includes("costos")|| lowText.includes("costo")) {
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
@@ -290,6 +290,8 @@
                     reply = `Pudes pagar con tarjeta atravez de tu tarjeta de credito o paypal, tambien puedes pagar en efectivo al momento de recibir tus productos `;
                 } else if (lowText.includes("carrito") || lowText.includes("carrito de compras") || lowText.includes("como uso el carrito de compras") || lowText.includes("no se usar el carrito de compras") || lowText.includes("donde veo lo que compre en liena")|| lowText.includes("como compro atraves de la pagina")|| lowText.includes("como veo lo que compre")) {
                     reply = `en icono del carrito de compras te aparecera los articulos que hayas seleccionado y continar para seleccionar el metodo de pago `;
+                    } else if (lowText.includes("devoluciones") || lowText.includes("reembolso") || lowText.includes("devolucion") || lowText.includes("cancelar compra") || lowText.includes("cancelar pedido") || lowText.includes("regresar un producto") || lowText.includes("devolver")) {
+                    reply = `¡puedes realizar la cancelacion de su compra o la devolucion de su pedido, mediante nuestro contacto en Whatsapp 5530370813.`;
                 } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
                     , de nuestros *horarios*?`;
