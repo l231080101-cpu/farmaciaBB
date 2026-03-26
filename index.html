@@ -258,7 +258,7 @@
                 if (esDespedida) {
                     const nombre = (userName) ? `, ${userName}` : "";
                     reply = `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
-                } else if (lowText.includes("como comprar") || lowText.includes("comprar")) {
+                } else if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("compra")) {
                     reply = `Realizar su compra es sencillo: inicie sesion ,  Busque el producto , Agréguelo al carrito,  Registre su envío y  Pague de forma segura. 🛒`;
                 } else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
                     reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
@@ -273,7 +273,8 @@
                 } else if (lowText.includes("gracias")) {
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
                 } else {
-                    reply = `Para ayudarle mejor, ¿su duda es sobre la **ubicación**, el proceso de **compra** o sus **pedidos**?`;
+                    reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
+                    , de nuestros *horarios*?`;
                 }
 
                 msgContainer.innerHTML += `<div class="flex justify-start animate-pop"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
