@@ -274,7 +274,7 @@
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
                 } else if (lowText.includes("productos") || lowText.includes("mercancia")) {
                     reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
-                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan") || lowText.includes("costos")) {
+                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan") || lowText.includes("costos")|| lowText.includes("costo")) {
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
                 } else if (lowText.includes("que me recomiendas si me duele") || lowText.includes("que me recomiendas para el dolor")) {
                     reply = `¡para aliviar el dolor cronico de espalda, cabeza ,articulaciones unas pastillas de mitrozon que puedes adquirir en la seccion de catalogo . `;
@@ -282,8 +282,10 @@
                     reply = `¡puedes adquirir la cantidad que desees  de productos nuestros directamente en nuetro catalogo. `;
                 } else if (lowText.includes("no se que elegir") || lowText.includes("no se")) {
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
-                    } else if (lowText.includes("consulta") || lowText.includes("consultas") || lowText.includes("citas") || lowText.includes("citas medicas")) {
+                } else if (lowText.includes("consulta") || lowText.includes("consultas") || lowText.includes("citas") || lowText.includes("citas medicas")) {
                     reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `;
+                   } else if (lowText.includes("como pido a domicilio") || lowText.includes("envios") || lowText.includes("entregas") || lowText.includes("citas medicas")) {
+                    reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `; 
                 } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
                     , de nuestros *horarios*?`;
@@ -307,6 +309,6 @@
         updateClock();
         checkSession();
         updateCartBadge();
-    </script>
+    </script>    
 </body>
 </html>
