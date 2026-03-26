@@ -258,7 +258,7 @@
                 if (esDespedida) {
                     const nombre = (userName) ? `, ${userName}` : "";
                     reply = `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
-                } else if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("compra")) {
+                } else if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("compra")  || lowText.includes("compro")  || lowText.includes("compre")) {
                     reply = `Realizar su compra es sencillo: inicie sesion ,  Busque el producto , Agréguelo al carrito,  Registre su envío y  Pague de forma segura. 🛒`;
                 } else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
                     reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
@@ -274,7 +274,7 @@
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
                 } else if (lowText.includes("productos") || lowText.includes("mercancia")) {
                     reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
-                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan")) {
+                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan") || lowText.includes("costos")) {
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
                 } else if (lowText.includes("que me recomiendas si me duele") || lowText.includes("que me recomiendas para el dolor")) {
                     reply = `¡para aliviar el dolor cronico de espalda, cabeza ,articulaciones unas pastillas de mitrozon que puedes adquirir en la seccion de catalogo . `;
