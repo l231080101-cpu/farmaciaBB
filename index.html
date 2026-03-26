@@ -276,6 +276,12 @@
                     reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
                 } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan")) {
                     reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
+                } else if (lowText.includes("que me recomiendas si me duele") || lowText.includes("que me recomiendas para el dolor")) {
+                    reply = `¡para aliviar el dolor cronico de espalda, cabeza ,articulaciones unas pastillas de mitrozon que puedes adquirir en la seccion de catalogo . `;
+                } else if (lowText.includes("puedo pedir 100 medicamentos") || lowText.includes("puedo pedir 100 pomadas")) {
+                    reply = `¡puedes adquirir la cantidad que desees  de productos nuestros directamente en nuetro catalogo. `;
+                } else if (lowText.includes("no se que elegir") || lowText.includes("no se")) {
+                    reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
                 } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
                     , de nuestros *horarios*?`;
