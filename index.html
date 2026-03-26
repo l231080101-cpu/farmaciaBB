@@ -272,6 +272,10 @@
                     reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
                 } else if (lowText.includes("gracias")) {
                     reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
+                } else if (lowText.includes("productos") || lowText.includes("mercancia")) {
+                    reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
+                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan")) {
+                    reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
                 } else {
                     reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
                     , de nuestros *horarios*?`;
