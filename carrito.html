@@ -8,10 +8,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T"></script>
+    <script src="https://www.google.com/google.com/recaptcha/api.js?render=6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -21,7 +19,7 @@
 </head>
 <body class="antialiased">
 
-    <header class="bg-white border-bottom border-slate-100 mb-8">
+    <header class="bg-white border-b border-slate-100 mb-8">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <a href="index.html" class="flex items-center gap-3">
                 <div class="bg-blue-600 text-white p-2 rounded-xl text-xl">⚕️</div>
@@ -66,7 +64,7 @@
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Tu Anon Key
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
@@ -74,7 +72,6 @@
 
         async function checkSession() {
             const { data: { session }, error } = await sb.auth.getSession();
-            
             if (error || !session) {
                 window.location.href = 'login.html';
                 return null;
@@ -84,12 +81,10 @@
 
         async function init() {
             lucide.createIcons();
-            
             currentUser = await checkSession();
             if (!currentUser) return; 
 
-            const userInfo = document.getElementById('user-info');
-            userInfo.classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('user-email').innerText = currentUser.email;
             
             render();
@@ -110,7 +105,6 @@
                 container.innerHTML = cart.map((item, idx) => {
                     const safeName = DOMPurify.sanitize(item.nombre);
                     const safeImg = DOMPurify.sanitize(item.imagen_url);
-
                     return `
                     <div class="card-style p-5 flex items-center gap-6">
                         <img src="${safeImg}" class="w-20 h-20 object-contain" alt="Producto">
@@ -119,12 +113,11 @@
                             <p class="text-blue-600 font-black text-lg">$${item.precio}</p>
                         </div>
                         <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
-                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">-</button>
-                            <span class="font-bold w-4 text-center text-slate-800">${item.cantidad}</span>
-                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">+</button>
+                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg">-</button>
+                            <span class="font-bold w-4 text-center">${item.cantidad}</span>
+                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg">+</button>
                         </div>
-                    </div>
-                    `
+                    </div>`;
                 }).join('');
 
                 document.getElementById('total').innerText = `$${total.toFixed(2)}`;
@@ -145,34 +138,48 @@
                         }]
                     });
                 },
-                onApprove: (data, actions) => {
-                    return actions.order.capture().then((details) => {
-                        
-                        grecaptcha.ready(function() {
-                            // --- CLAVE CORREGIDA AQUÍ TAMBIÉN ---
-                            grecaptcha.execute('6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T', {action: 'finalizar_compra'}).then(async function(token) {
-                                console.log("Token reCAPTCHA de seguridad generado:", token);
-                                
-                                const { error } = await sb.from('pedidos').insert([{
-                                    user_id: currentUser.id,
-                                    productos: cart,
-                                    total: total,
-                                    paypal_id: details.id,
-                                    estado: 'pagado'
-                                }]);
+                onApprove: async (data, actions) => {
+                    try {
+                        // 1. Capturar el pago de PayPal
+                        const details = await actions.order.capture();
+                        console.log("Pago capturado con éxito");
 
-                                if (!error) {
-                                    alert("¡Pago exitoso! Tu pedido ha sido registrado de forma segura.");
-                                    localStorage.removeItem('farmaCart');
-                                    window.location.href = "index.html"; 
-                                } else {
-                                    console.error("Error al insertar en DB:", error);
-                                    alert("Hubo un problema de conexión al guardar el reporte.");
-                                }
+                        // 2. Ejecutar reCAPTCHA antes de guardar en la base de datos
+                        // grecaptcha.ready asegura que la librería esté cargada
+                        const token = await new Promise((resolve) => {
+                            grecaptcha.ready(async () => {
+                                const t = await grecaptcha.execute('6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T', {action: 'finalizar_compra'});
+                                resolve(t);
                             });
                         });
 
-                    });
+                        console.log("Token de seguridad generado");
+
+                        // 3. Guardar en Supabase incluyendo el token para auditoría
+                        const { error } = await sb.from('pedidos').insert([{
+                            user_id: currentUser.id,
+                            productos: cart,
+                            total: total,
+                            paypal_id: details.id,
+                            estado: 'pagado',
+                            recaptcha_token: token // Campo sugerido para tu tabla
+                        }]);
+
+                        if (error) throw error;
+
+                        // 4. Finalizar proceso
+                        alert("¡Gracias " + details.payer.name.given_name + "! Tu pedido en FarmaPlus ha sido registrado.");
+                        localStorage.removeItem('farmaCart');
+                        window.location.href = "index.html";
+
+                    } catch (err) {
+                        console.error("Error en el proceso final:", err);
+                        alert("El pago se realizó pero hubo un error al registrar el pedido. Por favor contacta a soporte con tu ID de PayPal.");
+                    }
+                },
+                onError: (err) => {
+                    console.error("Error en PayPal:", err);
+                    alert("No se pudo procesar el pago con PayPal.");
                 }
             }).render('#paypal-button-container');
         }
@@ -181,7 +188,10 @@
             cart[idx].cantidad += d;
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            location.reload(); 
+            render(); // Mejor que reload, actualiza la UI
+            // Opcional: reiniciar PayPal si el total cambió drásticamente
+            document.getElementById('paypal-button-container').innerHTML = '';
+            initPayPal();
         }
 
         window.onload = init;
