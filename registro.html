@@ -3,121 +3,223 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Crear Cuenta - FarmaPlus</title>
+    <title>Registro - FarmaPlus</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.11.0/validator.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; }
-        .register-card { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
-            border: 1px solid #e2e8f0; 
-            width: 100%; 
-            max-width: 450px; 
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 8px; }
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+        
+        .login-wrapper { min-height: calc(100vh - 160px); display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; width: 100%; max-width: 500px; position: relative; overflow: hidden; }
+        
+        .input-group input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; background: #f8fafc; outline: none; }
+        .input-group input:focus { border-color: #2563eb; background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        
+        #loading-overlay { 
+            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.9); 
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; 
+            backdrop-filter: blur(4px);
         }
-        .input-group input { 
-            width: 100%; 
-            padding: 12px 16px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            transition: all 0.2s; 
-            background: #f8fafc; 
-            outline: none; 
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb;
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
-        .input-group input:focus { 
-            border-color: #2563eb; 
-            background: white; 
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body>
 
-    <div class="register-card">
-        <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
-                <i data-lucide="user-plus" size="32"></i>
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                </div>
             </div>
-            <h1 class="text-3xl font-extrabold text-slate-900">Crear Cuenta</h1>
-            <p class="text-slate-500 mt-2">Únete a la familia FarmaPlus</p>
         </div>
-        
-        <form id="register-form" class="space-y-6">
-            <div class="input-group">
-                <label for="reg-name" class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
-                <input type="text" id="reg-name" placeholder="Tu nombre y apellido" required>
+
+        <div class="main-header">
+            <div class="container">
+                <div class="main-header-content">
+                    <a href="index.html" class="logo">
+                        <div class="logo-box">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="text-slate-500 text-xs font-semibold">Tu farmacia de confianza</p>
+                        </div>
+                    </a>
+                    <nav class="flex gap-6">
+                        <a href="index.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Inicio</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="login-wrapper">
+        <div class="login-card">
+            <div id="loading-overlay">
+                <div class="spinner mb-4"></div>
+                <p class="text-blue-600 font-bold animate-pulse">Creando cuenta segura...</p>
             </div>
 
-            <div class="input-group">
-                <label for="reg-email" class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
-                <input type="email" id="reg-email" placeholder="ejemplo@correo.com" required>
-            </div>
-
-            <div class="input-group">
-                <label for="reg-password" class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
-                <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
+                    <i data-lucide="user-plus" size="32"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900">Crear Cuenta</h2>
+                <p class="text-slate-500 mt-2">Únete a FarmaPlus de forma segura</p>
             </div>
             
-            <p id="reg-error" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
+            <form id="register-form" class="space-y-4">
+                <div class="input-group">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
+                    <input type="text" id="fullname" placeholder="Ej. Juan Pérez" required>
+                </div>
+                <div class="input-group">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
+                    <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+                </div>
+                <div class="input-group">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
+                    <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                </div>
+                <div class="input-group">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label>
+                    <input type="password" id="confirm-password" placeholder="Repite tu contraseña" required>
+                </div>
+                
+                <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
+                <p id="success-message" class="hidden text-green-600 text-center text-sm font-bold bg-green-50 p-3 rounded-lg"></p>
+                
+                <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2 mt-4">
+                    <span>Registrarse</span>
+                </button>
+            </form>
 
-            <button type="submit" id="reg-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2">
-                <span>Registrarse</span>
-            </button>
-        </form>
-
-        <div class="text-center mt-6">
-            <a href="login.html" class="text-blue-600 text-sm font-semibold hover:underline">¿Ya tienes cuenta? Inicia sesión</a>
+            <div class="text-center mt-6 pt-6 border-t border-slate-100">
+                <p class="text-slate-500 text-sm mb-4">¿Ya tienes una cuenta?</p>
+                <a href="login.html" class="block w-full border-2 border-blue-600 text-blue-600 p-3 rounded-xl font-bold hover:bg-blue-50 transition-all text-center">
+                    Iniciar Sesión
+                </a>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
+        // 1. Configuración de Supabase (usando las llaves que me compartiste)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         lucide.createIcons();
 
+        // --- FUNCIÓN DE VALIDACIÓN CENTRALIZADA ---
+        function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
+            // 1. DOMPurify: Evita inyecciones en el nombre
+            const cleanName = DOMPurify.sanitize(rawName.trim());
+            const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
+
+            if (validator.isEmpty(cleanName)) {
+                return { valid: false, msg: "El nombre no puede estar vacío ni contener solo código." };
+            }
+
+            // 2. Validator: Revisa el formato de correo
+            if (!validator.isEmail(cleanEmail)) {
+                return { valid: false, msg: "El formato de correo no es válido." };
+            }
+
+            // 3. Validator: Obliga a usar una contraseña fuerte (Al menos 8 caracteres)
+            if (!validator.isLength(rawPassword, { min: 8 })) {
+                return { valid: false, msg: "La contraseña debe tener al menos 8 caracteres por seguridad." };
+            }
+
+            // 4. Coincidencia de contraseñas
+            if (rawPassword !== rawConfirm) {
+                return { valid: false, msg: "Las contraseñas no coinciden." };
+            }
+
+            return { valid: true, name: cleanName, email: cleanEmail };
+        }
+
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const errorMsg = document.getElementById('reg-error');
-            const btn = document.getElementById('reg-btn');
+            const rawName = document.getElementById('fullname').value;
+            const rawEmail = document.getElementById('email').value;
+            const rawPassword = document.getElementById('password').value;
+            const rawConfirm = document.getElementById('confirm-password').value;
+            
+            const errorMsg = document.getElementById('error-message');
+            const successMsg = document.getElementById('success-message');
+            const btn = document.getElementById('btn-submit');
+            const loader = document.getElementById('loading-overlay');
 
             errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
             btn.disabled = true;
-            btn.innerHTML = "Creando cuenta...";
+            btn.innerHTML = "Validando...";
 
+            // --- APLICAR VALIDACIÓN CENTRALIZADA ---
+            const validation = validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm);
+            
+            if (!validation.valid) {
+                errorMsg.textContent = validation.msg;
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = "Registrarse";
+                return;
+            }
+
+            loader.style.display = 'flex';
+
+            // 2. Registro seguro con Supabase (Incluyendo el nombre sanitizado en los metadatos)
             const { data, error } = await dbClient.auth.signUp({
-                email: email,
-                password: password,
+                email: validation.email,
+                password: rawPassword,
                 options: {
-                    data: { full_name: name }
+                    data: {
+                        full_name: validation.name,
+                        role: 'usuario' // Rol por defecto
+                    }
                 }
             });
 
+            loader.style.display = 'none';
+
             if (error) {
-                errorMsg.textContent = error.message;
+                errorMsg.textContent = "Error al registrar: " + (error.message.includes("User already registered") ? "Este correo ya está en uso." : "Inténtalo más tarde.");
                 errorMsg.classList.remove('hidden');
                 btn.disabled = false;
                 btn.innerHTML = "Registrarse";
             } else {
-                // Registro exitoso
-                alert("¡Registro exitoso! Ya puedes iniciar sesión.");
-                // CORRECCIÓN: Redirigir a login.html
-                window.location.href = 'login.html';
+                // ÉXITO: Por defecto Supabase exige confirmar el correo (Punto 5 de tu seguridad)
+                document.getElementById('register-form').reset();
+                successMsg.innerHTML = "¡Registro exitoso!<br><br>Hemos enviado un correo a <b>" + validation.email + "</b>. Por favor revisa tu bandeja de entrada o spam para confirmar tu cuenta antes de iniciar sesión.";
+                successMsg.classList.remove('hidden');
+                btn.style.display = 'none'; // Ocultar el botón para evitar múltiples clics
             }
         });
     </script>
 </body>
 </html>
-
-
