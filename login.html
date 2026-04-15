@@ -8,6 +8,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.11.0/validator.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
@@ -129,10 +133,29 @@
             document.getElementById('live-clock').textContent = new Date().toLocaleTimeString();
         }, 1000);
 
+        // --- FUNCIÓN DE VALIDACIÓN CENTRALIZADA ---
+        function validateLoginData(rawEmail, rawPassword) {
+            // 1. DOMPurify: Limpia cualquier inyección HTML/Script
+            const cleanEmail = DOMPurify.sanitize(rawEmail);
+            
+            // 2. Validator: Verifica formato estricto de correo
+            if (!validator.isEmail(cleanEmail)) {
+                return { valid: false, msg: "El formato de correo no es válido." };
+            }
+            
+            // 3. Validator: Verifica que la contraseña no esté vacía
+            if (validator.isEmpty(rawPassword)) {
+                return { valid: false, msg: "La contraseña es requerida." };
+            }
+            
+            return { valid: true, email: cleanEmail };
+        }
+
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            
+            const rawEmail = document.getElementById('email').value;
+            const rawPassword = document.getElementById('password').value;
             const errorMsg = document.getElementById('error-message');
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('loading-overlay');
@@ -141,11 +164,26 @@
             btn.disabled = true;
             btn.innerHTML = "Validando...";
 
-            // 1. Auth de Supabase
-            const { data, error } = await dbClient.auth.signInWithPassword({ email, password });
+            // --- APLICAR VALIDACIÓN CENTRALIZADA ANTES DE CONECTAR ---
+            const validation = validateLoginData(rawEmail, rawPassword);
+            
+            if (!validation.valid) {
+                errorMsg.textContent = validation.msg;
+                errorMsg.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = "Entrar";
+                return; // Detiene la ejecución aquí si hay peligro
+            }
+
+            // 1. Auth de Supabase (usando el correo sanitizado)
+            const { data, error } = await dbClient.auth.signInWithPassword({ 
+                email: validation.email, 
+                password: rawPassword 
+            });
 
             if (error) {
-                errorMsg.textContent = "Acceso denegado: " + error.message;
+                // CAMBIO DE SEGURIDAD: Mensaje genérico para no filtrar información al atacante
+                errorMsg.textContent = "Acceso denegado: Credenciales incorrectas o correo no verificado.";
                 errorMsg.classList.remove('hidden');
                 btn.disabled = false;
                 btn.innerHTML = "Entrar";
@@ -160,7 +198,7 @@
                     .eq('id', data.user.id)
                     .single();
 
-                // Pequeña pausa artificial para que la carga se vea natural (opcional)
+                // Pequeña pausa artificial para que la carga se vea natural
                 await new Promise(res => setTimeout(res, 800));
 
                 if (profileError || !profile) {
@@ -178,5 +216,3 @@
     </script>
 </body>
 </html>
-
-
