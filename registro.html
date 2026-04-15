@@ -42,8 +42,6 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
     </style>
 </head>
 <body>
@@ -80,42 +78,62 @@
         <div class="login-card">
             <div id="loading-overlay">
                 <div class="spinner mb-4"></div>
-                <p class="text-blue-600 font-bold animate-pulse">Creando cuenta segura...</p>
+                <p id="loading-text" class="text-blue-600 font-bold animate-pulse">Creando cuenta segura...</p>
             </div>
 
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
-                    <i data-lucide="user-plus" size="32"></i>
+            <div id="register-step">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
+                        <i data-lucide="user-plus" size="32"></i>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-slate-900">Crear Cuenta</h2>
+                    <p class="text-slate-500 mt-2">Únete a FarmaPlus de forma segura</p>
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-900">Crear Cuenta</h2>
-                <p class="text-slate-500 mt-2">Únete a FarmaPlus de forma segura</p>
+                
+                <form id="register-form" class="space-y-4">
+                    <div class="input-group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
+                        <input type="text" id="fullname" placeholder="Ej. Juan Pérez" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
+                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label>
+                        <input type="password" id="confirm-password" placeholder="Repite tu contraseña" required>
+                    </div>
+                    
+                    <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
+                    
+                    <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2 mt-4">
+                        <span>Registrarse</span>
+                    </button>
+                </form>
             </div>
-            
-            <form id="register-form" class="space-y-4">
-                <div class="input-group">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
-                    <input type="text" id="fullname" placeholder="Ej. Juan Pérez" required>
+
+            <div id="otp-step" class="hidden text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-full mb-4">
+                    <i data-lucide="mail-check" size="32"></i>
                 </div>
-                <div class="input-group">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
-                    <input type="email" id="email" placeholder="ejemplo@correo.com" required>
-                </div>
-                <div class="input-group">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
-                    <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
-                </div>
-                <div class="input-group">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label>
-                    <input type="password" id="confirm-password" placeholder="Repite tu contraseña" required>
-                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900 text-center mb-2">Verifica tu Email</h2>
+                <p class="text-slate-500 text-sm mb-6">Hemos enviado un código de 6 dígitos a <br><b id="display-email" class="text-blue-600"></b></p>
                 
-                <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
-                <p id="success-message" class="hidden text-green-600 text-center text-sm font-bold bg-green-50 p-3 rounded-lg"></p>
-                
-                <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2 mt-4">
-                    <span>Registrarse</span>
-                </button>
-            </form>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <input type="text" id="otp-code" placeholder="000000" maxlength="6" class="text-center text-3xl tracking-[0.5em] font-black !bg-white border-2 border-blue-100 focus:border-blue-600">
+                    </div>
+                    <p id="otp-error" class="hidden text-red-500 text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
+                    <button onclick="verificarCodigo()" class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-100">
+                        Confirmar Código
+                    </button>
+                    <button onclick="location.reload()" class="text-slate-400 text-sm hover:underline">¿Te equivocaste de correo? Volver</button>
+                </div>
+            </div>
 
             <div class="text-center mt-6 pt-6 border-t border-slate-100">
                 <p class="text-slate-500 text-sm mb-4">¿Ya tienes una cuenta?</p>
@@ -127,37 +145,20 @@
     </main>
 
     <script>
-        // 1. Configuración de Supabase (usando las llaves que me compartiste)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         lucide.createIcons();
 
-        // --- FUNCIÓN DE VALIDACIÓN CENTRALIZADA ---
         function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
-            // 1. DOMPurify: Evita inyecciones en el nombre
             const cleanName = DOMPurify.sanitize(rawName.trim());
             const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
 
-            if (validator.isEmpty(cleanName)) {
-                return { valid: false, msg: "El nombre no puede estar vacío ni contener solo código." };
-            }
-
-            // 2. Validator: Revisa el formato de correo
-            if (!validator.isEmail(cleanEmail)) {
-                return { valid: false, msg: "El formato de correo no es válido." };
-            }
-
-            // 3. Validator: Obliga a usar una contraseña fuerte (Al menos 8 caracteres)
-            if (!validator.isLength(rawPassword, { min: 8 })) {
-                return { valid: false, msg: "La contraseña debe tener al menos 8 caracteres por seguridad." };
-            }
-
-            // 4. Coincidencia de contraseñas
-            if (rawPassword !== rawConfirm) {
-                return { valid: false, msg: "Las contraseñas no coinciden." };
-            }
+            if (validator.isEmpty(cleanName)) return { valid: false, msg: "El nombre no puede estar vacío." };
+            if (!validator.isEmail(cleanEmail)) return { valid: false, msg: "El correo no es válido." };
+            if (!validator.isLength(rawPassword, { min: 8 })) return { valid: false, msg: "Mínimo 8 caracteres." };
+            if (rawPassword !== rawConfirm) return { valid: false, msg: "Las contraseñas no coinciden." };
 
             return { valid: true, name: cleanName, email: cleanEmail };
         }
@@ -169,57 +170,79 @@
             const rawEmail = document.getElementById('email').value;
             const rawPassword = document.getElementById('password').value;
             const rawConfirm = document.getElementById('confirm-password').value;
-            
             const errorMsg = document.getElementById('error-message');
-            const successMsg = document.getElementById('success-message');
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('loading-overlay');
 
             errorMsg.classList.add('hidden');
-            successMsg.classList.add('hidden');
-            btn.disabled = true;
-            btn.innerHTML = "Validando...";
-
-            // --- APLICAR VALIDACIÓN CENTRALIZADA ---
             const validation = validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm);
             
             if (!validation.valid) {
                 errorMsg.textContent = validation.msg;
                 errorMsg.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerHTML = "Registrarse";
                 return;
             }
 
             loader.style.display = 'flex';
+            btn.disabled = true;
 
-            // 2. Registro seguro con Supabase (Incluyendo el nombre sanitizado en los metadatos)
             const { data, error } = await dbClient.auth.signUp({
                 email: validation.email,
                 password: rawPassword,
                 options: {
-                    data: {
-                        full_name: validation.name,
-                        role: 'usuario' // Rol por defecto
-                    }
+                    data: { full_name: validation.name, role: 'usuario' }
                 }
             });
 
             loader.style.display = 'none';
 
             if (error) {
-                errorMsg.textContent = "Error al registrar: " + (error.message.includes("User already registered") ? "Este correo ya está en uso." : "Inténtalo más tarde.");
+                errorMsg.textContent = "Error: " + error.message;
                 errorMsg.classList.remove('hidden');
                 btn.disabled = false;
-                btn.innerHTML = "Registrarse";
             } else {
-                // ÉXITO: Por defecto Supabase exige confirmar el correo (Punto 5 de tu seguridad)
-                document.getElementById('register-form').reset();
-                successMsg.innerHTML = "¡Registro exitoso!<br><br>Hemos enviado un correo a <b>" + validation.email + "</b>. Por favor revisa tu bandeja de entrada o spam para confirmar tu cuenta antes de iniciar sesión.";
-                successMsg.classList.remove('hidden');
-                btn.style.display = 'none'; // Ocultar el botón para evitar múltiples clics
+                // ÉXITO: Pasar al paso de OTP
+                document.getElementById('display-email').textContent = validation.email;
+                document.getElementById('register-step').classList.add('hidden');
+                document.getElementById('otp-step').classList.remove('hidden');
+                lucide.createIcons(); // Recargar iconos de Lucide
             }
         });
+
+        async function verificarCodigo() {
+            const email = document.getElementById('email').value;
+            const token = document.getElementById('otp-code').value;
+            const otpError = document.getElementById('otp-error');
+            const loader = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+
+            otpError.classList.add('hidden');
+
+            if (token.length !== 6) {
+                otpError.textContent = "Ingresa los 6 dígitos.";
+                otpError.classList.remove('hidden');
+                return;
+            }
+
+            loader.style.display = 'flex';
+            loadingText.textContent = "Verificando código...";
+
+            const { data, error } = await dbClient.auth.verifyOtp({
+                email: email,
+                token: token,
+                type: 'signup'
+            });
+
+            loader.style.display = 'none';
+
+            if (error) {
+                otpError.textContent = "Código inválido o expirado.";
+                otpError.classList.remove('hidden');
+            } else {
+                alert("¡Cuenta verificada con éxito! Bienvenido a FarmaPlus.");
+                window.location.href = "login.html";
+            }
+        }
     </script>
 </body>
 </html>
