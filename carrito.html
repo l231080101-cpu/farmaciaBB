@@ -8,6 +8,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -25,16 +28,16 @@
                     <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Tu farmacia de confianza</p>
                 </div>
             </a>
-            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm"><i data-lucide="user" size="18"></i></div>
-                <p id="user-email" class="text-xs font-bold text-slate-700 italic">Cargando...</p>
+            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100 hidden">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm"><i data-lucide="shield-check" size="18"></i></div>
+                <p id="user-email" class="text-xs font-bold text-slate-700 italic">Verificando sesión...</p>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 mb-20">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight">Tu Carrito</h1>
+            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight">Tu Carrito Seguro</h1>
         </div>
 
         <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -51,7 +54,9 @@
 
                     <div id="paypal-button-container"></div>
                     
-                    <p class="text-center text-[10px] text-slate-400 mt-4 italic">Pago seguro procesado por PayPal Inc.</p>
+                    <p class="text-center text-[10px] text-slate-400 mt-4 italic flex items-center justify-center gap-1">
+                        <i data-lucide="lock" size="10"></i> Pago seguro y encriptado por PayPal Inc.
+                    </p>
                 </div>
             </aside>
         </div>
@@ -63,11 +68,34 @@
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
+        let currentUser = null; // Guardaremos el usuario autenticado aquí
+
+        // 1. GUARDIA DE SEGURIDAD (Route Guard)
+        async function checkSession() {
+            const { data: { session }, error } = await sb.auth.getSession();
+            
+            if (error || !session) {
+                // Si no hay sesión válida, lo expulsamos al login
+                window.location.href = 'login.html';
+                return null;
+            }
+            return session.user;
+        }
 
         async function init() {
             lucide.createIcons();
-            const { data: { user } } = await sb.auth.getUser();
-            document.getElementById('user-email').innerText = user ? user.email : "Invitado";
+            
+            // Validamos la sesión antes de hacer cualquier otra cosa
+            currentUser = await checkSession();
+            
+            // Si checkSession devolvió null, el código se detiene aquí (se está redirigiendo a login)
+            if (!currentUser) return; 
+
+            // Si llegamos aquí, el usuario es legítimo
+            const userInfo = document.getElementById('user-info');
+            userInfo.classList.remove('hidden');
+            document.getElementById('user-email').innerText = currentUser.email;
+            
             render();
             if(cart.length > 0) initPayPal();
         }
@@ -78,16 +106,21 @@
 
             if (cart.length === 0) {
                 sidebar.classList.add('hidden');
-                container.innerHTML = `<div class="card-style py-20 text-center"><h2>Carrito vacío</h2></div>`;
+                container.innerHTML = `<div class="card-style py-20 text-center text-slate-500 font-bold"><h2>Tu carrito está vacío</h2></div>`;
             } else {
                 sidebar.classList.remove('hidden');
                 let total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
                 
-                container.innerHTML = cart.map((item, idx) => `
+                container.innerHTML = cart.map((item, idx) => {
+                    // 2. SEGURIDAD OWASP: Sanitizamos los datos que vienen del LocalStorage
+                    const safeName = DOMPurify.sanitize(item.nombre);
+                    const safeImg = DOMPurify.sanitize(item.imagen_url);
+
+                    return `
                     <div class="card-style p-5 flex items-center gap-6">
-                        <img src="${item.imagen_url}" class="w-20 h-20 object-contain">
+                        <img src="${safeImg}" class="w-20 h-20 object-contain" alt="Producto">
                         <div class="flex-grow">
-                            <h4 class="font-bold text-slate-800">${item.nombre}</h4>
+                            <h4 class="font-bold text-slate-800">${safeName}</h4>
                             <p class="text-blue-600 font-black text-lg">$${item.precio}</p>
                         </div>
                         <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
@@ -96,40 +129,32 @@
                             <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">+</button>
                         </div>
                     </div>
-                `).join('');
+                    `
+                }).join('');
 
                 document.getElementById('total').innerText = `$${total.toFixed(2)}`;
                 document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
             }
         }
 
-        // LÓGICA DE PAYPAL PERSONALIZADA
         function initPayPal() {
             const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
             paypal.Buttons({
-                // CAMBIO 2: Estilo personalizado (Azul, Forma Píldora, Altura ajustada)
-                style: { 
-                    layout: 'vertical', 
-                    color: 'blue', 
-                    shape: 'pill', 
-                    label: 'pay',
-                    height: 45
-                },
+                style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay', height: 45 },
                 createOrder: (data, actions) => {
                     return actions.order.create({
                         purchase_units: [{ 
-                            description: "Compra en FarmaPlus",
+                            description: "Compra segura en FarmaPlus",
                             amount: { value: total.toFixed(2) } 
                         }]
                     });
                 },
                 onApprove: (data, actions) => {
                     return actions.order.capture().then(async (details) => {
-                        const { data: { user } } = await sb.auth.getUser();
-                        
+                        // Guardamos el pedido ligándolo estrictamente al ID del usuario verificado
                         const { error } = await sb.from('pedidos').insert([{
-                            user_id: user ? user.id : null,
+                            user_id: currentUser.id,
                             productos: cart,
                             total: total,
                             paypal_id: details.id,
@@ -137,12 +162,12 @@
                         }]);
 
                         if (!error) {
-                            alert("¡Pago exitoso! Tu pedido ha sido registrado en español.");
+                            alert("¡Pago exitoso! Tu pedido ha sido registrado de forma segura.");
                             localStorage.removeItem('farmaCart');
-                            window.location.href = "catalog.html";
+                            window.location.href = "catalog.html"; // Opcional: enviarlo a una página de 'gracias'
                         } else {
                             console.error(error);
-                            alert("Error al guardar el reporte.");
+                            alert("Error de conexión segura al guardar el reporte.");
                         }
                     });
                 }
