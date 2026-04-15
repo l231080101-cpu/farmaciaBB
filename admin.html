@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin Pro - FarmaPlus</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal.active { display: flex; }
     </style>
 </head>
-<body class="text-slate-900">
-
-    <div id="modal-edit" class="modal">
+<body class="text-slate-900 hidden" id="admin-body"> <div id="modal-edit" class="modal">
         <div class="glass-card p-8 rounded-[32px] w-full max-w-md shadow-2xl mx-4">
             <h2 class="text-2xl font-black mb-6">Editar Producto</h2>
             <input type="hidden" id="edit-id">
@@ -30,8 +32,8 @@
                     <option value="receta">📋 Receta</option>
                 </select>
                 <div class="flex gap-2 mt-4">
-                    <button onclick="cerrarModal()" class="flex-1 p-4 rounded-xl bg-slate-100 font-bold">Cancelar</button>
-                    <button onclick="actualizarProducto()" class="flex-1 p-4 rounded-xl bg-blue-600 text-white font-bold">Guardar</button>
+                    <button onclick="cerrarModal()" class="flex-1 p-4 rounded-xl bg-slate-100 font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button onclick="actualizarProducto()" class="flex-1 p-4 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors">Guardar</button>
                 </div>
             </div>
         </div>
@@ -40,14 +42,14 @@
     <div class="flex min-h-screen">
         <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col gap-8">
             <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-xl tracking-tighter">
-                <span class="bg-blue-600 text-white p-1 rounded-lg">⚕️</span> FarmaPlus
+                <span class="bg-blue-600 text-white p-1 rounded-lg flex items-center justify-center w-8 h-8"><i data-lucide="shield-alert" size="18"></i></span> FarmaPlus
             </a>
             <nav class="flex flex-col gap-2">
                 <button class="flex items-center gap-3 p-3 bg-blue-50 text-blue-600 rounded-xl font-bold">
                     <i data-lucide="layout-grid" size="20"></i> Dashboard
                 </button>
-                <button onclick="location.href='index.html'" class="flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 rounded-xl font-bold">
-                    <i data-lucide="home" size="20"></i> Inicio
+                <button onclick="cerrarSesionAdmin()" class="flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl font-bold mt-auto transition-colors">
+                    <i data-lucide="log-out" size="20"></i> Cerrar Sesión
                 </button>
             </nav>
         </aside>
@@ -55,14 +57,14 @@
         <main class="flex-1 p-10">
             <header class="flex justify-between items-center mb-10">
                 <div>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Panel Admin</h1>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Panel Admin Seguro</h1>
                     <p class="text-slate-500 font-medium">Control total de inventario y usuarios.</p>
                 </div>
-                <div id="admin-info" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-2xl border border-slate-100">
+                <div id="admin-info" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold" id="admin-initial">A</div>
                     <div>
-                        <p id="admin-name" class="font-bold text-sm leading-none">Admin</p>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">Nivel: Dios</p>
+                        <p id="admin-name" class="font-bold text-sm leading-none">Cargando...</p>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">Nivel: Administrador</p>
                     </div>
                 </div>
             </header>
@@ -81,13 +83,13 @@
                             </select>
                             <input type="text" id="prod-imagen" class="p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 bg-white" placeholder="URL de la imagen">
                         </div>
-                        <button onclick="guardarProducto()" class="mt-6 w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.01] transition-all">Publicar Producto</button>
+                        <button onclick="guardarProducto()" class="mt-6 w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.01] transition-all">Publicar Producto Seguro</button>
                     </div>
 
                     <div class="glass-card p-8 rounded-[32px] shadow-xl">
                         <h2 class="text-2xl font-black mb-6 flex justify-between items-center">
                             Inventario Actual
-                            <span id="count-prod" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500">0 items</span>
+                            <span id="count-prod" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500 font-bold">0 items</span>
                         </h2>
                         <div id="lista-inventario" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                     </div>
@@ -95,7 +97,7 @@
 
                 <section>
                     <div class="glass-card p-8 rounded-[32px] shadow-xl sticky top-10">
-                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="users" class="text-blue-600"></i> Usuarios</h2>
+                        <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="users" class="text-blue-600"></i> Control de Usuarios</h2>
                         <div id="usuarios-lista" class="flex flex-col gap-4"></div>
                     </div>
                 </section>
@@ -110,35 +112,155 @@
 
         async function init() {
             lucide.createIcons();
+            
+            // 1. EL ORDEN ES VITAL: Verificamos seguridad antes de cargar datos
+            const isAuthorized = await checkAdmin();
+            if (!isAuthorized) return; // Si no es admin, detenemos la ejecución del código aquí mismo
+
+            // Mostrar el contenido solo cuando se confirmó que es Administrador
+            document.getElementById('admin-body').classList.remove('hidden');
+
             await cargarInventario();
             await cargarUsuarios();
-            await checkAdmin();
         }
 
-        // --- CRUD PRODUCTOS ---
+        // --- AUTENTICACIÓN Y AUTORIZACIÓN (RBAC) ---
+        async function checkAdmin() {
+            // Verificar si hay alguien logueado
+            const { data: { session }, error } = await sb.auth.getSession();
+            
+            if (error || !session) {
+                alert("Acceso Restringido. Debes iniciar sesión.");
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            // Verificar si ese alguien tiene el ROL de admin
+            const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+            
+            if (!profile || profile.role !== 'admin') {
+                alert("Violación de Seguridad: Tu cuenta no tiene privilegios de administrador.");
+                window.location.href = 'index.html'; // Expulsar a la tienda
+                return false;
+            }
+
+            // Si pasa las pruebas, actualizamos su info en pantalla usando sanitización
+            const safeName = DOMPurify.sanitize(profile.full_name || 'Admin');
+            document.getElementById('admin-name').innerText = safeName;
+            document.getElementById('admin-initial').innerText = safeName.charAt(0).toUpperCase();
+            return true;
+        }
+
+        async function cerrarSesionAdmin() {
+            await sb.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // --- CRUD PRODUCTOS SEGURO ---
         async function cargarInventario() {
             const { data: productos } = await sb.from('productos').select('*').order('created_at', { ascending: false });
+            if(!productos) return;
+
             const container = document.getElementById('lista-inventario');
             document.getElementById('count-prod').innerText = `${productos.length} items`;
             
-            container.innerHTML = productos.map(p => `
+            container.innerHTML = productos.map(p => {
+                // SANITIZAR SALIDAS (Prevenir DOM-based XSS)
+                const safeName = DOMPurify.sanitize(p.nombre);
+                const safeImg = DOMPurify.sanitize(p.imagen_url);
+                const safeCat = DOMPurify.sanitize(p.categoria);
+                
+                return `
                 <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-300 transition-all">
-                    <img src="${p.imagen_url}" class="w-12 h-12 rounded-lg object-cover bg-white">
+                    <img src="${safeImg}" class="w-12 h-12 rounded-lg object-cover bg-white" alt="img" onerror="this.src='https://via.placeholder.com/150'">
                     <div class="flex-1">
-                        <p class="font-bold text-slate-800 text-sm">${p.nombre}</p>
-                        <p class="text-[10px] text-blue-600 font-bold">$${p.precio} • ${p.categoria}</p>
+                        <p class="font-bold text-slate-800 text-sm">${safeName}</p>
+                        <p class="text-[10px] text-blue-600 font-bold">$${p.precio} • ${safeCat}</p>
                     </div>
                     <div class="flex gap-1">
-                        <button onclick="abrirEditar('${p.id}', '${p.nombre}', ${p.precio}, '${p.categoria}')" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="edit-3" size="16"></i></button>
+                        <button onclick="abrirEditar('${p.id}', '${safeName}', ${p.precio}, '${safeCat}')" class="p-2 text-slate-400 hover:text-blue-600"><i data-lucide="edit-3" size="16"></i></button>
                         <button onclick="eliminarProducto('${p.id}')" class="p-2 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" size="16"></i></button>
                     </div>
                 </div>
-            `).join('');
+                `
+            }).join('');
             lucide.createIcons();
         }
 
+        async function guardarProducto() {
+            // SANITIZAR ENTRADAS antes de enviar a base de datos
+            const nombreRaw = document.getElementById('prod-nombre').value;
+            const urlRaw = document.getElementById('prod-imagen').value;
+            
+            const nombre = DOMPurify.sanitize(nombreRaw);
+            const imagen_url = DOMPurify.sanitize(urlRaw);
+            const precio = parseFloat(document.getElementById('prod-precio').value);
+            const categoria = document.getElementById('prod-categoria').value;
+
+            if(!nombre || isNaN(precio) || precio <= 0) return alert("Por favor ingresa un nombre y un precio válido.");
+
+            const { error } = await sb.from('productos').insert([{ nombre, precio, categoria, imagen_url }]);
+            
+            if(error) {
+                alert("Error al guardar en base de datos. (¿Configuraste RLS?)");
+                console.error(error);
+            } else {
+                location.reload();
+            }
+        }
+
+        // --- CRUD USUARIOS (PROFILES) SEGURO ---
+        async function cargarUsuarios() {
+            const { data: usuarios } = await sb.from('profiles').select('*');
+            if(!usuarios) return;
+
+            const container = document.getElementById('usuarios-lista');
+            
+            container.innerHTML = usuarios.map(u => {
+                const safeName = DOMPurify.sanitize(u.full_name || 'Usuario');
+                const safeRole = DOMPurify.sanitize(u.role || 'usuario');
+                const initial = safeName.charAt(0).toUpperCase();
+
+                return `
+                <div class="p-4 bg-white rounded-2xl border border-slate-100 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 ${safeRole === 'admin' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'} rounded-full flex items-center justify-center text-xs font-bold uppercase">${initial}</div>
+                            <div>
+                                <p class="font-bold text-sm leading-none">${safeName}</p>
+                                <p class="text-[10px] ${safeRole === 'admin' ? 'text-red-500 font-bold' : 'text-slate-400 font-mono'}">${safeRole}</p>
+                            </div>
+                        </div>
+                        <button onclick="eliminarUsuario('${u.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="user-minus" size="14"></i></button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="cambiarRol('${u.id}', 'admin')" class="text-[9px] bg-red-50 text-red-600 px-2 py-1 rounded-md font-bold uppercase hover:bg-red-100 transition-colors">Hacer Admin</button>
+                        <button onclick="cambiarRol('${u.id}', 'usuario')" class="text-[9px] bg-slate-50 text-slate-600 px-2 py-1 rounded-md font-bold uppercase hover:bg-slate-100 transition-colors">Quitar Admin</button>
+                    </div>
+                </div>
+                `
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function cambiarRol(id, nuevoRol) {
+            const { error } = await sb.from('profiles').update({ role: nuevoRol }).eq('id', id);
+            if(error) alert("Operación denegada. Necesitas configurar políticas RLS en Supabase.");
+            else cargarUsuarios();
+        }
+
+        async function eliminarUsuario(id) {
+            if(confirm("ALERTA: ¿Estás seguro de eliminar este usuario permanentemente?")) {
+                const { error } = await sb.from('profiles').delete().eq('id', id);
+                if(error) alert("Error de permisos.");
+                else cargarUsuarios();
+            }
+        }
+
+        // --- FUNCIONES MODAL EDICIÓN ---
         function abrirEditar(id, nombre, precio, cat) {
             document.getElementById('edit-id').value = id;
+            // No necesitamos sanitizar aquí porque los datos ya pasaron por DOMPurify al renderizar
             document.getElementById('edit-nombre').value = nombre;
             document.getElementById('edit-precio').value = precio;
             document.getElementById('edit-categoria').value = cat;
@@ -149,88 +271,16 @@
 
         async function actualizarProducto() {
             const id = document.getElementById('edit-id').value;
-            const updates = {
-                nombre: document.getElementById('edit-nombre').value,
-                precio: parseFloat(document.getElementById('edit-precio').value),
-                categoria: document.getElementById('edit-categoria').value
-            };
-            const { error } = await sb.from('productos').update(updates).eq('id', id);
-            if(error) alert("Error");
+            const nombre = DOMPurify.sanitize(document.getElementById('edit-nombre').value);
+            const precio = parseFloat(document.getElementById('edit-precio').value);
+            const categoria = document.getElementById('edit-categoria').value;
+
+            const { error } = await sb.from('productos').update({ nombre, precio, categoria }).eq('id', id);
+            if(error) alert("Error al actualizar");
             else { cerrarModal(); cargarInventario(); }
-        }
-
-        async function guardarProducto() {
-            const nombre = document.getElementById('prod-nombre').value;
-            const precio = document.getElementById('prod-precio').value;
-            const categoria = document.getElementById('prod-categoria').value;
-            const imagen_url = document.getElementById('prod-imagen').value;
-
-            if(!nombre || !precio) return alert("Faltan datos");
-
-            await sb.from('productos').insert([{ nombre, precio: parseFloat(precio), categoria, imagen_url }]);
-            location.reload();
-        }
-
-        async function eliminarProducto(id) {
-            if(confirm("¿Eliminar?")) {
-                await sb.from('productos').delete().eq('id', id);
-                cargarInventario();
-            }
-        }
-
-        // --- CRUD USUARIOS (PROFILES) ---
-        async function cargarUsuarios() {
-            const { data: usuarios } = await sb.from('profiles').select('*');
-            const container = document.getElementById('usuarios-lista');
-            
-            container.innerHTML = usuarios.map(u => `
-                <div class="p-4 bg-white rounded-2xl border border-slate-100 flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold uppercase">${u.full_name ? u.full_name[0] : '?'}</div>
-                            <div>
-                                <p class="font-bold text-sm leading-none">${u.full_name || 'Usuario'}</p>
-                                <p class="text-[10px] text-slate-400 font-mono">${u.role || 'usuario'}</p>
-                            </div>
-                        </div>
-                        <button onclick="eliminarUsuario('${u.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="user-minus" size="14"></i></button>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="cambiarRol('${u.id}', 'admin')" class="text-[9px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-bold uppercase">Hacer Admin</button>
-                        <button onclick="cambiarRol('${u.id}', 'usuario')" class="text-[9px] bg-slate-50 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Quitar Admin</button>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        async function cambiarRol(id, nuevoRol) {
-            const { error } = await sb.from('profiles').update({ role: nuevoRol }).eq('id', id);
-            if(error) alert("No tienes permisos suficientes en Supabase (Verifica RLS)");
-            else cargarUsuarios();
-        }
-
-        async function eliminarUsuario(id) {
-            if(confirm("¿Eliminar perfil de usuario?")) {
-                await sb.from('profiles').delete().eq('id', id);
-                cargarUsuarios();
-            }
-        }
-
-        async function checkAdmin() {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session) {
-                const { data: p } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-                if (p) {
-                    document.getElementById('admin-name').innerText = p.full_name;
-                    document.getElementById('admin-initial').innerText = p.full_name[0].toUpperCase();
-                }
-            }
         }
 
         window.onload = init;
     </script>
 </body>
 </html>
-
-
