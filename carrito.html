@@ -72,7 +72,6 @@
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
         let currentUser = null; 
 
-        // 1. GUARDIA DE SEGURIDAD (Route Guard)
         async function checkSession() {
             const { data: { session }, error } = await sb.auth.getSession();
             
@@ -149,13 +148,11 @@
                 onApprove: (data, actions) => {
                     return actions.order.capture().then((details) => {
                         
-                        // --- NUEVO: EJECUCIÓN DE RECAPTCHA ANTES DE GUARDAR EN SUPABASE ---
                         grecaptcha.ready(function() {
-                            // Sustituye PON_AQUI_TU_CLAVE_DE_SITIO con tu clave pública
-                            grecaptcha.execute('PON_AQUI_TU_CLAVE_DE_SITIO', {action: 'finalizar_compra'}).then(async function(token) {
+                            // --- CLAVE CORREGIDA AQUÍ TAMBIÉN ---
+                            grecaptcha.execute('6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T', {action: 'finalizar_compra'}).then(async function(token) {
                                 console.log("Token reCAPTCHA de seguridad generado:", token);
                                 
-                                // Ahora sí, guardamos el pedido ligándolo estrictamente al ID del usuario
                                 const { error } = await sb.from('pedidos').insert([{
                                     user_id: currentUser.id,
                                     productos: cart,
@@ -167,14 +164,13 @@
                                 if (!error) {
                                     alert("¡Pago exitoso! Tu pedido ha sido registrado de forma segura.");
                                     localStorage.removeItem('farmaCart');
-                                    window.location.href = "index.html"; // Redirige a inicio tras comprar
+                                    window.location.href = "index.html"; 
                                 } else {
                                     console.error("Error al insertar en DB:", error);
                                     alert("Hubo un problema de conexión al guardar el reporte.");
                                 }
                             });
                         });
-                        // --- FIN DE LO NUEVO ---
 
                     });
                 }
