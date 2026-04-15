@@ -11,6 +11,8 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
+    <script src="https://www.google.com/recaptcha/api.js?render=PON_AQUI_TU_CLAVE_DE_SITIO"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -68,14 +70,13 @@
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-        let currentUser = null; // Guardaremos el usuario autenticado aquí
+        let currentUser = null; 
 
         // 1. GUARDIA DE SEGURIDAD (Route Guard)
         async function checkSession() {
             const { data: { session }, error } = await sb.auth.getSession();
             
             if (error || !session) {
-                // Si no hay sesión válida, lo expulsamos al login
                 window.location.href = 'login.html';
                 return null;
             }
@@ -85,13 +86,9 @@
         async function init() {
             lucide.createIcons();
             
-            // Validamos la sesión antes de hacer cualquier otra cosa
             currentUser = await checkSession();
-            
-            // Si checkSession devolvió null, el código se detiene aquí (se está redirigiendo a login)
             if (!currentUser) return; 
 
-            // Si llegamos aquí, el usuario es legítimo
             const userInfo = document.getElementById('user-info');
             userInfo.classList.remove('hidden');
             document.getElementById('user-email').innerText = currentUser.email;
@@ -112,7 +109,6 @@
                 let total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
                 
                 container.innerHTML = cart.map((item, idx) => {
-                    // 2. SEGURIDAD OWASP: Sanitizamos los datos que vienen del LocalStorage
                     const safeName = DOMPurify.sanitize(item.nombre);
                     const safeImg = DOMPurify.sanitize(item.imagen_url);
 
@@ -151,24 +147,35 @@
                     });
                 },
                 onApprove: (data, actions) => {
-                    return actions.order.capture().then(async (details) => {
-                        // Guardamos el pedido ligándolo estrictamente al ID del usuario verificado
-                        const { error } = await sb.from('pedidos').insert([{
-                            user_id: currentUser.id,
-                            productos: cart,
-                            total: total,
-                            paypal_id: details.id,
-                            estado: 'pagado'
-                        }]);
+                    return actions.order.capture().then((details) => {
+                        
+                        // --- NUEVO: EJECUCIÓN DE RECAPTCHA ANTES DE GUARDAR EN SUPABASE ---
+                        grecaptcha.ready(function() {
+                            // Sustituye PON_AQUI_TU_CLAVE_DE_SITIO con tu clave pública
+                            grecaptcha.execute('PON_AQUI_TU_CLAVE_DE_SITIO', {action: 'finalizar_compra'}).then(async function(token) {
+                                console.log("Token reCAPTCHA de seguridad generado:", token);
+                                
+                                // Ahora sí, guardamos el pedido ligándolo estrictamente al ID del usuario
+                                const { error } = await sb.from('pedidos').insert([{
+                                    user_id: currentUser.id,
+                                    productos: cart,
+                                    total: total,
+                                    paypal_id: details.id,
+                                    estado: 'pagado'
+                                }]);
 
-                        if (!error) {
-                            alert("¡Pago exitoso! Tu pedido ha sido registrado de forma segura.");
-                            localStorage.removeItem('farmaCart');
-                            window.location.href = "catalog.html"; // Opcional: enviarlo a una página de 'gracias'
-                        } else {
-                            console.error(error);
-                            alert("Error de conexión segura al guardar el reporte.");
-                        }
+                                if (!error) {
+                                    alert("¡Pago exitoso! Tu pedido ha sido registrado de forma segura.");
+                                    localStorage.removeItem('farmaCart');
+                                    window.location.href = "index.html"; // Redirige a inicio tras comprar
+                                } else {
+                                    console.error("Error al insertar en DB:", error);
+                                    alert("Hubo un problema de conexión al guardar el reporte.");
+                                }
+                            });
+                        });
+                        // --- FIN DE LO NUEVO ---
+
                     });
                 }
             }).render('#paypal-button-container');
