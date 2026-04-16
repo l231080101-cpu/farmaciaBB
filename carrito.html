@@ -54,7 +54,7 @@
                     </div>
 
                     <div id="recaptcha-container" class="flex justify-center mb-4">
-                        <div class="g-recaptcha" data-sitekey="6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T" data-callback="habilitarPaypal"></div>
+                        <div class="g-recaptcha" data-sitekey="6LeQ9bosAAAAAGtnWuHoV38cKpEC4_i6oRD0Yhjg" data-callback="habilitarPaypal"></div>
                     </div>
 
                     <div id="paypal-button-container" style="display: none;"></div>
@@ -69,7 +69,7 @@
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Recuerda poner tu Anon Key completa aquí
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Recuerda poner tu Anon Key completa aquí de Supabase
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
