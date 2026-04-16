@@ -9,7 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <script src="https://www.google.com/google.com/recaptcha/api.js?render=6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T"></script>
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -52,7 +53,11 @@
                         <div class="flex justify-between items-center"><span class="font-black text-xl text-slate-900">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
                     </div>
 
-                    <div id="paypal-button-container"></div>
+                    <div id="recaptcha-container" class="flex justify-center mb-4">
+                        <div class="g-recaptcha" data-sitekey="6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T" data-callback="habilitarPaypal"></div>
+                    </div>
+
+                    <div id="paypal-button-container" style="display: none;"></div>
                     
                     <p class="text-center text-[10px] text-slate-400 mt-4 italic flex items-center justify-center gap-1">
                         <i data-lucide="lock" size="10"></i> Pago seguro y encriptado por PayPal Inc.
@@ -64,7 +69,7 @@
 
     <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Tu Anon Key
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Recuerda poner tu Anon Key completa aquí
         const sb = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
@@ -88,7 +93,8 @@
             document.getElementById('user-email').innerText = currentUser.email;
             
             render();
-            if(cart.length > 0) initPayPal();
+            // Eliminamos la inicialización directa de PayPal aquí. 
+            // Ahora se inicializará solo cuando pasen el reCAPTCHA.
         }
 
         function render() {
@@ -125,6 +131,16 @@
             }
         }
 
+        // 4. Esta función es llamada automáticamente por Google cuando palomean la casilla
+        window.habilitarPaypal = function() {
+            // Ocultamos la casilla de reCAPTCHA para limpiar la vista
+            document.getElementById('recaptcha-container').style.display = 'none';
+            // Mostramos el contenedor de PayPal
+            document.getElementById('paypal-button-container').style.display = 'block';
+            // Renderizamos el botón
+            initPayPal();
+        };
+
         function initPayPal() {
             const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
@@ -140,34 +156,21 @@
                 },
                 onApprove: async (data, actions) => {
                     try {
-                        // 1. Capturar el pago de PayPal
                         const details = await actions.order.capture();
                         console.log("Pago capturado con éxito");
 
-                        // 2. Ejecutar reCAPTCHA antes de guardar en la base de datos
-                        // grecaptcha.ready asegura que la librería esté cargada
-                        const token = await new Promise((resolve) => {
-                            grecaptcha.ready(async () => {
-                                const t = await grecaptcha.execute('6LcONrgsAAAAAOWahDYF4mM_UxDBTqW-mDBa1d7T', {action: 'finalizar_compra'});
-                                resolve(t);
-                            });
-                        });
-
-                        console.log("Token de seguridad generado");
-
-                        // 3. Guardar en Supabase incluyendo el token para auditoría
+                        // Guardar en Supabase. Quitamos el código viejo de reCAPTCHA v3 de aquí
+                        // ya que la validación ya se hizo antes de mostrar el botón
                         const { error } = await sb.from('pedidos').insert([{
                             user_id: currentUser.id,
                             productos: cart,
                             total: total,
                             paypal_id: details.id,
-                            estado: 'pagado',
-                            recaptcha_token: token // Campo sugerido para tu tabla
+                            estado: 'pagado'
                         }]);
 
                         if (error) throw error;
 
-                        // 4. Finalizar proceso
                         alert("¡Gracias " + details.payer.name.given_name + "! Tu pedido en FarmaPlus ha sido registrado.");
                         localStorage.removeItem('farmaCart');
                         window.location.href = "index.html";
@@ -188,10 +191,14 @@
             cart[idx].cantidad += d;
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            render(); // Mejor que reload, actualiza la UI
-            // Opcional: reiniciar PayPal si el total cambió drásticamente
-            document.getElementById('paypal-button-container').innerHTML = '';
-            initPayPal();
+            render(); 
+            
+            // Si el botón de PayPal ya estaba visible, lo volvemos a cargar con el nuevo total
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (paypalContainer.style.display === 'block') {
+                paypalContainer.innerHTML = '';
+                initPayPal();
+            }
         }
 
         window.onload = init;
