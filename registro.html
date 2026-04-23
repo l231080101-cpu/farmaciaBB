@@ -161,7 +161,7 @@
 
         lucide.createIcons();
 
-        // FUNCIÓN PARA GOOGLE AUTH
+        // FUNCIÓN MEJORADA PARA GOOGLE AUTH
         async function loginConGoogle() {
             const loader = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
@@ -169,10 +169,13 @@
             loader.style.display = 'flex';
             loadingText.textContent = "Conectando con Google...";
 
+            // Obtenemos la URL actual de forma limpia para evitar el error de localhost
+            const siteURL = window.location.origin + window.location.pathname.replace('registro.html', 'index.html');
+
             const { data, error } = await dbClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/index.html'
+                    redirectTo: siteURL
                 }
             });
 
@@ -182,21 +185,19 @@
             }
         }
 
+        // Validación y registro manual (Sin cambios)
         function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
             const cleanName = DOMPurify.sanitize(rawName.trim());
             const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
-
             if (validator.isEmpty(cleanName)) return { valid: false, msg: "El nombre no puede estar vacío." };
             if (!validator.isEmail(cleanEmail)) return { valid: false, msg: "El correo no es válido." };
             if (!validator.isLength(rawPassword, { min: 8 })) return { valid: false, msg: "Mínimo 8 caracteres." };
             if (rawPassword !== rawConfirm) return { valid: false, msg: "Las contraseñas no coinciden." };
-
             return { valid: true, name: cleanName, email: cleanEmail };
         }
 
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const rawName = document.getElementById('fullname').value;
             const rawEmail = document.getElementById('email').value;
             const rawPassword = document.getElementById('password').value;
@@ -249,7 +250,6 @@
             const loadingText = document.getElementById('loading-text');
 
             otpError.classList.add('hidden');
-
             if (token.length !== 6) {
                 otpError.textContent = "Ingresa los 6 dígitos.";
                 otpError.classList.remove('hidden');
