@@ -78,7 +78,7 @@
         <div class="login-card">
             <div id="loading-overlay">
                 <div class="spinner mb-4"></div>
-                <p id="loading-text" class="text-blue-600 font-bold animate-pulse">Creando cuenta segura...</p>
+                <p id="loading-text" class="text-blue-600 font-bold animate-pulse">Procesando...</p>
             </div>
 
             <div id="register-step">
@@ -114,6 +114,16 @@
                         <span>Registrarse</span>
                     </button>
                 </form>
+
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-200"></span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-slate-400 font-semibold">O también</span></div>
+                </div>
+
+                <button onclick="loginConGoogle()" class="w-full flex items-center justify-center gap-3 border-2 border-slate-200 p-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all">
+                    <img src="https://www.google.com/favicon.ico" class="w-5 h-5">
+                    <span>Continuar con Google</span>
+                </button>
             </div>
 
             <div id="otp-step" class="hidden text-center">
@@ -151,6 +161,27 @@
 
         lucide.createIcons();
 
+        // FUNCIÓN PARA GOOGLE AUTH
+        async function loginConGoogle() {
+            const loader = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+            
+            loader.style.display = 'flex';
+            loadingText.textContent = "Conectando con Google...";
+
+            const { data, error } = await dbClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/index.html'
+                }
+            });
+
+            if (error) {
+                loader.style.display = 'none';
+                alert("Error de Google: " + error.message);
+            }
+        }
+
         function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
             const cleanName = DOMPurify.sanitize(rawName.trim());
             const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
@@ -173,6 +204,7 @@
             const errorMsg = document.getElementById('error-message');
             const btn = document.getElementById('btn-submit');
             const loader = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
 
             errorMsg.classList.add('hidden');
             const validation = validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm);
@@ -184,6 +216,7 @@
             }
 
             loader.style.display = 'flex';
+            loadingText.textContent = "Creando cuenta segura...";
             btn.disabled = true;
 
             const { data, error } = await dbClient.auth.signUp({
@@ -201,11 +234,10 @@
                 errorMsg.classList.remove('hidden');
                 btn.disabled = false;
             } else {
-                // ÉXITO: Pasar al paso de OTP
                 document.getElementById('display-email').textContent = validation.email;
                 document.getElementById('register-step').classList.add('hidden');
                 document.getElementById('otp-step').classList.remove('hidden');
-                lucide.createIcons(); // Recargar iconos de Lucide
+                lucide.createIcons();
             }
         });
 
