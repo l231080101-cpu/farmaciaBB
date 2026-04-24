@@ -45,10 +45,8 @@
         .logout-btn:hover { background: #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
-        /* ESTILOS CHATBOT */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
-        #chat-messages::-webkit-scrollbar { width: 4px; }
-        #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #chat-messages { scroll-behavior: smooth; }
         .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
         .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
@@ -110,48 +108,6 @@
             </div>
         </header>
 
-        <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
-                <i data-lucide="message-circle" id="chat-icon"></i>
-            </button>
-
-            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
-                <div class="bg-blue-600 p-4 text-white">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <h4 class="font-bold text-sm">Asistente Virtual FarmaPlus</h4>
-                    </div>
-                    <p class="text-[10px] opacity-80">Atención profesional e inmediata</p>
-                </div>
-                
-                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
-                    <div class="flex justify-start">
-                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Bienvenido a FarmaPlus! 👋 Soy su asistente. ¿En qué podemos servirle con respecto a su bienestar hoy?
-                        </div>
-                    </div>
-                </div>
-
-                <div id="quick-replies" class="px-3 py-2 flex flex-wrap gap-1.5 bg-slate-50 border-t border-slate-100">
-                    <button onclick="sendQuickReply('¿Cómo comprar?')" class="quick-reply-btn">🛒 Comprar</button>
-                    <button onclick="sendQuickReply('Estado de mi pedido')" class="quick-reply-btn">📦 Mi Pedido</button>
-                    <button onclick="sendQuickReply('Subir receta')" class="quick-reply-btn">📄 Receta</button>
-                    <button onclick="sendQuickReply('Horarios')" class="quick-reply-btn">⏰ Horarios</button>
-                    <button onclick="sendQuickReply('Ubicación')" class="quick-reply-btn">📍 Ubicación</button>
-                    <button onclick="sendQuickReply('Adiós')" class="quick-reply-btn">👋 Salir</button>
-                </div>
-
-                <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está analizando...</div>
-                
-                <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" placeholder="Escriba su duda aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" onkeypress="handleChatKey(event)">
-                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
-                        <i data-lucide="send" size="16"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <main class="container py-12">
             <div class="content-card text-center">
                 <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
@@ -165,6 +121,36 @@
             </div>
         </main>
 
+        <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
+            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                <i data-lucide="message-circle" id="chat-icon"></i>
+            </button>
+
+            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+                <div class="bg-blue-600 p-4 text-white">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                    </div>
+                </div>
+                
+                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
+                    <div class="flex justify-start">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
+                            ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 border-t bg-white flex gap-2">
+                    <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
+                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
+                        <i data-lucide="send" size="16"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <footer class="bg-slate-900 text-white py-12 mt-20">
             <div class="container text-center">
                 <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
@@ -173,14 +159,75 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         let userName = ""; 
 
-        // GESTIÓN DE CARRITO
+        // 1. ACTUALIZACIÓN AUTOMÁTICA DE SESIÓN (ESTO ARREGLA TU PROBLEMA)
+        dbClient.auth.onAuthStateChange((event, session) => {
+            console.log("Evento de Auth:", event);
+            if (session) {
+                renderUserSession(session);
+            } else {
+                renderLoginButton();
+            }
+        });
+
+        async function renderUserSession(session) {
+            const authSection = document.getElementById('user-auth-section');
+            const welcomeTitle = document.getElementById('welcome-title');
+            const adminContainer = document.getElementById('admin-action-container');
+
+            // Intentar obtener nombre de base de datos o de Google
+            const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
+            
+            // Prioridad: 1. Tabla Perfiles, 2. Metadatos Google, 3. Email
+            const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+            userName = fullName.split(' ')[0];
+            const role = profile?.role || 'usuario';
+
+            if (role === 'admin') {
+                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
+            }
+
+            authSection.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
+                        <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
+                    </span>
+                    <button onclick="logout()" class="logout-btn">Salir</button>
+                </div>`;
+            
+            welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
+            lucide.createIcons();
+        }
+
+        function renderLoginButton() {
+            document.getElementById('user-auth-section').innerHTML = `
+                <a href="login.html" class="action-link">
+                    <i data-lucide="user"></i>
+                    <span>Iniciar Sesión</span>
+                </a>`;
+            document.getElementById('welcome-title').innerText = "Bienvenido a FarmaPlus";
+            lucide.createIcons();
+        }
+
+        async function logout() {
+            await dbClient.auth.signOut();
+            localStorage.removeItem('farmaCart');
+            window.location.href = "index.html";
+        }
+
+        // RELOJ Y CARRITO
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+        }
+
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
@@ -189,132 +236,26 @@
             badge.style.display = count > 0 ? 'flex' : 'none';
         }
 
-        // SESIÓN Y USUARIO
-        async function checkSession() {
-            const { data: { session } } = await dbClient.auth.getSession();
-            const authSection = document.getElementById('user-auth-section');
-            const adminContainer = document.getElementById('admin-action-container');
-            const welcomeTitle = document.getElementById('welcome-title');
-
-            if (session) {
-                const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-                
-                const fullName = profile ? profile.full_name : session.user.email;
-                userName = (fullName.length < 2) ? "Cliente" : fullName.split(' ')[0];
-                const role = profile ? profile.role : 'usuario';
-
-                if (role === 'admin') {
-                    adminContainer.innerHTML = `
-                        <a href="admin.html" title="Panel de Control" class="flex items-center gap-2 text-blue-600 hover:opacity-80 transition">
-                            <span class="admin-badge">ADMIN</span>
-                            <i data-lucide="layout-grid"></i>
-                        </a>`;
-                }
-
-                authSection.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
-                            <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
-                        </span>
-                        <button onclick="logout()" class="logout-btn">Salir</button>
-                    </div>`;
-                
-                welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
-            }
-            lucide.createIcons();
-        }
-
-        async function logout() {
-            await dbClient.auth.signOut();
-            localStorage.removeItem('farmaCart');
-            window.location.reload();
-        }
-
-        // LÓGICA DEL CHATBOT (SIN CAMBIOS)
-        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); lucide.createIcons(); }
+        // CHATBOT SIMPLE PARA PRUEBAS
+        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
-        function sendQuickReply(text) { document.getElementById('chat-input').value = text; sendMessage(); }
-
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
-            const typing = document.getElementById('typing');
-            const originalText = input.value.trim();
-            if (!originalText) return;
-
-            msgContainer.innerHTML += `<div class="flex justify-end animate-pop"><div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm">${originalText}</div></div>`;
+            if (!input.value.trim()) return;
+            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${input.value}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
-            typing.classList.remove('hidden');
-
-            setTimeout(() => {
-                typing.classList.add('hidden');
-                const lowText = originalText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!.,]/g, "");
-                let reply = "";
-
-                const despedidas = ["adios", "hasta luego", "bye", "chao", "nos vemos", "luego hablamos", "cerrar chat", "terminar", "gracias adios", "es todo"];
-                const esDespedida = despedidas.some(p => lowText.includes(p));
-
-                if (esDespedida) {
-                    const nombre = (userName) ? `, ${userName}` : "";
-                    reply = `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
-                } else if (lowText.includes("como comprar") || lowText.includes("comprar") || lowText.includes("compra")  || lowText.includes("compro")  || lowText.includes("compre")) {
-                    reply = `Realizar su compra es sencillo: inicie sesion ,  Busque el producto , Agréguelo al carrito,  Registre su envío y  Pague de forma segura. 🛒`;
-                } else if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envio")) {
-                    reply = `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
-                } else if (lowText.includes("horario") || lowText.includes("abierto") || lowText.includes("cierre")) {
-                    reply = `Abrimos de **Lunes a Sábado de 8 AM a 10 PM** y **Domingos de 9 AM a 8 PM**. ⏰`;
-                } else if (lowText.includes("ubicacion") || lowText.includes("donde") || lowText.includes("lugar") || lowText.includes("sitio"))  {
-                    reply = `Estamos en la **Calle 67 #16 duplex**. ¡Esperamos su visita! 📍`;
-                } else if (lowText.includes("receta") || lowText.includes("controlado") || lowText.includes("medicamento") || lowText.includes("medicina"))  {
-                    reply = `Para controlados, adjunte su receta al finalizar la compra o envíela a nuestro WhatsApp  55 23 69 79 40.📄`;
-                } else if (lowText.includes("hola") || lowText.includes("buenos dias") || lowText.includes("informacion")) {
-                    reply = `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
-                } else if (lowText.includes("gracias")) {
-                    reply = `¡De nada! Estamos para apoyarle en su salud. 😊`;
-                } else if (lowText.includes("productos") || lowText.includes("mercancia") || lowText.includes("catalogo")) {
-                    reply = `¡selecciona la opcion de "catalogo" en el menu para ver los productos que estan disponibles en nuestra tienda o en fisico. `;
-                } else if (lowText.includes("precio") || lowText.includes("cuanto cuestan") || lowText.includes("costos")|| lowText.includes("costo")) {
-                    reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
-                } else if (lowText.includes("que me recomiendas si me duele") || lowText.includes("que me recomiendas para el dolor")) {
-                    reply = `¡para aliviar el dolor cronico de espalda, cabeza ,articulaciones unas pastillas de mitrozon que puedes adquirir en la seccion de catalogo . `;
-                } else if (lowText.includes("puedo pedir 100 medicamentos") || lowText.includes("puedo pedir 100 pomadas")) {
-                    reply = `¡puedes adquirir la cantidad que desees  de productos nuestros directamente en nuetro catalogo. `;
-                } else if (lowText.includes("no se que elegir") || lowText.includes("no se")) {
-                    reply = `¡puedes consultar el precio de nuestros productos directamente en nuetro catalogo. `;
-                } else if (lowText.includes("consulta") || lowText.includes("consultas") || lowText.includes("citas") || lowText.includes("citas medicas")) {
-                    reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `;
-                } else if (lowText.includes("como pido a domicilio") || lowText.includes("envios") || lowText.includes("entregas") || lowText.includes("citas medicas")) {
-                    reply = `Unicamente te podemos ofrecer medicamentos, precios sobre nuestros productos y horarios de atencion, para una cita medica consulte a su medico de confianza `; 
-                } else if (lowText.includes("metodos de pago") || lowText.includes("modos de pago") || lowText.includes("pagos") || lowText.includes("aceptas efectivo") || lowText.includes("aceptas tarjeta")|| lowText.includes("pago")|| lowText.includes("como pago")) {
-                    reply = `Pudes pagar con tarjeta atravez de tu tarjeta de credito o paypal, tambien puedes pagar en efectivo al momento de recibir tus productos `;
-                } else if (lowText.includes("carrito") || lowText.includes("carrito de compras") || lowText.includes("como uso el carrito de compras") || lowText.includes("no se usar el carrito de compras") || lowText.includes("donde veo lo que compre en liena")|| lowText.includes("como compro atraves de la pagina")|| lowText.includes("como veo lo que compre")) {
-                    reply = `en icono del carrito de compras te aparecera los articulos que hayas seleccionado y continar para seleccionar el metodo de pago `;
-                    } else if (lowText.includes("devoluciones") || lowText.includes("reembolso") || lowText.includes("devolucion") || lowText.includes("cancelar compra") || lowText.includes("cancelar pedido") || lowText.includes("regresar un producto") || lowText.includes("devolver")) {
-                    reply = `¡puedes realizar la cancelacion de su compra o la devolucion de su pedido, mediante nuestro contacto en Whatsapp 5530370813.`;
-                } else {
-                    reply = `Para ayudarle mejor, ¿su duda es sobre la *ubicación*, el proceso de *compra* o sus *pedidos*, de una *receta*
-                    , de nuestros *horarios*?`;
-                }
-
-                msgContainer.innerHTML += `<div class="flex justify-start animate-pop"><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]">${reply}</div></div>`;
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-                lucide.createIcons();
-            }, 800);
         }
 
-        // RELOJ Y CARGA INICIAL
-        function updateClock() {
-            const clockElement = document.getElementById('live-clock');
-            const now = new Date();
-            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
-        }
-
+        // INICIALIZACIÓN
         setInterval(updateClock, 1000);
         updateClock();
-        checkSession();
         updateCartBadge();
-    </script>    
+        // Verificamos sesión al cargar por si el evento onAuthStateChange tarda un poco
+        dbClient.auth.getSession().then(({data}) => {
+            if(data.session) renderUserSession(data.session);
+        });
+    </script>
 </body>
 </html>
