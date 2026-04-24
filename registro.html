@@ -161,7 +161,7 @@
 
         lucide.createIcons();
 
-        // FUNCIÓN MEJORADA PARA GOOGLE AUTH
+        // FUNCIÓN MEJORADA Y CORREGIDA PARA GOOGLE AUTH
         async function loginConGoogle() {
             const loader = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
@@ -169,13 +169,17 @@
             loader.style.display = 'flex';
             loadingText.textContent = "Conectando con Google...";
 
-            // Obtenemos la URL actual de forma limpia para evitar el error de localhost
-            const siteURL = window.location.origin + window.location.pathname.replace('registro.html', 'index.html');
+            // CAMBIO CLAVE: Forzamos la URL de Vercel para evitar que regrese a localhost
+            const siteURL = 'https://farmacia-bb-six.vercel.app/index.html';
 
             const { data, error } = await dbClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: siteURL
+                    redirectTo: siteURL,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'select_account',
+                    },
                 }
             });
 
@@ -185,7 +189,7 @@
             }
         }
 
-        // Validación y registro manual (Sin cambios)
+        // Validación y registro manual
         function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
             const cleanName = DOMPurify.sanitize(rawName.trim());
             const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
