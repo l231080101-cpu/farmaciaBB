@@ -170,7 +170,7 @@
             loadingText.textContent = "Conectando con Google...";
 
             // CAMBIO CLAVE: Forzamos la URL de Vercel para evitar que regrese a localhost
-            const siteURL = 'https://farmacia-bb-six.vercel.app/index.html';
+            const siteURL = "https://farmaciabb.vercel.app/index.html";
 
             const { data, error } = await dbClient.auth.signInWithOAuth({
                 provider: 'google',
