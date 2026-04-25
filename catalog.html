@@ -11,11 +11,10 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .product-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .product-card:hover { transform: translateY(-12px); shadow-color: rgba(37, 99, 235, 0.1); }
+        .product-card:hover { transform: translateY(-12px); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.15); }
         .filter-btn { transition: all 0.3s ease; }
         .filter-btn.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
         
-        /* Animación para la carga de productos */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -67,7 +66,8 @@
         </div>
 
         <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            </div>
+            <!-- Se llena dinámicamente -->
+        </div>
 
         <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center">
             <div class="bg-blue-50 p-6 rounded-full mb-4">
@@ -85,16 +85,17 @@
     </footer>
 
     <script>
+        // ⚠️ CLAVE EXPUESTA: Debes rotarla inmediatamente en Supabase (Settings > API)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
-        const sb = supabase.createClient(_url, _key);
+        const dbClient = supabase.createClient(_url, _key);  // ✅ sb → dbClient
 
         let todosLosProductos = [];
         let categoriaActual = 'todos';
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
         async function cargarProductos() {
-            const { data, error } = await sb.from('productos').select('*').order('nombre', { ascending: true });
+            const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true });  // ✅ sb → dbClient
             
             if (error) {
                 console.error("Error:", error);
@@ -205,8 +206,8 @@
 
         window.onload = cargarProductos;
     </script>
+
+    <!-- ✅ NUEVO: Cierre de sesión automático por inactividad -->
+    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
-
-
-
