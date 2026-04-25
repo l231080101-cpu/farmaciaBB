@@ -19,7 +19,8 @@
         .modal.active { display: flex; }
     </style>
 </head>
-<body class="text-slate-900 hidden" id="admin-body"> <div id="modal-edit" class="modal">
+<body class="text-slate-900 hidden" id="admin-body">
+    <div id="modal-edit" class="modal">
         <div class="glass-card p-8 rounded-[32px] w-full max-w-md shadow-2xl mx-4">
             <h2 class="text-2xl font-black mb-6">Editar Producto</h2>
             <input type="hidden" id="edit-id">
@@ -106,16 +107,17 @@
     </div>
 
     <script>
+        // ⚠️ CLAVE EXPUESTA: Debes rotarla inmediatamente en Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
-        const sb = supabase.createClient(_url, _key);
+        const dbClient = supabase.createClient(_url, _key); // ✅ Renombrado sb → dbClient
 
         async function init() {
             lucide.createIcons();
             
-            // 1. EL ORDEN ES VITAL: Verificamos seguridad antes de cargar datos
+            // 1. Verificar si el usuario es administrador
             const isAuthorized = await checkAdmin();
-            if (!isAuthorized) return; // Si no es admin, detenemos la ejecución del código aquí mismo
+            if (!isAuthorized) return; // Detiene la ejecución si no es admin
 
             // Mostrar el contenido solo cuando se confirmó que es Administrador
             document.getElementById('admin-body').classList.remove('hidden');
@@ -126,8 +128,7 @@
 
         // --- AUTENTICACIÓN Y AUTORIZACIÓN (RBAC) ---
         async function checkAdmin() {
-            // Verificar si hay alguien logueado
-            const { data: { session }, error } = await sb.auth.getSession();
+            const { data: { session }, error } = await dbClient.auth.getSession(); // ✅ sb → dbClient
             
             if (error || !session) {
                 alert("Acceso Restringido. Debes iniciar sesión.");
@@ -135,16 +136,14 @@
                 return false;
             }
 
-            // Verificar si ese alguien tiene el ROL de admin
-            const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+            const { data: profile } = await dbClient.from('profiles').select('*').eq('id', session.user.id).single(); // ✅ sb → dbClient
             
             if (!profile || profile.role !== 'admin') {
                 alert("Violación de Seguridad: Tu cuenta no tiene privilegios de administrador.");
-                window.location.href = 'index.html'; // Expulsar a la tienda
+                window.location.href = 'index.html';
                 return false;
             }
 
-            // Si pasa las pruebas, actualizamos su info en pantalla usando sanitización
             const safeName = DOMPurify.sanitize(profile.full_name || 'Admin');
             document.getElementById('admin-name').innerText = safeName;
             document.getElementById('admin-initial').innerText = safeName.charAt(0).toUpperCase();
@@ -152,20 +151,19 @@
         }
 
         async function cerrarSesionAdmin() {
-            await sb.auth.signOut();
+            await dbClient.auth.signOut(); // ✅ sb → dbClient
             window.location.href = 'login.html';
         }
 
-        // --- CRUD PRODUCTOS SEGURO ---
+        // --- CRUD PRODUCTOS ---
         async function cargarInventario() {
-            const { data: productos } = await sb.from('productos').select('*').order('created_at', { ascending: false });
+            const { data: productos } = await dbClient.from('productos').select('*').order('created_at', { ascending: false }); // ✅ sb → dbClient
             if(!productos) return;
 
             const container = document.getElementById('lista-inventario');
             document.getElementById('count-prod').innerText = `${productos.length} items`;
             
             container.innerHTML = productos.map(p => {
-                // SANITIZAR SALIDAS (Prevenir DOM-based XSS)
                 const safeName = DOMPurify.sanitize(p.nombre);
                 const safeImg = DOMPurify.sanitize(p.imagen_url);
                 const safeCat = DOMPurify.sanitize(p.categoria);
@@ -188,7 +186,6 @@
         }
 
         async function guardarProducto() {
-            // SANITIZAR ENTRADAS antes de enviar a base de datos
             const nombreRaw = document.getElementById('prod-nombre').value;
             const urlRaw = document.getElementById('prod-imagen').value;
             
@@ -199,7 +196,7 @@
 
             if(!nombre || isNaN(precio) || precio <= 0) return alert("Por favor ingresa un nombre y un precio válido.");
 
-            const { error } = await sb.from('productos').insert([{ nombre, precio, categoria, imagen_url }]);
+            const { error } = await dbClient.from('productos').insert([{ nombre, precio, categoria, imagen_url }]); // ✅ sb → dbClient
             
             if(error) {
                 alert("Error al guardar en base de datos. (¿Configuraste RLS?)");
@@ -209,9 +206,17 @@
             }
         }
 
-        // --- CRUD USUARIOS (PROFILES) SEGURO ---
+        async function eliminarProducto(id) {
+            if(confirm("¿Eliminar este producto?")) {
+                const { error } = await dbClient.from('productos').delete().eq('id', id); // ✅ sb → dbClient
+                if(error) alert("Error de permisos.");
+                else cargarInventario();
+            }
+        }
+
+        // --- USUARIOS ---
         async function cargarUsuarios() {
-            const { data: usuarios } = await sb.from('profiles').select('*');
+            const { data: usuarios } = await dbClient.from('profiles').select('*'); // ✅ sb → dbClient
             if(!usuarios) return;
 
             const container = document.getElementById('usuarios-lista');
@@ -244,23 +249,22 @@
         }
 
         async function cambiarRol(id, nuevoRol) {
-            const { error } = await sb.from('profiles').update({ role: nuevoRol }).eq('id', id);
+            const { error } = await dbClient.from('profiles').update({ role: nuevoRol }).eq('id', id); // ✅ sb → dbClient
             if(error) alert("Operación denegada. Necesitas configurar políticas RLS en Supabase.");
             else cargarUsuarios();
         }
 
         async function eliminarUsuario(id) {
             if(confirm("ALERTA: ¿Estás seguro de eliminar este usuario permanentemente?")) {
-                const { error } = await sb.from('profiles').delete().eq('id', id);
+                const { error } = await dbClient.from('profiles').delete().eq('id', id); // ✅ sb → dbClient
                 if(error) alert("Error de permisos.");
                 else cargarUsuarios();
             }
         }
 
-        // --- FUNCIONES MODAL EDICIÓN ---
+        // --- MODAL EDICIÓN ---
         function abrirEditar(id, nombre, precio, cat) {
             document.getElementById('edit-id').value = id;
-            // No necesitamos sanitizar aquí porque los datos ya pasaron por DOMPurify al renderizar
             document.getElementById('edit-nombre').value = nombre;
             document.getElementById('edit-precio').value = precio;
             document.getElementById('edit-categoria').value = cat;
@@ -275,12 +279,15 @@
             const precio = parseFloat(document.getElementById('edit-precio').value);
             const categoria = document.getElementById('edit-categoria').value;
 
-            const { error } = await sb.from('productos').update({ nombre, precio, categoria }).eq('id', id);
+            const { error } = await dbClient.from('productos').update({ nombre, precio, categoria }).eq('id', id); // ✅ sb → dbClient
             if(error) alert("Error al actualizar");
             else { cerrarModal(); cargarInventario(); }
         }
 
         window.onload = init;
     </script>
+
+    <!-- ✅ NUEVO: Cierre de sesión automático por inactividad -->
+    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
