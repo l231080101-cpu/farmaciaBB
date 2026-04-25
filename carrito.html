@@ -68,15 +68,16 @@
     </main>
 
     <script>
+        // ⚠️ CLAVE EXPUESTA: Debes rotarla inmediatamente en Supabase (Settings > API)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; // Recuerda poner tu Anon Key completa aquí de Supabase
-        const sb = supabase.createClient(_url, _key);
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(_url, _key);  // ✅ sb → dbClient
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
         let currentUser = null; 
 
         async function checkSession() {
-            const { data: { session }, error } = await sb.auth.getSession();
+            const { data: { session }, error } = await dbClient.auth.getSession();  // ✅ sb → dbClient
             if (error || !session) {
                 window.location.href = 'login.html';
                 return null;
@@ -93,8 +94,7 @@
             document.getElementById('user-email').innerText = currentUser.email;
             
             render();
-            // Eliminamos la inicialización directa de PayPal aquí. 
-            // Ahora se inicializará solo cuando pasen el reCAPTCHA.
+            // PayPal se inicializa después de pasar reCAPTCHA
         }
 
         function render() {
@@ -131,7 +131,7 @@
             }
         }
 
-        // 4. Esta función es llamada automáticamente por Google cuando palomean la casilla
+        // Esta función es llamada automáticamente por Google cuando palomean la casilla
         window.habilitarPaypal = function() {
             // Ocultamos la casilla de reCAPTCHA para limpiar la vista
             document.getElementById('recaptcha-container').style.display = 'none';
@@ -159,9 +159,8 @@
                         const details = await actions.order.capture();
                         console.log("Pago capturado con éxito");
 
-                        // Guardar en Supabase. Quitamos el código viejo de reCAPTCHA v3 de aquí
-                        // ya que la validación ya se hizo antes de mostrar el botón
-                        const { error } = await sb.from('pedidos').insert([{
+                        // Guardar en Supabase
+                        const { error } = await dbClient.from('pedidos').insert([{  // ✅ sb → dbClient
                             user_id: currentUser.id,
                             productos: cart,
                             total: total,
@@ -203,5 +202,8 @@
 
         window.onload = init;
     </script>
+
+    <!-- ✅ NUEVO: Cierre de sesión automático por inactividad -->
+    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
