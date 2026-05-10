@@ -53,35 +53,27 @@
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* =========================================
-           📱 AJUSTES RESPONSIVOS (PARA CELULARES)
-           ========================================= */
+       
         @media (max-width: 768px) {
-            /* 1. Apilar la información de contacto */
+       
             .contact-info { flex-direction: column; gap: 8px; align-items: center; text-align: center; }
             .top-bar { padding: 15px 0; }
             
-            /* 2. Apilar el encabezado (Logo, Buscador, Botones) */
             .main-header-content { flex-direction: column; align-items: stretch; gap: 15px; }
             .logo { justify-content: center; }
             .search-bar { max-width: 100%; width: 100%; }
             .header-actions { justify-content: center; flex-wrap: wrap; }
             
-            /* 3. Ajustar el menú para que no se corte */
             .nav-desktop { flex-wrap: wrap; justify-content: center; gap: 5px; }
             .nav-link { padding: 8px 12px; font-size: 0.9rem; }
             
-            /* 4. Ajustar la tarjeta principal y sus botones */
             .content-card { padding: 25px 15px; margin-top: 20px; }
             .flex.justify-center.gap-4 { flex-direction: column; width: 100%; }
             .flex.justify-center.gap-4 a { width: 100%; text-align: center; box-sizing: border-box; }
         }
-        /* =========================================
-           ⌨️ NAVEGACIÓN POR TECLADO (ACCESIBILIDAD)
-           ========================================= */
         *:focus-visible {
-            outline: 3px solid #ef4444 !important; /* Borde rojo grueso */
-            outline-offset: 3px; /* Separado del botón */
+            outline: 3px solid #ef4444 !important; 
+            outline-offset: 3px; 
             border-radius: 6px;
         }
     </style>
