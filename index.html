@@ -76,6 +76,14 @@
             .flex.justify-center.gap-4 { flex-direction: column; width: 100%; }
             .flex.justify-center.gap-4 a { width: 100%; text-align: center; box-sizing: border-box; }
         }
+        /* =========================================
+           ⌨️ NAVEGACIÓN POR TECLADO (ACCESIBILIDAD)
+           ========================================= */
+        *:focus-visible {
+            outline: 3px solid #ef4444 !important; /* Borde rojo grueso */
+            outline-offset: 3px; /* Separado del botón */
+            border-radius: 6px;
+        }
     </style>
 </head>
 
