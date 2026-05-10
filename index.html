@@ -53,6 +53,29 @@
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* =========================================
+           📱 AJUSTES RESPONSIVOS (PARA CELULARES)
+           ========================================= */
+        @media (max-width: 768px) {
+            /* 1. Apilar la información de contacto */
+            .contact-info { flex-direction: column; gap: 8px; align-items: center; text-align: center; }
+            .top-bar { padding: 15px 0; }
+            
+            /* 2. Apilar el encabezado (Logo, Buscador, Botones) */
+            .main-header-content { flex-direction: column; align-items: stretch; gap: 15px; }
+            .logo { justify-content: center; }
+            .search-bar { max-width: 100%; width: 100%; }
+            .header-actions { justify-content: center; flex-wrap: wrap; }
+            
+            /* 3. Ajustar el menú para que no se corte */
+            .nav-desktop { flex-wrap: wrap; justify-content: center; gap: 5px; }
+            .nav-link { padding: 8px 12px; font-size: 0.9rem; }
+            
+            /* 4. Ajustar la tarjeta principal y sus botones */
+            .content-card { padding: 25px 15px; margin-top: 20px; }
+            .flex.justify-center.gap-4 { flex-direction: column; width: 100%; }
+            .flex.justify-center.gap-4 a { width: 100%; text-align: center; box-sizing: border-box; }
+        }
     </style>
 </head>
 
@@ -116,7 +139,7 @@
 
         <main class="container py-12" role="main">
             <section class="content-card text-center" aria-labelledby="welcome-title">
-                <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+          <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
                 <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
                     Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
                 </p>
