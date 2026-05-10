@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="FarmaPlus - Tu farmacia de confianza en línea. Compra medicamentos y recíbelos en tu hogar." />
     <title>FarmaPlus - Tu Farmacia de Confianza</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -41,7 +42,7 @@
         .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
 
         #user-auth-section { display: flex; align-items: center; gap: 15px; }
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; background: transparent; }
         .logout-btn:hover { background: #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
@@ -57,14 +58,14 @@
 
 <body>
     <div id="root">
-        <header class="site-header">
+        <header class="site-header" role="banner">
             <div class="top-bar">
                 <div class="container">
                     <div class="top-bar-content">
                         <div class="contact-info">
-                            <div class="contact-item"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
-                            <div class="contact-item"><i data-lucide="map-pin" size="16"></i> <span>Calle 67 #16 duplex</span></div>
-                            <div class="contact-item"><i data-lucide="clock" size="16"></i> <span id="live-clock">Cargando...</span></div>
+                            <div class="contact-item"><i data-lucide="phone" size="16" aria-hidden="true"></i> <span>+52 55 23 69 79 40</span></div>
+                            <div class="contact-item"><i data-lucide="map-pin" size="16" aria-hidden="true"></i> <span>Calle 67 #16 duplex</span></div>
+                            <div class="contact-item"><i data-lucide="clock" size="16" aria-hidden="true"></i> <span id="live-clock" aria-live="polite">Cargando...</span></div>
                         </div>
                     </div>
                 </div>
@@ -73,33 +74,38 @@
             <div class="main-header">
                 <div class="container">
                     <div class="main-header-content">
-                        <a href="index.html" class="logo">
-                            <div class="logo-box">⚕️</div>
+                        <a href="index.html" class="logo" aria-label="Volver al inicio de FarmaPlus">
+                            <div class="logo-box" aria-hidden="true">⚕️</div>
                             <div>
                                 <h1 class="logo-title">FarmaPlus</h1>
                                 <p class="logo-subtitle">Tu farmacia de confianza</p>
                             </div>
                         </a>
-                        <div class="search-bar">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" placeholder="Buscar productos..." class="search-input" />
+                        
+                        <div class="search-bar" role="search">
+                            <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+                            <input type="text" aria-label="Buscar productos en el catálogo" placeholder="Buscar productos..." class="search-input" />
                         </div>
+                        
                         <div class="header-actions">
                             <div id="admin-action-container"></div>
-                            <a href="carrito.html" class="cart-container text-slate-700" title="Ver mi carrito">
-                                <i data-lucide="shopping-basket" size="22"></i>
-                                <span id="cart-count" class="cart-badge">0</span>
+                            
+                            <a href="carrito.html" class="cart-container text-slate-700" aria-label="Ver mi carrito de compras" title="Ver mi carrito">
+                                <i data-lucide="shopping-basket" size="22" aria-hidden="true"></i>
+                                <span id="cart-count" class="cart-badge" aria-hidden="true">0</span>
                             </a>
+                            
                             <div id="user-auth-section">
-                                <a href="login.html" class="action-link">
-                                    <i data-lucide="user"></i>
+                                <a href="login.html" class="action-link" aria-label="Iniciar Sesión en FarmaPlus">
+                                    <i data-lucide="user" aria-hidden="true"></i>
                                     <span>Iniciar Sesión</span>
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <nav class="nav-desktop">
-                        <a href="index.html" class="nav-link active">Inicio</a>
+                    
+                    <nav class="nav-desktop" aria-label="Navegación principal">
+                        <a href="index.html" class="nav-link active" aria-current="page">Inicio</a>
                         <a href="catalog.html" class="nav-link">Catálogo</a>
                         <a href="nosotros.html" class="nav-link">Nosotros</a>
                         <a href="contacto.html" class="nav-link">Contacto</a>
@@ -108,8 +114,8 @@
             </div>
         </header>
 
-        <main class="container py-12">
-            <div class="content-card text-center">
+        <main class="container py-12" role="main">
+            <section class="content-card text-center" aria-labelledby="welcome-title">
                 <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
                 <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
                     Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
@@ -118,23 +124,23 @@
                     <a href="catalog.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-all">Ver Catálogo</a>
                     <a href="contacto.html" class="bg-white text-slate-600 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Soporte</a>
                 </div>
-            </div>
+            </section>
         </main>
 
         <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
-                <i data-lucide="message-circle" id="chat-icon"></i>
+            <button onclick="toggleChat()" aria-label="Abrir ventana de chat de soporte" aria-expanded="false" aria-controls="chat-window" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                <i data-lucide="message-circle" id="chat-icon" aria-hidden="true"></i>
             </button>
 
-            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col" role="region" aria-label="Ventana de soporte en vivo">
                 <div class="bg-blue-600 p-4 text-white">
                     <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true"></div>
+                        <h3 class="font-bold text-sm m-0">Asistente FarmaPlus</h3>
                     </div>
                 </div>
                 
-                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
+                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50" aria-live="polite">
                     <div class="flex justify-start">
                         <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
                             ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
@@ -143,15 +149,15 @@
                 </div>
 
                 <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
-                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
-                        <i data-lucide="send" size="16"></i>
+                    <input id="chat-input" type="text" aria-label="Escriba su mensaje aquí" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
+                    <button onclick="sendMessage()" aria-label="Enviar mensaje" class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors">
+                        <i data-lucide="send" size="16" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <footer class="bg-slate-900 text-white py-12 mt-20">
+        <footer class="bg-slate-900 text-white py-12 mt-20" role="contentinfo">
             <div class="container text-center">
                 <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
             </div>
@@ -159,11 +165,11 @@
     </div>
 
     <script>
-        // ⚠️ RECUERDA ROTAR ESTA CLAVE INMEDIATAMENTE (ver instrucciones abajo)
+        // ⚠️ RECUERDA ROTAR ESTA CLAVE INMEDIATAMENTE
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
-        
+
         let userName = ""; 
 
         // 1. ACTUALIZACIÓN AUTOMÁTICA DE SESIÓN
@@ -190,15 +196,15 @@
             const role = profile?.role || 'usuario';
 
             if (role === 'admin') {
-                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
+                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600" aria-label="Ir al panel de administrador"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid" aria-hidden="true"></i></a>`;
             }
 
             authSection.innerHTML = `
                 <div class="flex items-center gap-4">
                     <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
-                        <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
+                        <i data-lucide="user-check" size="18" class="text-blue-600" aria-hidden="true"></i> ${userName}
                     </span>
-                    <button onclick="logout()" class="logout-btn">Salir</button>
+                    <button onclick="logout()" class="logout-btn" aria-label="Cerrar sesión de ${userName}">Salir</button>
                 </div>`;
             
             welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
@@ -207,8 +213,8 @@
 
         function renderLoginButton() {
             document.getElementById('user-auth-section').innerHTML = `
-                <a href="login.html" class="action-link">
-                    <i data-lucide="user"></i>
+                <a href="login.html" class="action-link" aria-label="Iniciar Sesión en FarmaPlus">
+                    <i data-lucide="user" aria-hidden="true"></i>
                     <span>Iniciar Sesión</span>
                 </a>`;
             document.getElementById('welcome-title').innerText = "Bienvenido a FarmaPlus";
@@ -238,7 +244,15 @@
         }
 
         // CHATBOT SIMPLE PARA PRUEBAS
-        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
+        function toggleChat() { 
+            const chatWindow = document.getElementById('chat-window');
+            const chatBtn = document.querySelector('button[aria-controls="chat-window"]');
+            chatWindow.classList.toggle('hidden'); 
+            
+            // A11y: Actualiza el estado del botón para el lector de pantalla
+            const isHidden = chatWindow.classList.contains('hidden');
+            chatBtn.setAttribute('aria-expanded', !isHidden);
+        }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
         async function sendMessage() {
             const input = document.getElementById('chat-input');
@@ -259,7 +273,6 @@
         });
     </script>
 
-    <!-- ✅ NUEVO: Script de cierre de sesión por inactividad -->
     <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
