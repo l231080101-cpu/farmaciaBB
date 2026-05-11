@@ -12,7 +12,10 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .product-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .product-card:hover { transform: translateY(-12px); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.15); }
-        .filter-btn { transition: all 0.3s ease; }
+        
+        /* Enfoque ultra visible para navegación por teclado */
+        *:focus-visible { outline: 3px solid #2563eb !important; outline-offset: 3px; }
+        
         .filter-btn.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); }
         
         @keyframes fadeIn {
@@ -21,98 +24,75 @@
         }
         .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
 
-        /* =========================================
-           🔔 ALERTAS VISUALES (ACCESIBILIDAD AUDITIVA)
-           ========================================= */
         .alerta-visual {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #16a34a;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background-color: #16a34a; color: white; padding: 12px 24px;
+            border-radius: 12px; font-weight: bold; box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            z-index: 1000; display: flex; align-items: center; gap: 10px;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease;
         }
-
-        .alerta-visual.mostrar {
-            opacity: 1;
-            visibility: visible;
-            bottom: 40px;
-        }
+        .alerta-visual.mostrar { opacity: 1; visibility: visible; bottom: 40px; }
+        
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
     </style>
 </head>
 <body class="text-slate-900">
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
-                <span class="bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-200">⚕️</span> FarmaPlus
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100" role="banner">
+        <div class="max-w-77xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter" aria-label="FarmaPlus Inicio">
+                <span class="bg-blue-600 text-white p-1.5 rounded-xl" aria-hidden="true">⚕️</span> FarmaPlus
             </a>
 
             <div class="flex items-center gap-6">
-                <nav class="hidden md:flex gap-8">
+                <nav class="hidden md:flex gap-8" aria-label="Navegación principal">
                     <a href="index.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Inicio</a>
-                    <a href="catalog.html" class="text-blue-600 font-bold">Catálogo</a>
+                    <a href="catalog.html" class="text-blue-600 font-bold" aria-current="page">Catálogo</a>
                     <a href="nosotros.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Nosotros</a>
                 </nav>
                 
-                <a href="carrito.html" class="relative p-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all border border-transparent hover:border-blue-100">
-                    <i data-lucide="shopping-basket"></i>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[20px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white">0</span>
+                <a href="carrito.html" class="relative p-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-blue-50 transition-all" aria-label="Ver mi carrito de compras">
+                    <i data-lucide="shopping-basket" aria-hidden="true"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[20px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white" style="display:none">0</span>
                 </a>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-12">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-8">
+    <main class="max-w-7xl mx-auto px-6 py-12" id="main-content">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-8">
             <div>
                 <h1 class="text-6xl font-black text-slate-900 tracking-tight mb-3">Catálogo</h1>
                 <p class="text-slate-500 font-medium text-lg">Encuentra todo lo que necesitas para tu salud.</p>
             </div>
             
-            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 w-full lg:w-96 focus-within:border-blue-400 transition-all">
-                <i data-lucide="search" class="text-slate-400 ml-3"></i>
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-2 w-full lg:w-96 focus-within:ring-2 focus-within:ring-blue-400 transition-all">
+                <label for="search-input" class="sr-only">Buscar productos</label>
+                <i data-lucide="search" class="text-slate-400 ml-3" aria-hidden="true"></i>
                 <input type="text" id="search-input" placeholder="Buscar por nombre o síntoma..." class="outline-none p-2 text-sm w-full bg-transparent">
             </div>
-        </div>
+        </header>
 
-        <div class="flex flex-wrap gap-3 mb-12">
-            <button onclick="filtrarCategoria('todos')" class="filter-btn active px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-todos">Todos</button>
-            <button onclick="filtrarCategoria('medicamentos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-medicamentos">💊 Medicamentos</button>
-            <button onclick="filtrarCategoria('promos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-promos">🔥 Promos</button>
-            <button onclick="filtrarCategoria('receta')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-receta">📋 Con Receta</button>
-        </div>
+        <nav class="flex flex-wrap gap-3 mb-12" aria-label="Filtrar por categoría">
+            <button onclick="filtrarCategoria('todos')" class="filter-btn active px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-todos" aria-pressed="true">Todos</button>
+            <button onclick="filtrarCategoria('medicamentos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-medicamentos" aria-pressed="false">💊 Medicamentos</button>
+            <button onclick="filtrarCategoria('promos')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-promos" aria-pressed="false">🔥 Promos</button>
+            <button onclick="filtrarCategoria('receta')" class="filter-btn px-6 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white" id="btn-receta" aria-pressed="false">📋 Con Receta</button>
+        </nav>
 
-        <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" role="region" aria-live="polite" aria-busy="false">
             </div>
 
-        <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center">
+        <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center" role="alert">
             <div class="bg-blue-50 p-6 rounded-full mb-4">
-                <i data-lucide="package-search" size="48" class="text-blue-500"></i>
+                <i data-lucide="package-search" size="48" class="text-blue-500" aria-hidden="true"></i>
             </div>
             <h3 class="text-2xl font-bold text-slate-800">No encontramos lo que buscas</h3>
             <p class="text-slate-500 max-w-xs mx-auto mt-2">Intenta con otro término o revisa otra categoría.</p>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-100 py-12 mt-20">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-slate-400 font-medium">© 2026 FarmaPlus. Calidad y salud para tu familia.</p>
-        </div>
-    </footer>
-
-    <div id="alerta-accesible" class="alerta-visual" role="alert" aria-live="assertive">
+    <div id="alerta-accesible" class="alerta-visual" role="status" aria-live="polite">
         <i data-lucide="check-circle" aria-hidden="true"></i>
         <span id="mensaje-alerta">¡Acción realizada!</span>
     </div>
@@ -127,6 +107,9 @@
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
         async function cargarProductos() {
+            const grid = document.getElementById('productos-grid');
+            grid.setAttribute('aria-busy', 'true');
+            
             const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true }); 
             
             if (error) {
@@ -137,6 +120,7 @@
             todosLosProductos = data;
             renderizar(data);
             updateCount();
+            grid.setAttribute('aria-busy', 'false');
         }
 
         function renderizar(lista) {
@@ -159,9 +143,9 @@
             noResults.classList.remove('flex');
 
             grid.innerHTML = filtrados.map((p, index) => `
-                <div class="product-card bg-white p-6 rounded-[35px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col animate-fade-in" style="animation-delay: ${index * 0.05}s">
+                <article class="product-card bg-white p-6 rounded-[35px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col animate-fade-in" style="animation-delay: ${index * 0.05}s">
                     <div class="relative aspect-square w-full mb-6 overflow-hidden rounded-[25px] bg-slate-50 group">
-                        <img src="${p.imagen_url}" class="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110" alt="${p.nombre}">
+                        <img src="${p.imagen_url}" class="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110" alt="Empaque de ${p.nombre}">
                         ${p.categoria === 'promos' ? '<span class="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">OFERTA</span>' : ''}
                     </div>
                     
@@ -171,28 +155,35 @@
                         </div>
                         <h3 class="font-extrabold text-xl mb-1 text-slate-800 capitalize leading-tight">${p.nombre}</h3>
                         <p class="text-slate-400 text-xs font-bold mb-4 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Disponible para entrega
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full" aria-hidden="true"></span> Producto en existencia
                         </p>
                     </div>
 
                     <div class="flex justify-between items-center mt-4 bg-slate-50 p-3 rounded-2xl">
                         <div class="flex flex-col">
-                            <span class="text-2xl font-black text-blue-600">$${p.precio}</span>
+                            <span class="sr-only">Precio:</span>
+                            <span class="text-2xl font-black text-blue-600" aria-label="${p.precio} pesos">$${p.precio}</span>
                         </div>
-                        <button onclick="addToCart('${p.id}')" aria-label="Agregar ${p.nombre} al carrito" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
-                            <i data-lucide="plus" class="group-hover/btn:rotate-90 transition-transform"></i>
+                        <button onclick="addToCart('${p.id}')" 
+                                aria-label="Añadir ${p.nombre} al carrito" 
+                                class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
+                            <i data-lucide="plus" class="group-hover/btn:rotate-90 transition-transform" aria-hidden="true"></i>
                         </button>
                     </div>
-                </div>
+                </article>
             `).join('');
             lucide.createIcons();
         }
 
         function filtrarCategoria(cat) {
             categoriaActual = cat;
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${cat}`).classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            const activeBtn = document.getElementById(`btn-${cat}`);
+            activeBtn.classList.add('active');
+            activeBtn.setAttribute('aria-pressed', 'true');
             
             aplicarBusquedaYFiltro();
         }
@@ -205,7 +196,6 @@
 
         document.getElementById('search-input').addEventListener('input', aplicarBusquedaYFiltro);
 
-        // Función para mostrar alertas visuales (Accesibilidad)
         function lanzarAlertaVisual(mensaje) {
             const alerta = document.getElementById('alerta-accesible');
             const textoMensaje = document.getElementById('mensaje-alerta');
@@ -230,8 +220,6 @@
             
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             updateCount();
-            
-            // 🔥 Notificación accesible conectada al botón
             lanzarAlertaVisual(`¡${producto.nombre} añadido al carrito!`);
         }
 
@@ -244,7 +232,5 @@
 
         window.onload = cargarProductos;
     </script>
-
-    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
