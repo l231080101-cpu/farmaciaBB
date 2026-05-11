@@ -155,30 +155,32 @@
                     });
                 },
                 onApprove: async (data, actions) => {
-                    try {
-                        const details = await actions.order.capture();
-                        console.log("Pago capturado con éxito");
+    try {
+        const details = await actions.order.capture();
+        
+        // Intentar guardar en Supabase
+        const { error } = await dbClient.from('pedidos').insert([{ 
+            user_id: currentUser.id,
+            productos: cart,      // Verifica que en Supabase se llame igual
+            total: total,
+            paypal_id: details.id, // Verifica que en Supabase se llame igual
+            estado: 'pagado'
+        }]);
 
-                        // Guardar en Supabase
-                        const { error } = await dbClient.from('pedidos').insert([{  // ✅ sb → dbClient
-                            user_id: currentUser.id,
-                            productos: cart,
-                            total: total,
-                            paypal_id: details.id,
-                            estado: 'pagado'
-                        }]);
+        if (error) {
+            // Esto nos dirá exactamente por qué falló Supabase
+            console.error("Error detallado de Supabase:", error.message);
+            throw error;
+        }
 
-                        if (error) throw error;
+        alert("¡Compra exitosa! Pedido registrado.");
+        localStorage.removeItem('farmaCart');
+        window.location.href = "index.html";
 
-                        alert("¡Gracias " + details.payer.name.given_name + "! Tu pedido en FarmaPlus ha sido registrado.");
-                        localStorage.removeItem('farmaCart');
-                        window.location.href = "index.html";
-
-                    } catch (err) {
-                        console.error("Error en el proceso final:", err);
-                        alert("El pago se realizó pero hubo un error al registrar el pedido. Por favor contacta a soporte con tu ID de PayPal.");
-                    }
-                },
+    } catch (err) {
+        alert("Pago realizado pero error al registrar. ID de PayPal: " + data.orderID);
+    }
+}
                 onError: (err) => {
                     console.error("Error en PayPal:", err);
                     alert("No se pudo procesar el pago con PayPal.");
