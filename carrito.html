@@ -1,78 +1,173 @@
-paypal.Buttons({
-    style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'checkout' },
-    
-    // 1. CREAR LA ORDEN
-    createOrder: (data, actions) => {
-        return actions.order.create({
-            purchase_units: [{ 
-                description: "Pedido FarmaPlus",
-                amount: { 
-                    currency_code: 'MXN', 
-                    value: total.toFixed(2) 
-                } 
-            }]
-        });
-    },
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito - FarmaPlus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=MXN"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .status-error { background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.75rem; border: 1px solid #fecaca; }
+        .status-success { background: #dcfce7; color: #166534; padding: 1rem; border-radius: 0.75rem; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
 
-    // 2. CUANDO EL USUARIO AUTORIZA EL PAGO
-    onApprove: async (data, actions) => {
-        try {
-            // Esperamos a que PayPal capture el dinero realmente
-            const detalles = await actions.order.capture();
-            
-            if (detalles.status === 'COMPLETED') {
-                console.log('Pago capturado con éxito');
-                // Solo si el pago es exitoso, registramos en Supabase
-                await registrarPedidoEnBaseDeDatos(detalles);
+    <div class="container mx-auto p-6 max-w-4xl">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-600 flex items-center gap-2">
+                <i data-lucide="shopping-cart"></i> Mi Carrito
+            </h1>
+            <a href="catalog.html" class="text-slate-600 font-medium hover:text-blue-600 flex items-center gap-1">
+                <i data-lucide="arrow-left" size="18"></i> Seguir comprando
+            </a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-4" id="cart-items">
+                </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-6">
+                <h2 class="text-xl font-bold text-slate-800">Resumen</h2>
+                <div id="cart-status" class="mb-4"></div>
+                
+                <div class="flex justify-between text-lg font-extrabold text-slate-900 border-t pt-4">
+                    <span>Total:</span>
+                    <span id="cart-total">$0.00</span>
+                </div>
+
+                <div id="paypal-button-container" class="mt-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN SUPABASE
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(_url, _key);
+
+        let total = 0;
+        let carrito = JSON.parse(localStorage.getItem('farmaCart')) || [];
+
+        function renderCarrito() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            total = 0;
+
+            if (carrito.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-10">Tu carrito está vacío.</p>';
+                document.getElementById('paypal-button-container').style.display = 'none';
+                return;
             }
-        } catch (error) {
-            console.error('Error en la captura de PayPal:', error);
-            alert('El pago no pudo completarse. Revisa tu saldo o tarjeta.');
+
+            carrito.forEach((item, index) => {
+                total += item.precio * item.cantidad;
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl flex items-center gap-4 shadow-sm border border-slate-50">
+                        <img src="${item.imagen}" class="w-20 h-20 object-cover rounded-xl">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-800">${item.nombre}</h3>
+                            <p class="text-blue-600 font-bold">$${item.precio.toFixed(2)} x ${item.cantidad}</p>
+                        </div>
+                        <button onclick="eliminarItem(${index})" class="text-red-400 hover:text-red-600 p-2">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+            lucide.createIcons();
         }
-    },
 
-    onError: (err) => {
-        console.error('Error general del SDK de PayPal:', err);
-        document.getElementById('cart-status').innerHTML = 
-            `<div class="status-error p-4 rounded-xl text-red-700 bg-red-100">
-                Error en la conexión con PayPal. Inténtalo de nuevo.
-            </div>`;
-    }
-}).render('#paypal-button-container');
+        function eliminarItem(index) {
+            carrito.splice(index, 1);
+            localStorage.setItem('farmaCart', JSON.stringify(carrito));
+            renderCarrito();
+        }
 
-// FUNCIÓN AUXILIAR PARA EL REGISTRO
-async function registrarPedidoEnBaseDeDatos(detallesPayPal) {
-    const statusMsg = document.getElementById('cart-status'); // Asegúrate de tener este ID en tu HTML
-    
-    try {
-        const { data: { session } } = await dbClient.auth.getSession();
-        if (!session) throw new Error("No hay sesión activa");
+        // LÓGICA DE PAYPAL
+        paypal.Buttons({
+            style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'checkout' },
+            
+            createOrder: (data, actions) => {
+                return actions.order.create({
+                    purchase_units: [{ 
+                        description: "Compra FarmaPlus",
+                        amount: { currency_code: 'MXN', value: total.toFixed(2) } 
+                    }]
+                });
+            },
 
-        const itemsCarrito = JSON.parse(localStorage.getItem('farmaCart')) || [];
+            onApprove: async (data, actions) => {
+                const statusMsg = document.getElementById('cart-status');
+                statusMsg.innerHTML = '<p class="text-blue-600 animate-pulse">Procesando pago, no cierres esta ventana...</p>';
 
-        const { error } = await dbClient
-            .from('pedidos')
-            .insert([{
-                user_id: session.user.id,
-                total: total,
-                paypal_order_id: detallesPayPal.id,
-                estado: 'Pagado',
-                items: itemsCarrito,
-                fecha: new Date().toISOString()
-            }]);
+                try {
+                    const detalles = await actions.order.capture();
+                    
+                    if (detalles.status === 'COMPLETED') {
+                        // El pago fue exitoso, ahora registramos en Supabase
+                        await registrarPedidoEnBaseDeDatos(detalles);
+                    }
+                } catch (error) {
+                    console.error('Error en captura:', error);
+                    statusMsg.innerHTML = '<div class="status-error">Error al procesar el pago con PayPal.</div>';
+                }
+            }
+        }).render('#paypal-button-container');
 
-        if (error) throw error;
+        async function registrarPedidoEnBaseDeDatos(detallesPayPal) {
+            const statusMsg = document.getElementById('cart-status');
+            
+            try {
+                // Obtener sesión de usuario
+                const { data: { session } } = await dbClient.auth.getSession();
+                
+                if (!session) {
+                    statusMsg.innerHTML = '<div class="status-error">Debes iniciar sesión para registrar tu compra.</div>';
+                    return;
+                }
 
-        // ÉXITO TOTAL
-        localStorage.removeItem('farmaCart');
-        window.location.href = 'confirmacion.html?order=' + detallesPayPal.id;
+                // Insertar en la tabla 'pedidos' que configuramos en SQL
+                const { error } = await dbClient
+                    .from('pedidos')
+                    .insert([{
+                        user_id: session.user.id,
+                        total: total,
+                        paypal_order_id: detallesPayPal.id,
+                        items: carrito,
+                        estado: 'Pagado',
+                        fecha: new Date().toISOString()
+                    }]);
 
-    } catch (err) {
-        console.error('Error al registrar en BD:', err);
-        statusMsg.innerHTML = `
-            <div class="p-4 bg-yellow-100 text-yellow-800 rounded-xl">
-                Pago realizado, pero hubo un error al registrar tu pedido. 
-                Guarda tu ticket: <b>${detallesPayPal.id}</b> y contáctanos.
-            </div>`;
-    }
-}
+                if (error) throw error;
+
+                // ÉXITO: Limpiar carrito y redirigir
+                localStorage.removeItem('farmaCart');
+                statusMsg.innerHTML = '<div class="status-success">¡Compra registrada! Redirigiendo...</div>';
+                
+                setTimeout(() => {
+                    window.location.href = 'confirmacion.html?order=' + detallesPayPal.id;
+                }, 2000);
+
+            } catch (err) {
+                console.error('Error Supabase:', err);
+                statusMsg.innerHTML = `
+                    <div class="p-4 bg-yellow-100 text-yellow-800 rounded-xl border border-yellow-200">
+                        Pago aceptado, pero hubo un error al guardar el pedido. 
+                        <strong>ID de Transacción: ${detallesPayPal.id}</strong>. 
+                        Toma una captura de esto y contáctanos.
+                    </div>`;
+            }
+        }
+
+        renderCarrito();
+    </script>
+</body>
+</html>
