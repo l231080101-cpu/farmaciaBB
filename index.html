@@ -13,6 +13,14 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
+        
+        /* === CLASES DE ACCESIBILIDAD === */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: #ef4444; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; text-decoration: none; }
+        .skip-link:focus { top: 0; }
+        *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; border-radius: 6px; }
+
+        /* === ESTILOS GENERALES === */
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
@@ -23,6 +31,7 @@
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
         .logo-subtitle { font-size: 0.85rem; color: #64748b; }
+        
         .search-bar { flex: 1; position: relative; max-width: 550px; }
         .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; transition: border-color 0.2s; }
         .search-input:focus { border-color: #2563eb; }
@@ -46,69 +55,32 @@
         .logout-btn:hover { background: #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
+        /* === CHAT Y ALERTAS === */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
         #chat-messages { scroll-behavior: smooth; }
-        .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
-        .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
-        .animate-pop { animation: popIn 0.3s ease-out; }
-        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-       
+        
+        .alerta-visual { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 1000; display: flex; align-items: center; gap: 10px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .alerta-visual.mostrar { opacity: 1; visibility: visible; bottom: 40px; }
+
         @media (max-width: 768px) {
             .contact-info { flex-direction: column; gap: 8px; align-items: center; text-align: center; }
             .top-bar { padding: 15px 0; }
-            
             .main-header-content { flex-direction: column; align-items: stretch; gap: 15px; }
             .logo { justify-content: center; }
             .search-bar { max-width: 100%; width: 100%; }
             .header-actions { justify-content: center; flex-wrap: wrap; }
-            
             .nav-desktop { flex-wrap: wrap; justify-content: center; gap: 5px; }
             .nav-link { padding: 8px 12px; font-size: 0.9rem; }
-            
             .content-card { padding: 25px 15px; margin-top: 20px; }
             .flex.justify-center.gap-4 { flex-direction: column; width: 100%; }
             .flex.justify-center.gap-4 a { width: 100%; text-align: center; box-sizing: border-box; }
-        }
-        
-        *:focus-visible {
-            outline: 3px solid #ef4444 !important; 
-            outline-offset: 3px; 
-            border-radius: 6px;
-        }
-
-        /* =========================================
-           🔔 ALERTAS VISUALES (ACCESIBILIDAD AUDITIVA)
-           ========================================= */
-        .alerta-visual {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #16a34a;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .alerta-visual.mostrar {
-            opacity: 1;
-            visibility: visible;
-            bottom: 40px;
         }
     </style>
 </head>
 
 <body>
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
     <div id="root">
         <header class="site-header" role="banner">
             <div class="top-bar">
@@ -134,10 +106,11 @@
                             </div>
                         </a>
                         
-                        <div class="search-bar" role="search">
+                        <form class="search-bar" role="search" onsubmit="event.preventDefault(); /* Lógica de búsqueda */">
+                            <label for="buscar-productos" class="sr-only">Buscar productos en el catálogo</label>
                             <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
-                            <input type="text" aria-label="Buscar productos en el catálogo" placeholder="Buscar productos..." class="search-input" />
-                        </div>
+                            <input type="search" id="buscar-productos" placeholder="Buscar productos..." class="search-input" />
+                        </form>
                         
                         <div class="header-actions">
                             <div id="admin-action-container"></div>
@@ -166,7 +139,7 @@
             </div>
         </header>
 
-        <main class="container py-12" role="main">
+        <main id="main-content" class="container py-12" tabindex="-1">
             <section class="content-card text-center" aria-labelledby="welcome-title">
           <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
                 <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
@@ -180,16 +153,19 @@
         </main>
 
         <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-            <button onclick="toggleChat()" aria-label="Abrir ventana de chat de soporte" aria-expanded="false" aria-controls="chat-window" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+            <button onclick="toggleChat()" aria-label="Abrir ventana de chat de soporte" aria-expanded="false" aria-controls="chat-window" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all focus:outline-none focus:ring-4 focus:ring-red-400">
                 <i data-lucide="message-circle" id="chat-icon" aria-hidden="true"></i>
             </button>
 
             <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col" role="region" aria-label="Ventana de soporte en vivo">
-                <div class="bg-blue-600 p-4 text-white">
+                <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true"></div>
                         <h3 class="font-bold text-sm m-0">Asistente FarmaPlus</h3>
                     </div>
+                    <button onclick="toggleChat()" aria-label="Cerrar ventana de chat" class="text-white hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-white rounded">
+                        <i data-lucide="x" size="18" aria-hidden="true"></i>
+                    </button>
                 </div>
                 
                 <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50" aria-live="polite">
@@ -201,8 +177,9 @@
                 </div>
 
                 <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" aria-label="Escriba su mensaje aquí" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
-                    <button onclick="sendMessage()" aria-label="Enviar mensaje" class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    <label for="chat-input" class="sr-only">Escriba su mensaje para soporte</label>
+                    <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" onkeypress="handleChatKey(event)">
+                    <button onclick="sendMessage()" aria-label="Enviar mensaje" class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <i data-lucide="send" size="16" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -229,7 +206,6 @@
         let userName = ""; 
 
         dbClient.auth.onAuthStateChange((event, session) => {
-            console.log("Evento de Auth:", event);
             if (session) {
                 renderUserSession(session);
             } else {
@@ -249,7 +225,7 @@
             const role = profile?.role || 'usuario';
 
             if (role === 'admin') {
-                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600" aria-label="Ir al panel de administrador"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid" aria-hidden="true"></i></a>`;
+                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 p-1 rounded" aria-label="Ir al panel de administrador"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid" aria-hidden="true"></i></a>`;
             }
 
             authSection.innerHTML = `
@@ -257,7 +233,7 @@
                     <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
                         <i data-lucide="user-check" size="18" class="text-blue-600" aria-hidden="true"></i> ${userName}
                     </span>
-                    <button onclick="logout()" class="logout-btn" aria-label="Cerrar sesión de ${userName}">Salir</button>
+                    <button onclick="logout()" class="logout-btn focus:outline-none focus:ring-2 focus:ring-red-400" aria-label="Cerrar sesión de ${userName}">Salir</button>
                 </div>`;
             
             welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
@@ -266,7 +242,7 @@
 
         function renderLoginButton() {
             document.getElementById('user-auth-section').innerHTML = `
-                <a href="login.html" class="action-link" aria-label="Iniciar Sesión en FarmaPlus">
+                <a href="login.html" class="action-link focus:outline-none focus:ring-2 focus:ring-blue-400 p-1 rounded" aria-label="Iniciar Sesión en FarmaPlus">
                     <i data-lucide="user" aria-hidden="true"></i>
                     <span>Iniciar Sesión</span>
                 </a>`;
@@ -298,10 +274,19 @@
         function toggleChat() { 
             const chatWindow = document.getElementById('chat-window');
             const chatBtn = document.querySelector('button[aria-controls="chat-window"]');
+            const chatInput = document.getElementById('chat-input');
+            
             chatWindow.classList.toggle('hidden'); 
             
             const isHidden = chatWindow.classList.contains('hidden');
             chatBtn.setAttribute('aria-expanded', !isHidden);
+            
+            // Foco manejado para accesibilidad
+            if (!isHidden) {
+                setTimeout(() => chatInput.focus(), 100);
+            } else {
+                chatBtn.focus();
+            }
         }
 
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
@@ -315,7 +300,6 @@
             msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
-        // Función para mostrar alertas visuales (Accesibilidad)
         function lanzarAlertaVisual(mensaje) {
             const alerta = document.getElementById('alerta-accesible');
             const textoMensaje = document.getElementById('mensaje-alerta');
@@ -328,6 +312,7 @@
             }, 3000);
         }
 
+        lucide.createIcons();
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
