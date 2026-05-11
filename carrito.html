@@ -9,9 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
@@ -68,16 +66,15 @@
     </main>
 
     <script>
-        // ⚠️ CLAVE EXPUESTA: Debes rotarla inmediatamente en Supabase (Settings > API)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);  // ✅ sb → dbClient
+        const dbClient = supabase.createClient(_url, _key);
 
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
         let currentUser = null; 
 
         async function checkSession() {
-            const { data: { session }, error } = await dbClient.auth.getSession();  // ✅ sb → dbClient
+            const { data: { session }, error } = await dbClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'login.html';
                 return null;
@@ -92,9 +89,7 @@
 
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('user-email').innerText = currentUser.email;
-            
             render();
-            // PayPal se inicializa después de pasar reCAPTCHA
         }
 
         function render() {
@@ -131,18 +126,15 @@
             }
         }
 
-        // Esta función es llamada automáticamente por Google cuando palomean la casilla
         window.habilitarPaypal = function() {
-            // Ocultamos la casilla de reCAPTCHA para limpiar la vista
             document.getElementById('recaptcha-container').style.display = 'none';
-            // Mostramos el contenedor de PayPal
             document.getElementById('paypal-button-container').style.display = 'block';
-            // Renderizamos el botón
             initPayPal();
         };
 
         function initPayPal() {
-            const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+            // Recalculamos el total exacto antes de crear los botones
+            const totalCompra = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
             paypal.Buttons({
                 style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay', height: 45 },
@@ -150,40 +142,40 @@
                     return actions.order.create({
                         purchase_units: [{ 
                             description: "Compra segura en FarmaPlus",
-                            amount: { value: total.toFixed(2) } 
+                            amount: { currency_code: 'MXN', value: totalCompra.toFixed(2) } 
                         }]
                     });
                 },
                 onApprove: async (data, actions) => {
-    try {
-        const details = await actions.order.capture();
-        
-        // Intentar guardar en Supabase
-        const { error } = await dbClient.from('pedidos').insert([{ 
-            user_id: currentUser.id,
-            productos: cart,      // Verifica que en Supabase se llame igual
-            total: total,
-            paypal_id: details.id, // Verifica que en Supabase se llame igual
-            estado: 'pagado'
-        }]);
+                    try {
+                        const details = await actions.order.capture();
+                        
+                        // Insertar en Supabase
+                        const { error } = await dbClient.from('pedidos').insert([{ 
+                            user_id: currentUser.id,
+                            productos: cart,      
+                            total: totalCompra,
+                            paypal_id: details.id, 
+                            estado: 'pagado'
+                        }]);
 
-        if (error) {
-            // Esto nos dirá exactamente por qué falló Supabase
-            console.error("Error detallado de Supabase:", error.message);
-            throw error;
-        }
+                        if (error) {
+                            console.error("Error Supabase:", error.message);
+                            throw error;
+                        }
 
-        alert("¡Compra exitosa! Pedido registrado.");
-        localStorage.removeItem('farmaCart');
-        window.location.href = "index.html";
+                        alert("¡Compra exitosa! Pedido registrado.");
+                        localStorage.removeItem('farmaCart');
+                        window.location.href = "index.html";
 
-    } catch (err) {
-        alert("Pago realizado pero error al registrar. ID de PayPal: " + data.orderID);
-    }
-}
+                    } catch (err) {
+                        console.error("Error al registrar pedido:", err);
+                        alert("El pago se procesó, pero hubo un error al guardar tu pedido. Guarda tu ID de transacción: " + data.orderID);
+                    }
+                }, // <--- AQUÍ FALTABA ESTA COMA
                 onError: (err) => {
                     console.error("Error en PayPal:", err);
-                    alert("No se pudo procesar el pago con PayPal.");
+                    alert("No se pudo procesar el pago con PayPal. Verifica tu conexión o tarjeta.");
                 }
             }).render('#paypal-button-container');
         }
@@ -194,18 +186,15 @@
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             render(); 
             
-            // Si el botón de PayPal ya estaba visible, lo volvemos a cargar con el nuevo total
             const paypalContainer = document.getElementById('paypal-button-container');
             if (paypalContainer.style.display === 'block') {
-                paypalContainer.innerHTML = '';
-                initPayPal();
+                paypalContainer.innerHTML = ''; // Limpiar botones viejos
+                initPayPal(); // Re-renderizar con el nuevo total
             }
         }
 
         window.onload = init;
     </script>
-
-    <!-- ✅ NUEVO: Cierre de sesión automático por inactividad -->
     <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
