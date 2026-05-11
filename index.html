@@ -55,7 +55,6 @@
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
        
         @media (max-width: 768px) {
-       
             .contact-info { flex-direction: column; gap: 8px; align-items: center; text-align: center; }
             .top-bar { padding: 15px 0; }
             
@@ -71,10 +70,40 @@
             .flex.justify-center.gap-4 { flex-direction: column; width: 100%; }
             .flex.justify-center.gap-4 a { width: 100%; text-align: center; box-sizing: border-box; }
         }
+        
         *:focus-visible {
             outline: 3px solid #ef4444 !important; 
             outline-offset: 3px; 
             border-radius: 6px;
+        }
+
+        /* =========================================
+           🔔 ALERTAS VISUALES (ACCESIBILIDAD AUDITIVA)
+           ========================================= */
+        .alerta-visual {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .alerta-visual.mostrar {
+            opacity: 1;
+            visibility: visible;
+            bottom: 40px;
         }
     </style>
 </head>
@@ -187,15 +216,18 @@
         </footer>
     </div>
 
+    <div id="alerta-accesible" class="alerta-visual" role="alert" aria-live="assertive">
+        <i data-lucide="check-circle" aria-hidden="true"></i>
+        <span id="mensaje-alerta">¡Acción realizada!</span>
+    </div>
+
     <script>
-        // ⚠️ RECUERDA ROTAR ESTA CLAVE INMEDIATAMENTE
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         let userName = ""; 
 
-        // 1. ACTUALIZACIÓN AUTOMÁTICA DE SESIÓN
         dbClient.auth.onAuthStateChange((event, session) => {
             console.log("Evento de Auth:", event);
             if (session) {
@@ -210,10 +242,8 @@
             const welcomeTitle = document.getElementById('welcome-title');
             const adminContainer = document.getElementById('admin-action-container');
 
-            // Intentar obtener nombre de base de datos o de Google
             const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
             
-            // Prioridad: 1. Tabla Perfiles, 2. Metadatos Google, 3. Email
             const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
             userName = fullName.split(' ')[0];
             const role = profile?.role || 'usuario';
@@ -250,7 +280,6 @@
             window.location.href = "index.html";
         }
 
-        // RELOJ Y CARRITO
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
@@ -266,17 +295,17 @@
             badge.style.display = count > 0 ? 'flex' : 'none';
         }
 
-        // CHATBOT SIMPLE PARA PRUEBAS
         function toggleChat() { 
             const chatWindow = document.getElementById('chat-window');
             const chatBtn = document.querySelector('button[aria-controls="chat-window"]');
             chatWindow.classList.toggle('hidden'); 
             
-            // A11y: Actualiza el estado del botón para el lector de pantalla
             const isHidden = chatWindow.classList.contains('hidden');
             chatBtn.setAttribute('aria-expanded', !isHidden);
         }
+
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+        
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
@@ -286,11 +315,23 @@
             msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
-        // INICIALIZACIÓN
+        // Función para mostrar alertas visuales (Accesibilidad)
+        function lanzarAlertaVisual(mensaje) {
+            const alerta = document.getElementById('alerta-accesible');
+            const textoMensaje = document.getElementById('mensaje-alerta');
+            
+            textoMensaje.textContent = mensaje;
+            alerta.classList.add('mostrar');
+            
+            setTimeout(() => {
+                alerta.classList.remove('mostrar');
+            }, 3000);
+        }
+
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
-        // Verificamos sesión al cargar por si el evento onAuthStateChange tarda un poco
+        
         dbClient.auth.getSession().then(({data}) => {
             if(data.session) renderUserSession(data.session);
         });
