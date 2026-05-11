@@ -42,16 +42,21 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Clase para accesibilidad (oculto visualmente pero leído por lectores de pantalla) */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
     </style>
 </head>
 <body>
 
-    <header class="site-header">
+    <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+    <header class="site-header" role="banner">
         <div class="top-bar">
             <div class="container">
-                <div class="top-bar-content">
-                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
-                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                <div class="top-bar-content text-sm">
+                    <div class="contact-item"><i data-lucide="phone" size="18" aria-hidden="true"></i><span aria-label="Teléfono de contacto: +52 55 23 69 79 40">+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18" aria-hidden="true"></i><span>Calle 67 #16 duplex</span></div>
                 </div>
             </div>
         </div>
@@ -59,14 +64,14 @@
         <div class="main-header">
             <div class="container">
                 <div class="main-header-content">
-                    <a href="index.html" class="logo">
-                        <div class="logo-box">⚕️</div>
+                    <a href="index.html" class="logo" aria-label="Ir a la página de inicio de FarmaPlus">
+                        <div class="logo-box" aria-hidden="true">⚕️</div>
                         <div>
                             <h1 class="logo-title">FarmaPlus</h1>
                             <p class="text-slate-500 text-xs font-semibold">Tu farmacia de confianza</p>
                         </div>
                     </a>
-                    <nav class="flex gap-6">
+                    <nav class="flex gap-6" role="navigation" aria-label="Menú principal">
                         <a href="index.html" class="text-slate-600 font-semibold hover:text-blue-600 transition">Inicio</a>
                     </nav>
                 </div>
@@ -74,80 +79,83 @@
         </div>
     </header>
 
-    <main class="login-wrapper">
+    <main class="login-wrapper" role="main">
         <div class="login-card">
-            <div id="loading-overlay">
+            <div id="loading-overlay" aria-hidden="true">
                 <div class="spinner mb-4"></div>
-                <p id="loading-text" class="text-blue-600 font-bold animate-pulse">Procesando...</p>
+                <p id="loading-text" class="text-blue-600 font-bold animate-pulse" role="status">Procesando...</p>
             </div>
 
             <div id="register-step">
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4" aria-hidden="true">
                         <i data-lucide="user-plus" size="32"></i>
                     </div>
-                    <h2 class="text-3xl font-extrabold text-slate-900">Crear Cuenta</h2>
+                    <h2 class="text-3xl font-extrabold text-slate-900" id="form-title">Crear Cuenta</h2>
                     <p class="text-slate-500 mt-2">Únete a FarmaPlus de forma segura</p>
                 </div>
                 
-                <form id="register-form" class="space-y-4">
+                <form id="register-form" class="space-y-4" aria-labelledby="form-title" novalidate>
                     <div class="input-group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
-                        <input type="text" id="fullname" placeholder="Ej. Juan Pérez" required>
+                        <label for="fullname" class="block text-sm font-bold text-slate-700 mb-2">Nombre Completo</label>
+                        <input type="text" id="fullname" placeholder="Ej. Juan Pérez" required aria-required="true" autocomplete="name">
                     </div>
                     <div class="input-group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
-                        <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+                        <label for="email" class="block text-sm font-bold text-slate-700 mb-2">Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="ejemplo@correo.com" required aria-required="true" autocomplete="email">
                     </div>
                     <div class="input-group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
-                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required>
+                        <label for="password" class="block text-sm font-bold text-slate-700 mb-2">Contraseña</label>
+                        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required aria-required="true" aria-describedby="pwd-desc" autocomplete="new-password">
+                        <p id="pwd-desc" class="sr-only">La contraseña debe tener al menos 8 caracteres.</p>
                     </div>
                     <div class="input-group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label>
-                        <input type="password" id="confirm-password" placeholder="Repite tu contraseña" required>
+                        <label for="confirm-password" class="block text-sm font-bold text-slate-700 mb-2">Confirmar Contraseña</label>
+                        <input type="password" id="confirm-password" placeholder="Repite tu contraseña" required aria-required="true" aria-describedby="match-status" autocomplete="new-password">
+                        <p id="match-status" class="text-xs font-bold mt-2 hidden" aria-live="polite"></p>
                     </div>
                     
-                    <p id="error-message" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
+                    <div id="error-message" class="hidden text-red-500 text-center text-sm font-bold bg-red-50 p-3 rounded-lg border border-red-200" role="alert" aria-live="assertive"></div>
                     
-                    <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2 mt-4">
+                    <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-100 flex justify-center items-center gap-2 mt-4 focus:ring-4 focus:ring-blue-300 focus:outline-none">
                         <span>Registrarse</span>
                     </button>
                 </form>
 
-                <div class="relative my-8">
+                <div class="relative my-8" aria-hidden="true">
                     <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-200"></span></div>
                     <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-slate-400 font-semibold">O también</span></div>
                 </div>
 
-                <button onclick="loginConGoogle()" class="w-full flex items-center justify-center gap-3 border-2 border-slate-200 p-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all">
-                    <img src="https://www.google.com/favicon.ico" class="w-5 h-5">
+                <button onclick="loginConGoogle()" class="w-full flex items-center justify-center gap-3 border-2 border-slate-200 p-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all focus:ring-4 focus:ring-slate-200 focus:outline-none">
+                    <img src="https://www.google.com/favicon.ico" class="w-5 h-5" alt="Logotipo de Google">
                     <span>Continuar con Google</span>
                 </button>
             </div>
 
-            <div id="otp-step" class="hidden text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-full mb-4">
+            <div id="otp-step" class="hidden text-center" aria-live="polite">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-600 rounded-full mb-4" aria-hidden="true">
                     <i data-lucide="mail-check" size="32"></i>
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-900 text-center mb-2">Verifica tu Email</h2>
+                <h2 class="text-3xl font-extrabold text-slate-900 text-center mb-2" id="otp-title">Verifica tu Email</h2>
                 <p class="text-slate-500 text-sm mb-6">Hemos enviado un código de 6 dígitos a <br><b id="display-email" class="text-blue-600"></b></p>
                 
                 <div class="space-y-4">
                     <div class="input-group">
-                        <input type="text" id="otp-code" placeholder="000000" maxlength="6" class="text-center text-3xl tracking-[0.5em] font-black !bg-white border-2 border-blue-100 focus:border-blue-600">
+                        <label for="otp-code" class="sr-only">Código de verificación de 6 dígitos</label>
+                        <input type="text" id="otp-code" placeholder="000000" maxlength="6" aria-required="true" class="text-center text-3xl tracking-[0.5em] font-black !bg-white border-2 border-blue-100 focus:border-blue-600 focus:ring-4 focus:ring-blue-200 transition-all rounded-xl outline-none">
                     </div>
-                    <p id="otp-error" class="hidden text-red-500 text-sm font-bold bg-red-50 p-2 rounded-lg"></p>
-                    <button onclick="verificarCodigo()" class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-100">
+                    <div id="otp-error" class="hidden text-red-500 text-sm font-bold bg-red-50 p-3 rounded-lg border border-red-200" role="alert" aria-live="assertive"></div>
+                    <button onclick="verificarCodigo()" class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-100 focus:ring-4 focus:ring-green-300 focus:outline-none">
                         Confirmar Código
                     </button>
-                    <button onclick="location.reload()" class="text-slate-400 text-sm hover:underline">¿Te equivocaste de correo? Volver</button>
+                    <button onclick="location.reload()" class="text-slate-500 text-sm hover:text-slate-700 hover:underline focus:outline-none focus:ring-2 focus:ring-slate-400 rounded">¿Te equivocaste de correo? Volver</button>
                 </div>
             </div>
 
             <div class="text-center mt-6 pt-6 border-t border-slate-100">
                 <p class="text-slate-500 text-sm mb-4">¿Ya tienes una cuenta?</p>
-                <a href="login.html" class="block w-full border-2 border-blue-600 text-blue-600 p-3 rounded-xl font-bold hover:bg-blue-50 transition-all text-center">
+                <a href="login.html" class="block w-full border-2 border-blue-600 text-blue-600 p-3 rounded-xl font-bold hover:bg-blue-50 transition-all text-center focus:ring-4 focus:ring-blue-200 focus:outline-none">
                     Iniciar Sesión
                 </a>
             </div>
@@ -161,25 +169,27 @@
 
         lucide.createIcons();
 
-        // FUNCIÓN MEJORADA Y CORREGIDA PARA GOOGLE AUTH
+        function announceToScreenReader(message) {
+            const announcer = document.getElementById('sr-announcer');
+            announcer.textContent = '';
+            setTimeout(() => { announcer.textContent = message; }, 100);
+        }
+
         async function loginConGoogle() {
             const loader = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
             
             loader.style.display = 'flex';
             loadingText.textContent = "Conectando con Google...";
+            announceToScreenReader("Redirigiendo a la conexión segura de Google.");
 
-            // CAMBIO CLAVE: Forzamos la URL de Vercel para evitar que regrese a localhost
             const siteURL = "https://farmaciabb.vercel.app/index.html";
 
             const { data, error } = await dbClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: siteURL,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'select_account',
-                    },
+                    queryParams: { access_type: 'offline', prompt: 'select_account' }
                 }
             });
 
@@ -189,13 +199,35 @@
             }
         }
 
-        // Validación y registro manual
+        // 🔥 Validacion visual y auditiva de contraseñas en tiempo real
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm-password');
+        const matchStatus = document.getElementById('match-status');
+
+        function checkPasswordMatch() {
+            if (confirmInput.value === '') {
+                matchStatus.classList.add('hidden');
+                return;
+            }
+            matchStatus.classList.remove('hidden');
+            if (passwordInput.value === confirmInput.value) {
+                matchStatus.textContent = "✓ Las contraseñas coinciden";
+                matchStatus.className = "text-xs font-bold mt-2 text-green-600 block";
+            } else {
+                matchStatus.textContent = "✗ Las contraseñas no coinciden";
+                matchStatus.className = "text-xs font-bold mt-2 text-red-500 block";
+            }
+        }
+
+        passwordInput.addEventListener('input', checkPasswordMatch);
+        confirmInput.addEventListener('input', checkPasswordMatch);
+
         function validateRegistrationData(rawName, rawEmail, rawPassword, rawConfirm) {
             const cleanName = DOMPurify.sanitize(rawName.trim());
             const cleanEmail = DOMPurify.sanitize(rawEmail.trim());
             if (validator.isEmpty(cleanName)) return { valid: false, msg: "El nombre no puede estar vacío." };
             if (!validator.isEmail(cleanEmail)) return { valid: false, msg: "El correo no es válido." };
-            if (!validator.isLength(rawPassword, { min: 8 })) return { valid: false, msg: "Mínimo 8 caracteres." };
+            if (!validator.isLength(rawPassword, { min: 8 })) return { valid: false, msg: "La contraseña debe tener mínimo 8 caracteres." };
             if (rawPassword !== rawConfirm) return { valid: false, msg: "Las contraseñas no coinciden." };
             return { valid: true, name: cleanName, email: cleanEmail };
         }
@@ -217,11 +249,15 @@
             if (!validation.valid) {
                 errorMsg.textContent = validation.msg;
                 errorMsg.classList.remove('hidden');
+                // Forzar el enfoque en el error para que sea lo primero que lea el usuario
+                errorMsg.setAttribute('tabindex', '-1');
+                errorMsg.focus();
                 return;
             }
 
             loader.style.display = 'flex';
             loadingText.textContent = "Creando cuenta segura...";
+            announceToScreenReader("Enviando formulario de registro, por favor espere.");
             btn.disabled = true;
 
             const { data, error } = await dbClient.auth.signUp({
@@ -238,11 +274,17 @@
                 errorMsg.textContent = "Error: " + error.message;
                 errorMsg.classList.remove('hidden');
                 btn.disabled = false;
+                errorMsg.focus();
             } else {
                 document.getElementById('display-email').textContent = validation.email;
                 document.getElementById('register-step').classList.add('hidden');
-                document.getElementById('otp-step').classList.remove('hidden');
+                const otpStep = document.getElementById('otp-step');
+                otpStep.classList.remove('hidden');
                 lucide.createIcons();
+                
+                // Anunciar el cambio de vista y hacer foco en el input del código
+                announceToScreenReader("Registro exitoso. Se requiere verificación de correo.");
+                document.getElementById('otp-code').focus();
             }
         });
 
@@ -255,13 +297,14 @@
 
             otpError.classList.add('hidden');
             if (token.length !== 6) {
-                otpError.textContent = "Ingresa los 6 dígitos.";
+                otpError.textContent = "Por favor, ingresa los 6 dígitos completos.";
                 otpError.classList.remove('hidden');
                 return;
             }
 
             loader.style.display = 'flex';
             loadingText.textContent = "Verificando código...";
+            announceToScreenReader("Verificando código de seguridad.");
 
             const { data, error } = await dbClient.auth.verifyOtp({
                 email: email,
@@ -272,7 +315,7 @@
             loader.style.display = 'none';
 
             if (error) {
-                otpError.textContent = "Código inválido o expirado.";
+                otpError.textContent = "El código es inválido o ha expirado.";
                 otpError.classList.remove('hidden');
             } else {
                 alert("¡Cuenta verificada con éxito! Bienvenido a FarmaPlus.");
