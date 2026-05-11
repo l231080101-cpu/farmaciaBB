@@ -9,64 +9,89 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .card-style { background: white; border-radius: 20px; border: 1px solid #edf2f7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        /* Clase de utilidad para ocultar elementos visualmente pero dejarlos para lectores de pantalla */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        
+        /* Enfoque ultra-claro para navegación por teclado */
+        button:focus-visible, a:focus-visible {
+            outline: 4px solid #2563eb;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
     <header class="bg-white border-b border-slate-100 mb-8" role="banner">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-3" aria-label="Ir a la página de inicio de FarmaPlus">
+            <a href="index.html" class="flex items-center gap-3" aria-label="FarmaPlus - Regresar a inicio">
                 <div class="bg-blue-600 text-white p-2 rounded-xl text-xl" aria-hidden="true">⚕️</div>
                 <div>
-                    <h1 class="text-xl font-extrabold text-blue-600 leading-none">FarmaPlus</h1>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Tu farmacia de confianza</p>
+                    <span class="text-xl font-extrabold text-blue-600 leading-none block">FarmaPlus</span>
+                    <span class="text-[10px] text-slate-500 uppercase tracking-tighter">Tu farmacia de confianza</span>
                 </div>
             </a>
-            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100 hidden" aria-live="polite">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm" aria-hidden="true"><i data-lucide="shield-check" size="18"></i></div>
-                <p id="user-email" class="text-xs font-bold text-slate-700 italic">Verificando sesión...</p>
+            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100 hidden">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm" aria-hidden="true">
+                    <i data-lucide="shield-check" size="18"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Sesión Protegida</p>
+                    <p id="user-email" class="text-xs font-bold text-slate-700 italic">Verificando...</p>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 mb-20" role="main">
+    <main class="max-w-7xl mx-auto px-6 mb-20">
         <div class="mb-8">
-            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight" tabindex="-1" id="main-heading">Tu Carrito Seguro</h1>
+            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight" id="cart-title">Tu Carrito Seguro</h1>
+            <p class="text-slate-500">Revisa tus productos antes de finalizar el pago.</p>
         </div>
 
         <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <section aria-labelledby="main-heading" class="lg:col-span-2 space-y-4">
-                <div id="cart-items-container" class="space-y-4"></div>
+            <section aria-labelledby="cart-title" class="lg:col-span-2 space-y-4">
+                <div id="cart-items-container" class="space-y-4">
+                    </div>
             </section>
 
-            <aside id="summary-sidebar" class="hidden" aria-label="Resumen de tu compra">
+            <aside id="summary-sidebar" class="hidden">
                 <div class="card-style p-8 sticky top-6">
                     <h2 class="text-xl font-bold mb-6">Resumen de Compra</h2>
                     
-                    <div class="space-y-4 border-t pt-6 mb-8" aria-live="polite">
-                        <div class="flex justify-between text-slate-500 font-bold"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
-                        <div class="flex justify-between items-center"><span class="font-black text-xl text-slate-900">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
+                    <div class="space-y-4 border-t pt-6 mb-8" role="region" aria-label="Cálculo de costos">
+                        <div class="flex justify-between text-slate-500 font-bold">
+                            <span>Subtotal</span>
+                            <span id="subtotal" aria-label="Subtotal">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-xl text-slate-900">Total</span>
+                            <div>
+                                <span class="sr-only">Total a pagar:</span>
+                                <span id="total" class="text-3xl font-black text-blue-600">$0.00</span>
+                                <span class="text-xs font-bold text-slate-400 block text-right">MXN</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="recaptcha-container" class="flex justify-center mb-4">
-                        <div class="g-recaptcha" data-sitekey="6LeQ9bosAAAAAGtnWuHoV38cKpEC4_i6oRD0Yhjg" data-callback="habilitarPaypal" aria-label="Verificación de seguridad reCAPTCHA"></div>
+                    <div id="recaptcha-container" class="flex flex-col items-center mb-4">
+                        <p class="text-xs text-slate-500 mb-2 font-semibold">Verifica que eres humano para pagar:</p>
+                        <div class="g-recaptcha" data-sitekey="6LeQ9bosAAAAAGtnWuHoV38cKpEC4_i6oRD0Yhjg" data-callback="habilitarPaypal"></div>
                     </div>
 
-                    <div id="paypal-button-container" style="display: none;" aria-label="Opciones de pago con PayPal"></div>
+                    <div id="paypal-button-container" class="hidden" aria-label="Botones de pago seguro"></div>
                     
+                    <div id="payment-status" class="mt-4 hidden p-4 rounded-xl text-sm font-bold" role="alert"></div>
+
                     <p class="text-center text-[10px] text-slate-400 mt-4 italic flex items-center justify-center gap-1">
-                        <i data-lucide="lock" size="10" aria-hidden="true"></i> Pago seguro y encriptado por PayPal Inc.
+                        <i data-lucide="lock" size="10" aria-hidden="true"></i> 
+                        Transacción protegida por cifrado SSL de 256 bits
                     </p>
                 </div>
             </aside>
@@ -74,7 +99,6 @@
     </main>
 
     <script>
-        // ⚠️ CLAVE EXPUESTA: Recuerda rotarla en Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
@@ -83,12 +107,17 @@
         let currentUser = null; 
 
         async function checkSession() {
-            const { data: { session }, error } = await dbClient.auth.getSession();
-            if (error || !session) {
-                window.location.href = 'login.html';
+            const { data: { session } } = await dbClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html?redirect=carrito.html';
                 return null;
             }
             return session.user;
+        }
+
+        function announce(msg) {
+            const announcer = document.getElementById('sr-announcer');
+            announcer.textContent = msg;
         }
 
         async function init() {
@@ -102,87 +131,87 @@
             render();
         }
 
-        function announceToScreenReader(message) {
-            const announcer = document.getElementById('sr-announcer');
-            announcer.textContent = ''; // Limpiar para forzar el anuncio
-            setTimeout(() => { announcer.textContent = message; }, 100);
-        }
-
         function render(isUpdate = false) {
             const container = document.getElementById('cart-items-container');
             const sidebar = document.getElementById('summary-sidebar');
 
             if (cart.length === 0) {
                 sidebar.classList.add('hidden');
-                container.innerHTML = `<div class="card-style py-20 text-center text-slate-500 font-bold" role="status"><h2>Tu carrito está vacío</h2></div>`;
-                if(isUpdate) announceToScreenReader("El carrito ahora está vacío.");
+                container.innerHTML = `
+                    <div class="card-style py-20 text-center" role="status">
+                        <i data-lucide="shopping-cart" class="mx-auto text-slate-200 mb-4" size="48"></i>
+                        <h2 class="text-2xl font-bold text-slate-400">Tu carrito está vacío</h2>
+                        <a href="catalog.html" class="text-blue-600 underline mt-4 inline-block font-bold">Ir a comprar productos</a>
+                    </div>`;
+                if(isUpdate) announce("Carrito vacío. No hay productos para pagar.");
+                lucide.createIcons();
             } else {
                 sidebar.classList.remove('hidden');
                 let total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
                 
                 container.innerHTML = cart.map((item, idx) => {
                     const safeName = DOMPurify.sanitize(item.nombre);
-                    const safeImg = DOMPurify.sanitize(item.imagen_url);
                     return `
-                    <div class="card-style p-5 flex flex-col sm:flex-row items-center gap-6">
-                        <img src="${safeImg}" class="w-20 h-20 object-contain" alt="" aria-hidden="true">
+                    <article class="card-style p-5 flex flex-col sm:flex-row items-center gap-6 animate-fade-in">
+                        <img src="${DOMPurify.sanitize(item.imagen_url)}" class="w-20 h-20 object-contain" alt="" aria-hidden="true">
                         <div class="flex-grow text-center sm:text-left">
                             <h3 class="font-bold text-slate-800 text-lg">${safeName}</h3>
-                            <p class="text-blue-600 font-black text-lg" aria-label="Precio: ${item.precio} pesos">$${item.precio}</p>
+                            <p class="text-blue-600 font-black text-lg">
+                                <span class="sr-only">Precio unitario:</span> $${item.precio} MXN
+                            </p>
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                        <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-xl">
                             <button onclick="changeQty(${idx}, -1, '${safeName}')" 
-                                    aria-label="Disminuir cantidad de ${safeName}" 
-                                    class="w-10 h-10 bg-white shadow-sm border border-slate-200 rounded-lg hover:bg-slate-100 focus:ring-2 focus:ring-blue-600 focus:outline-none transition-all flex justify-center items-center font-bold text-lg text-slate-600">
-                                -
-                            </button>
+                                    aria-label="Quitar uno de ${safeName}"
+                                    class="w-10 h-10 bg-white shadow-sm rounded-lg hover:bg-red-50 text-slate-600 font-bold">-</button>
                             
-                            <span class="font-bold w-6 text-center text-lg" aria-label="Cantidad actual: ${item.cantidad}">${item.cantidad}</span>
+                            <span class="font-black w-8 text-center" aria-label="Cantidad: ${item.cantidad}">${item.cantidad}</span>
                             
                             <button onclick="changeQty(${idx}, 1, '${safeName}')" 
-                                    aria-label="Aumentar cantidad de ${safeName}" 
-                                    class="w-10 h-10 bg-white shadow-sm border border-slate-200 rounded-lg hover:bg-slate-100 focus:ring-2 focus:ring-blue-600 focus:outline-none transition-all flex justify-center items-center font-bold text-lg text-slate-600">
-                                +
-                            </button>
+                                    aria-label="Agregar otro de ${safeName}"
+                                    class="w-10 h-10 bg-white shadow-sm rounded-lg hover:bg-green-50 text-slate-600 font-bold">+</button>
                         </div>
-                    </div>`;
+                    </article>`;
                 }).join('');
 
-                const formattedTotal = total.toFixed(2);
-                document.getElementById('total').innerText = `$${formattedTotal}`;
-                document.getElementById('subtotal').innerText = `$${formattedTotal}`;
+                const formatted = total.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+                document.getElementById('total').innerText = `$${formatted}`;
+                document.getElementById('subtotal').innerText = `$${formatted}`;
                 
-                if(isUpdate) {
-                    announceToScreenReader(`Carrito actualizado. Nuevo total: ${formattedTotal} pesos.`);
-                }
+                if(isUpdate) announce(`Total actualizado a ${formatted} pesos.`);
             }
         }
 
         window.habilitarPaypal = function() {
-            document.getElementById('recaptcha-container').style.display = 'none';
-            document.getElementById('paypal-button-container').style.display = 'block';
-            announceToScreenReader("Verificación exitosa. Botones de pago de PayPal habilitados.");
+            document.getElementById('recaptcha-container').classList.add('hidden');
+            const paypalBtn = document.getElementById('paypal-button-container');
+            paypalBtn.classList.remove('hidden');
+            announce("Verificación humana completa. Los botones de pago están listos.");
             initPayPal();
         };
 
         function initPayPal() {
+            const container = document.getElementById('paypal-button-container');
+            container.innerHTML = ''; // Limpiar botones previos si cambia el total
+
             const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
             paypal.Buttons({
-                style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay', height: 45 },
+                style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'checkout' },
                 createOrder: (data, actions) => {
                     return actions.order.create({
                         purchase_units: [{ 
-                            description: "Compra segura en FarmaPlus",
-                            amount: { value: total.toFixed(2) } 
+                            description: "Pedido FarmaPlus",
+                            amount: { currency_code: 'MXN', value: total.toFixed(2) } 
                         }]
                     });
                 },
                 onApprove: async (data, actions) => {
+                    const statusDiv = document.getElementById('payment-status');
                     try {
                         const details = await actions.order.capture();
-                        console.log("Pago capturado con éxito");
-
+                        
+                        // Guardar en Supabase
                         const { error } = await dbClient.from('pedidos').insert([{ 
                             user_id: currentUser.id,
                             productos: cart,
@@ -193,43 +222,41 @@
 
                         if (error) throw error;
 
-                        alert("¡Gracias " + details.payer.name.given_name + "! Tu pedido en FarmaPlus ha sido registrado.");
+                        statusDiv.className = "mt-4 p-4 rounded-xl text-sm font-bold bg-green-100 text-green-800";
+                        statusDiv.innerHTML = `¡Pago exitoso! Gracias ${details.payer.name.given_name}. Redirigiendo...`;
+                        statusDiv.classList.remove('hidden');
+                        
                         localStorage.removeItem('farmaCart');
-                        window.location.href = "index.html";
+                        setTimeout(() => window.location.href = "index.html", 3000);
 
                     } catch (err) {
-                        console.error("Error en el proceso final:", err);
-                        alert("El pago se realizó pero hubo un error al registrar el pedido. Por favor contacta a soporte con tu ID de PayPal.");
+                        statusDiv.className = "mt-4 p-4 rounded-xl text-sm font-bold bg-red-100 text-red-800";
+                        statusDiv.innerText = "Error al procesar el registro del pedido.";
+                        statusDiv.classList.remove('hidden');
                     }
-                },
-                onError: (err) => {
-                    console.error("Error en PayPal:", err);
-                    alert("No se pudo procesar el pago con PayPal.");
                 }
             }).render('#paypal-button-container');
         }
 
-        window.changeQty = (idx, d, productName) => {
-            cart[idx].cantidad += d;
-            
-            if(cart[idx].cantidad < 1) {
+        window.changeQty = (idx, delta, name) => {
+            cart[idx].cantidad += delta;
+            if (cart[idx].cantidad < 1) {
                 cart.splice(idx, 1);
-                announceToScreenReader(`${productName} ha sido eliminado del carrito.`);
+                announce(`${name} eliminado del carrito.`);
+            } else {
+                announce(`Cantidad de ${name} cambiada.`);
             }
             
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            render(true); // Pasamos 'true' para avisar que es una actualización 
-            
-            const paypalContainer = document.getElementById('paypal-button-container');
-            if (paypalContainer.style.display === 'block') {
-                paypalContainer.innerHTML = '';
+            render(true);
+
+            // Reiniciar PayPal para reflejar el nuevo total si ya estaba habilitado
+            if (!document.getElementById('paypal-button-container').classList.contains('hidden')) {
                 initPayPal();
             }
-        }
+        };
 
         window.onload = init;
     </script>
-
-    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
