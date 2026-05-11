@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - FarmaPlus</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+    </style>
+</head>
+<body class="text-slate-900 hidden" id="perfil-body">
+
+    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="max-w-6xl mx-auto p-6 md:p-10 min-h-screen flex flex-col gap-8">
+        
+        <header class="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-xl tracking-tighter focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg p-1">
+                <span class="bg-blue-600 text-white p-1 rounded-lg flex items-center justify-center w-8 h-8" aria-hidden="true"><i data-lucide="shield-alert" size="18"></i></span> FarmaPlus
+            </a>
+            <nav aria-label="Navegación principal">
+                <a href="catalog.html" class="font-bold text-slate-500 hover:text-blue-600 mr-4 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg p-2">Tienda</a>
+                <a href="carrito.html" class="font-bold text-slate-500 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg p-2">Mi Carrito</a>
+            </nav>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1" role="main">
+            
+            <section class="lg:col-span-1" aria-labelledby="perfil-heading">
+                <div class="glass-card p-8 rounded-[32px] shadow-xl sticky top-10 text-center">
+                    <div class="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-4xl font-black mx-auto mb-6 shadow-inner" id="user-initial" aria-hidden="true">
+                        ...
+                    </div>
+                    <h1 id="perfil-heading" class="text-2xl font-black text-slate-900 mb-1" id="user-name">Cargando perfil...</h1>
+                    <p class="text-slate-500 font-medium mb-8" id="user-email">...</p>
+
+                    <div class="flex flex-col gap-3">
+                        <button onclick="cerrarSesion()" class="w-full flex items-center justify-center gap-2 p-4 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400">
+                            <i data-lucide="log-out" size="20" aria-hidden="true"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-2" aria-labelledby="pedidos-heading">
+                <div class="glass-card p-8 rounded-[32px] shadow-xl h-full">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 id="pedidos-heading" class="text-2xl font-black flex items-center gap-2">
+                            <i data-lucide="package" class="text-blue-600" aria-hidden="true"></i> Mis Pedidos
+                        </h2>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-slate-100">
+                                    <th scope="col" class="pb-4 text-sm font-bold text-slate-500">ID Pedido</th>
+                                    <th scope="col" class="pb-4 text-sm font-bold text-slate-500">Fecha</th>
+                                    <th scope="col" class="pb-4 text-sm font-bold text-slate-500">Estado</th>
+                                    <th scope="col" class="pb-4 text-sm font-bold text-slate-500 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-pedidos" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="4" class="py-8 text-center text-slate-400 font-medium">Buscando tu historial...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
+        const dbClient = supabase.createClient(_url, _key);
+
+        let currentUser = null;
+
+        function announce(message) {
+            const announcer = document.getElementById('sr-announcer');
+            announcer.textContent = '';
+            setTimeout(() => { announcer.textContent = message; }, 100);
+        }
+
+        async function init() {
+            lucide.createIcons();
+            await checkAuth();
+        }
+
+        async function checkAuth() {
+            const { data: { session }, error } = await dbClient.auth.getSession();
+            
+            if (error || !session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = session.user;
+            document.getElementById('perfil-body').classList.remove('hidden');
+            
+            await cargarDatosPerfil();
+            await cargarPedidos();
+        }
+
+        async function cargarDatosPerfil() {
+            const { data: profile } = await dbClient.from('profiles').select('*').eq('id', currentUser.id).single();
+            
+            const nombre = DOMPurify.sanitize(profile?.full_name || 'Usuario FarmaPlus');
+            const email = DOMPurify.sanitize(currentUser.email);
+            
+            document.getElementById('user-name').innerText = nombre;
+            document.getElementById('user-email').innerText = email;
+            document.getElementById('user-initial').innerText = nombre.charAt(0).toUpperCase();
+            
+            announce(`Perfil cargado. Bienvenido, ${nombre}`);
+        }
+
+        async function cargarPedidos() {
+            // Suponiendo que tienes una tabla 'pedidos' en Supabase relacionada con el user_id
+            const { data: pedidos, error } = await dbClient.from('pedidos')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            const tbody = document.getElementById('lista-pedidos');
+
+            if (error || !pedidos || pedidos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-12 text-center">
+                            <div class="flex flex-col items-center justify-center text-slate-400">
+                                <i data-lucide="shopping-bag" size="48" class="mb-4 opacity-50" aria-hidden="true"></i>
+                                <p class="font-bold text-lg text-slate-500">Aún no tienes pedidos</p>
+                                <p class="text-sm mt-1">¡Explora nuestra tienda para hacer tu primera compra!</p>
+                                <a href="catalog.html" class="mt-4 bg-blue-50 text-blue-600 px-6 py-2 rounded-xl font-bold hover:bg-blue-100 transition-colors">Ir a la Tienda</a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            tbody.innerHTML = pedidos.map(p => {
+                const date = new Date(p.created_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+                const estadoConfig = obtenerEstiloEstado(p.estado);
+
+                return `
+                <tr class="hover:bg-slate-50 transition-colors group">
+                    <td class="py-4 pr-4 font-mono text-sm text-slate-500">#${p.id.split('-')[0]}</td>
+                    <td class="py-4 text-sm font-bold text-slate-700">${date}</td>
+                    <td class="py-4">
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${estadoConfig.clase}" aria-label="Estado del pedido: ${p.estado}">
+                            ${estadoConfig.texto}
+                        </span>
+                    </td>
+                    <td class="py-4 text-right font-black text-blue-600">$${p.total_pagado}</td>
+                </tr>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function obtenerEstiloEstado(estado) {
+            // Mapea el estado a colores y textos amigables
+            const estados = {
+                'pendiente': { clase: 'bg-yellow-100 text-yellow-700', texto: 'Pendiente' },
+                'procesando': { clase: 'bg-blue-100 text-blue-700', texto: 'Procesando' },
+                'enviado': { clase: 'bg-purple-100 text-purple-700', texto: 'Enviado' },
+                'entregado': { clase: 'bg-green-100 text-green-700', texto: 'Entregado' },
+            };
+            return estados[estado?.toLowerCase()] || { clase: 'bg-slate-100 text-slate-600', texto: estado || 'Desconocido' };
+        }
+
+        async function cerrarSesion() {
+            await dbClient.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        window.onload = init;
+    </script>
+    <script src="js/sessionTimeout.js"></script>
+</body>
+</html>
