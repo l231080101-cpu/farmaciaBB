@@ -296,7 +296,7 @@
             const loadingText = document.getElementById('loading-text');
 
             otpError.classList.add('hidden');
-            if (token.length !== 6) {
+            if (token.length !== 8) {
                 otpError.textContent = "Por favor, ingresa los 6 dígitos completos.";
                 otpError.classList.remove('hidden');
                 return;
