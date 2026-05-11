@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
@@ -34,19 +35,18 @@
         .nav-link.active { background: #2563eb; color: white; }
         .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
 
-        /* MEJORA ACCESIBILIDAD: Foco visible */
-        *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; }
-
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.2s; }
         .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; transition: transform 0.2s; }
         .back-to-index:hover { transform: translateY(-5px); }
-        .map-container { border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid white; height: 100%; min-height: 400px; }
+        
+        .map-container { border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; min-height: 400px; }
         .form-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; }
         
-        /* Estilo para mensajes de estado */
-        .status-message { padding: 1rem; border-radius: 0.75rem; font-weight: 600; display: none; margin-bottom: 1rem; }
-        .status-success { background: #dcfce7; color: #166534; display: block; }
-        .status-error { background: #fee2e2; color: #991b1b; display: block; }
+        .status-message { padding: 1rem; border-radius: 0.75rem; font-weight: 600; display: none; margin-bottom: 1.5rem; transition: all 0.3s; }
+        .status-success { background: #dcfce7; color: #166534; display: block; border: 1px solid #bbf7d0; }
+        .status-error { background: #fee2e2; color: #991b1b; display: block; border: 1px solid #fecaca; }
+
+        *:focus-visible { outline: 3px solid #2563eb !important; outline-offset: 3px; }
     </style>
 </head>
 <body>
@@ -55,9 +55,9 @@
         <div class="top-bar">
             <div class="container">
                 <div class="top-bar-content">
-                    <div class="contact-item"><i data-lucide="phone" size="18" aria-hidden="true"></i><span>+52 55 23 69 79 40</span></div>
-                    <div class="contact-item"><i data-lucide="map-pin" size="18" aria-hidden="true"></i><span>Calle 67 #16 duplex</span></div>
-                    <div class="contact-item"><i data-lucide="clock" size="18" aria-hidden="true"></i><span id="live-clock" aria-live="polite">Cargando...</span></div>
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
+                    <div class="contact-item"><i data-lucide="clock" size="18"></i><span id="live-clock">Cargando...</span></div>
                 </div>
             </div>
         </div>
@@ -65,178 +65,186 @@
         <div class="main-header">
             <div class="container">
                 <div class="main-header-content">
-                    <a href="index.html" class="logo" aria-label="FarmaPlus - Ir a inicio">
-                        <div class="logo-box" aria-hidden="true">⚕️</div>
+                    <a href="index.html" class="logo">
+                        <div class="logo-box">⚕️</div>
                         <div>
                             <span class="logo-title block">FarmaPlus</span>
                             <span class="logo-subtitle">Tu farmacia de confianza</span>
                         </div>
                     </a>
 
-                    <form class="search-bar" role="search">
-                        <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
-                        <input type="text" id="main-search" placeholder="Buscar productos..." class="search-input" aria-label="Buscar productos en la tienda" onkeypress="handleSearch(event)" />
+                    <form class="search-bar" role="search" onsubmit="event.preventDefault(); handleSearch();">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="main-search" placeholder="Buscar productos..." class="search-input" />
                     </form>
 
                     <div class="flex items-center gap-4">
-                        <button onclick="window.location.href='admin.html'" aria-label="Panel de administración">
-                            <i data-lucide="layout-grid" class="text-blue-600"></i>
-                        </button>
-                        
-                        <a href="carrito.html" class="relative" aria-label="Ver carrito">
+                        <a href="carrito.html" class="relative p-2 hover:bg-slate-50 rounded-full transition-colors">
                             <i data-lucide="shopping-cart" class="text-slate-700"></i>
-                            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                            <span id="cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
                         </a>
 
                         <div id="user-auth-placeholder">
-                            <a href="login.html" class="flex items-center gap-2 text-slate-700">
-                                <i data-lucide="user" aria-hidden="true"></i>
-                                <span class="text-sm font-medium">Iniciar Sesión</span>
+                            <a href="login.html" class="flex items-center gap-2 text-slate-700 font-medium text-sm">
+                                <i data-lucide="user"></i> Iniciar Sesión
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <nav class="nav-desktop" aria-label="Navegación principal">
+                <nav class="nav-desktop">
                     <a href="index.html" class="nav-link">Inicio</a>
                     <a href="catalog.html" class="nav-link">Catálogo</a>
                     <a href="nosotros.html" class="nav-link">Nosotros</a>
-                    <a href="contacto.html" class="nav-link active" aria-current="page">Contacto</a>
+                    <a href="contacto.html" class="nav-link active">Contacto</a>
                 </nav>
             </div>
         </div>
     </header>
 
-    <main class="container py-16" id="main-content">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Contáctanos</h2>
-            <p class="text-slate-500 text-lg">Estamos aquí para resolver tus dudas.</p>
+    <main class="container py-16">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-black text-slate-900 mb-4 tracking-tight">Hablemos</h2>
+            <p class="text-slate-500 text-xl font-medium">¿Dudas con tu receta o pedido? Nuestro equipo médico te responde.</p>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
-            <section class="form-card" aria-labelledby="form-title">
-                <h3 id="form-title" class="sr-only">Formulario de contacto</h3>
-                
-                <div id="form-status" class="status-message" role="alert" aria-live="assertive"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <section class="form-card">
+                <div id="form-status" class="status-message" role="alert"></div>
 
                 <form id="contact-form" class="flex flex-col gap-6" onsubmit="handleContactSubmit(event)">
                     <div class="flex flex-col gap-2">
-                        <label for="contact-name" class="text-slate-700 font-semibold">Tu nombre completo</label>
-                        <input type="text" id="contact-name" name="name" placeholder="Ej. Juan Pérez" required aria-required="true" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500">
+                        <label for="contact-name" class="text-sm font-bold text-slate-700 uppercase tracking-wide">Nombre Completo</label>
+                        <input type="text" id="contact-name" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all" placeholder="Juan Pérez">
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label for="contact-email" class="text-slate-700 font-semibold">Correo electrónico</label>
-                        <input type="email" id="contact-email" name="email" placeholder="email@ejemplo.com" required aria-required="true" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500">
+                        <label for="contact-email" class="text-sm font-bold text-slate-700 uppercase tracking-wide">Email de Contacto</label>
+                        <input type="email" id="contact-email" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all" placeholder="ejemplo@correo.com">
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label for="contact-msg" class="text-slate-700 font-semibold">Mensaje</label>
-                        <textarea id="contact-msg" name="message" placeholder="¿En qué podemos ayudarte?" rows="4" required aria-required="true" class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"></textarea>
+                        <label for="contact-msg" class="text-sm font-bold text-slate-700 uppercase tracking-wide">Tu Mensaje</label>
+                        <textarea id="contact-msg" rows="5" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
                     </div>
-                    <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition-all transform active:scale-95">
-                        Enviar Mensaje
+                    <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-800 text-white p-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-100 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        Enviar Mensaje <i data-lucide="send" size="20"></i>
                     </button>
                 </form>
             </section>
 
-            <section class="map-container" aria-label="Ubicación de nuestra farmacia">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.6616223214!2d-99.1650!3d19.4326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzU3LjQiTiA5OcKwMDknNTQuMCJX!5e0!3m2!1ses!2smx!4v1620000000000!5m2!1ses!2smx" 
-                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" title="Mapa con la ubicación de FarmaPlus"></iframe>
+            <section class="space-y-8">
+                <div class="map-container h-[400px]">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3762.661!2d-99.16!3d19.43!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDI1JzQ4LjAiTiA5OcKwMDknMzYuMCJX!5e0!3m2!1ses!2smx!4v1620000000000!5m2!1ses!2smx" 
+                        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="p-6 bg-blue-50 rounded-3xl border border-blue-100">
+                        <i data-lucide="message-square" class="text-blue-600 mb-3"></i>
+                        <h4 class="font-bold text-slate-900">WhatsApp</h4>
+                        <p class="text-sm text-slate-600">+52 55 2369 7940</p>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <i data-lucide="mail" class="text-slate-600 mb-3"></i>
+                        <h4 class="font-bold text-slate-900">Email Directo</h4>
+                        <p class="text-sm text-slate-600">soporte@farmaplus.com</p>
+                    </div>
+                </div>
             </section>
         </div>
     </main>
 
-    <a href="index.html" class="back-to-index" aria-label="Regresar a la página de inicio">
-        <i data-lucide="arrow-left" aria-hidden="true"></i>
-        <span>Regresar al Inicio</span>
+    <a href="index.html" class="back-to-index">
+        <i data-lucide="home"></i>
+        <span>Volver a la Tienda</span>
     </a>
 
     <script>
+        // Configuración Supabase
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         lucide.createIcons();
 
+        async function init() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            updateCartBadge();
+            await checkSession();
+        }
+
         async function checkSession() {
             const { data: { session } } = await dbClient.auth.getSession();
             const authPlaceholder = document.getElementById('user-auth-placeholder');
 
             if (session) {
-                const { data: profile } = await dbClient
-                    .from('profiles')
-                    .select('full_name')
-                    .eq('id', session.user.id)
-                    .single();
-
-                const name = profile ? profile.full_name : session.user.email;
-
+                const { data: profile } = await dbClient.from('profiles').select('full_name').eq('id', session.user.id).single();
+                const name = profile?.full_name || session.user.email;
                 authPlaceholder.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <span class="text-slate-700 font-semibold text-xs flex items-center gap-1">
-                            <i data-lucide="user-check" size="14" class="text-blue-600" aria-hidden="true"></i> ${name.split(' ')[0]}
-                        </span>
+                        <span class="text-slate-700 font-bold text-sm bg-slate-100 px-3 py-1 rounded-lg">Hola, ${name.split(' ')[0]}</span>
                         <button onclick="logout()" class="logout-btn">Salir</button>
-                    </div>
-                `;
+                    </div>`;
                 lucide.createIcons();
             }
         }
 
-        async function logout() {
-            await dbClient.auth.signOut();
-            localStorage.clear();
-            window.location.reload();
+        async function handleContactSubmit(e) {
+            e.preventDefault();
+            const status = document.getElementById('form-status');
+            const btn = document.getElementById('submit-btn');
+
+            // Captura y Sanitización
+            const nombre = DOMPurify.sanitize(document.getElementById('contact-name').value);
+            const email = DOMPurify.sanitize(document.getElementById('contact-email').value);
+            const mensaje = DOMPurify.sanitize(document.getElementById('contact-msg').value);
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Enviando...`;
+            lucide.createIcons();
+
+            try {
+                // Guardar en Supabase (Asegúrate que la tabla existe)
+                const { error } = await dbClient.from('mensajes_contacto').insert([{ nombre, email, mensaje }]);
+                
+                if (error) throw error;
+
+                status.textContent = "¡Mensaje enviado con éxito! Te contactaremos pronto.";
+                status.className = "status-message status-success";
+                e.target.reset();
+            } catch (err) {
+                status.textContent = "Error al enviar. Intenta por WhatsApp.";
+                status.className = "status-message status-error";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `Enviar Mensaje <i data-lucide="send" size="20"></i>`;
+                lucide.createIcons();
+                setTimeout(() => { status.className = "status-message"; }, 5000);
+            }
         }
 
         function updateClock() {
-            const clockElement = document.getElementById('live-clock');
             const now = new Date();
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+            document.getElementById('live-clock').textContent = `${days[now.getDay()]} ${now.toLocaleTimeString()}`;
         }
 
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-            const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
-            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('cart-count').textContent = cart.reduce((acc, item) => acc + item.cantidad, 0);
         }
 
-        function handleSearch(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const query = document.getElementById('main-search').value;
-                if(query.trim() !== "") {
-                    window.location.href = `catalog.html?search=${encodeURIComponent(query)}`;
-                }
-            }
+        async function logout() {
+            await dbClient.auth.signOut();
+            location.reload();
         }
 
-        function handleContactSubmit(event) {
-            event.preventDefault();
-            const status = document.getElementById('form-status');
-            const btn = document.getElementById('submit-btn');
-
-            btn.disabled = true;
-            btn.textContent = "Enviando...";
-
-            // Simulación de envío (Aquí podrías conectar con Supabase o un servicio de email)
-            setTimeout(() => {
-                status.textContent = "¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.";
-                status.className = "status-message status-success";
-                event.target.reset();
-                btn.disabled = false;
-                btn.textContent = "Enviar Mensaje";
-                
-                // Desaparecer mensaje después de 5 segundos
-                setTimeout(() => { status.className = "status-message"; }, 5000);
-            }, 1500);
+        function handleSearch() {
+            const query = document.getElementById('main-search').value;
+            if(query.trim()) location.href = `catalog.html?search=${encodeURIComponent(query)}`;
         }
 
-        // Init
-        setInterval(updateClock, 1000);
-        updateClock();
-        checkSession();
-        updateCartBadge();
+        window.onload = init;
     </script>
 </body>
 </html>
