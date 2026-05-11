@@ -11,145 +11,152 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
-        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; scroll-behavior: smooth; }
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; font-weight: 600; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
         .contact-item { display: flex; align-items: center; gap: 8px; }
-        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
-        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
-        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
-        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
-        .search-bar { flex: 1; position: relative; max-width: 600px; }
-        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .nav-desktop { display: flex; gap: 30px; margin-top: 20px; }
-        .nav-link { text-decoration: none; color: #475569; font-weight: 500; padding: 8px 16px; border-radius: 6px; transition: all 0.2s; }
-        .nav-link.active { background: #2563eb; color: white; }
-        .nav-link:hover:not(.active) { color: #2563eb; background: #eff6ff; }
-        .about-section { padding: 80px 0; }
-        .about-hero-image { width: 100%; height: 500px; object-fit: cover; border-radius: 20px; margin: 40px 0; }
-        .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; transition: transform 0.2s; }
         
-        /* Botón de salida */
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.2s; }
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 15px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 10px; border-radius: 12px; font-size: 1.5rem; transition: transform 0.3s; }
+        .logo:hover .logo-box { transform: rotate(-10deg); }
+        .logo-title { font-size: 1.7rem; font-weight: 800; color: #1e293b; line-height: 1; letter-spacing: -0.05em; }
+        
+        .search-bar { flex: 1; position: relative; max-width: 500px; }
+        .search-input { width: 100%; padding: 10px 15px 10px 45px; border: 2px solid #f1f5f9; border-radius: 12px; background: #f8fafc; transition: 0.3s; }
+        .search-input:focus { border-color: #2563eb; outline: none; background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        
+        .nav-link { text-decoration: none; color: #64748b; font-weight: 600; padding: 10px 20px; border-radius: 10px; transition: 0.2s; font-size: 0.95rem; }
+        .nav-link.active { background: #eff6ff; color: #2563eb; }
+        .nav-link:hover:not(.active) { color: #1e293b; background: #f8fafc; }
+        
+        .about-hero-image { width: 100%; height: 450px; object-fit: cover; border-radius: 30px; margin: 40px 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        .logout-btn { color: #ef4444; font-weight: 800; cursor: pointer; font-size: 0.75rem; padding: 6px 12px; border-radius: 8px; border: 2px solid #fee2e2; transition: 0.2s; }
         .logout-btn:hover { background: #fee2e2; }
-        .cursor-pointer:active { transform: scale(0.95); }
+        
+        .badge-animation { animation: bounce 0.4s ease; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
     </style>
 </head>
 <body>
 
-    <header class="site-header">
-        <div class="top-bar">
-            <div class="container">
-                <div class="top-bar-content">
-                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
-                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex</span></div>
-                    <div class="contact-item"><i data-lucide="clock" size="18"></i><span id="live-clock">Cargando...</span></div>
-                </div>
+    <div class="top-bar" role="complementary">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="contact-item"><i data-lucide="phone" size="14"></i><span>+52 55 23 69 79 40</span></div>
+                <div class="contact-item"><i data-lucide="clock" size="14"></i><span id="live-clock">Cargando hora...</span></div>
             </div>
         </div>
+    </div>
 
-        <div class="main-header">
-            <div class="container">
-                <div class="main-header-content">
-                    <a href="index.html" class="logo">
-                        <div class="logo-box">⚕️</div>
-                        <div>
-                            <h1 class="logo-title">FarmaPlus</h1>
-                            <p class="logo-subtitle">Tu farmacia de confianza</p>
-                        </div>
-                    </a>
-
-                    <div class="search-bar">
-                        <i data-lucide="search" class="search-icon"></i>
-                        <input type="text" id="main-search" placeholder="Buscar productos..." class="search-input" onkeypress="handleSearch(event)" />
+    <header class="main-header" role="banner">
+        <div class="container">
+            <div class="main-header-content">
+                <a href="index.html" class="logo" aria-label="FarmaPlus Inicio">
+                    <div class="logo-box">⚕️</div>
+                    <div>
+                        <h1 class="logo-title">FarmaPlus</h1>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Salud Digital</p>
                     </div>
+                </a>
 
-                    <div class="flex items-center gap-4" id="header-actions-area">
-                        <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'"></i>
-                        
-                        <div class="relative cursor-pointer" onclick="window.location.href='carrito.html'">
-                            <i data-lucide="shopping-cart" class="text-slate-700"></i>
-                            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                        </div>
-
-                        <div id="user-auth-placeholder">
-                            <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
-                                <i data-lucide="user"></i>
-                                <span class="text-sm font-medium">Iniciar Sesión</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="search-bar">
+                    <label for="main-search" class="sr-only">Buscar productos</label>
+                    <i data-lucide="search" class="search-icon" aria-hidden="true"></i>
+                    <input type="text" id="main-search" placeholder="Buscar medicina, vitaminas..." class="search-input" onkeypress="handleSearch(event)" />
                 </div>
 
-                <nav class="nav-desktop">
-                    <a href="index.html" class="nav-link">Inicio</a>
-                    <a href="catalog.html" class="nav-link">Catálogo</a>
-                    <a href="nosotros.html" class="nav-link active">Nosotros</a>
-                    <a href="contacto.html" class="nav-link">Contacto</a>
-                </nav>
+                <div class="flex items-center gap-6">
+                    <button onclick="window.location.href='admin.html'" class="text-slate-400 hover:text-blue-600 transition" aria-label="Panel de Administración">
+                        <i data-lucide="layout-grid"></i>
+                    </button>
+                    
+                    <button class="relative text-slate-700 hover:text-blue-600 transition" onclick="window.location.href='carrito.html'" aria-label="Ver carrito">
+                        <i data-lucide="shopping-cart"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">0</span>
+                    </button>
+
+                    <div id="user-auth-placeholder">
+                        <button class="flex items-center gap-2 text-slate-700 font-bold text-sm" onclick="window.location.href='login.html'">
+                            <i data-lucide="user" size="20"></i>
+                            <span class="hidden sm:inline">Ingresar</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <nav class="flex gap-2 mt-6" aria-label="Navegación principal">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="catalog.html" class="nav-link">Catálogo</a>
+                <a href="nosotros.html" class="nav-link active">Nosotros</a>
+                <a href="contacto.html" class="nav-link">Contacto</a>
+            </nav>
         </div>
     </header>
 
-    <main class="container about-section">
-        <div class="text-center">
-            <h2 class="text-5xl font-extrabold text-slate-900 mb-4">Nuestra Identidad</h2>
-            <p class="text-slate-500 text-xl">Cuidando de ti y de los tuyos desde el primer día.</p>
-            <button onclick="simulateAdd()" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">
-                Simular Compra de Prueba
-            </button>
-        </div>
+    <main class="container py-16">
+        <section class="text-center max-w-3xl mx-auto">
+            <span class="text-blue-600 font-black text-sm uppercase tracking-widest bg-blue-50 px-4 py-2 rounded-full">Nuestra Historia</span>
+            <h2 class="text-5xl font-black text-slate-900 mt-6 mb-4 tracking-tight">Cuidamos lo que más quieres</h2>
+            <p class="text-slate-500 text-lg leading-relaxed">En FarmaPlus combinamos la calidez de la farmacia tradicional con la eficiencia de la tecnología moderna para llevar salud a cada hogar mexicano.</p>
+            
+            <div class="mt-10 flex justify-center gap-4">
+                <button onclick="simulateAdd()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                    Probar Carrito (Demo)
+                </button>
+            </div>
+        </section>
 
-        <img src="https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?auto=format&fit=crop&q=80&w=1200" alt="Equipo" class="about-hero-image">
+        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200" alt="Profesionales de la salud trabajando" class="about-hero-image">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-            <div class="bg-slate-50 p-10 rounded-3xl">
-                <h3 class="text-2xl font-bold mb-4 text-blue-600">Nuestra Misión</h3>
-                <p class="text-slate-600 leading-relaxed">Proporcionar acceso fácil y confiable a productos farmacéuticos de calidad.</p>
-            </div>
-            <div class="bg-slate-50 p-10 rounded-3xl">
-                <h3 class="text-2xl font-bold mb-4 text-green-600">Nuestra Visión</h3>
-                <p class="text-slate-600 leading-relaxed">Ser la farmacia online líder, reconocida por nuestra excelencia en el servicio.</p>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-8">
+            <article class="bg-slate-50 p-12 rounded-[40px] border border-slate-100">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                    <i data-lucide="target"></i>
+                </div>
+                <h3 class="text-2xl font-black mb-4 text-slate-800">Nuestra Misión</h3>
+                <p class="text-slate-600 leading-relaxed text-lg">Democratizar el acceso a la salud mediante una plataforma segura, precios justos y una entrega garantizada en menos de 24 horas.</p>
+            </article>
+
+            <article class="bg-slate-900 p-12 rounded-[40px] text-white">
+                <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-2xl flex items-center justify-center mb-6">
+                    <i data-lucide="eye"></i>
+                </div>
+                <h3 class="text-2xl font-black mb-4">Nuestra Visión</h3>
+                <p class="text-slate-400 leading-relaxed text-lg">Convertirnos en el ecosistema de bienestar digital más grande de Latinoamérica, integrando servicios médicos y farmacia en un solo click.</p>
+            </article>
         </div>
     </main>
 
-    <a href="index.html" class="back-to-index">
-        <i data-lucide="arrow-left"></i>
-        <span>Regresar al Inicio</span>
+    <a href="index.html" class="fixed bottom-8 right-8 bg-white border-2 border-slate-100 p-4 rounded-2xl shadow-xl flex items-center gap-3 hover:scale-105 transition-all z-50 group">
+        <i data-lucide="home" class="text-blue-600 group-hover:fill-blue-600"></i>
+        <span class="font-bold text-slate-700">Inicio</span>
     </a>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
         lucide.createIcons();
 
-        // 1. VERIFICAR SESIÓN
         async function checkSession() {
             const { data: { session } } = await dbClient.auth.getSession();
             const authPlaceholder = document.getElementById('user-auth-placeholder');
 
             if (session) {
-                const { data: profile } = await dbClient
-                    .from('profiles')
-                    .select('full_name')
-                    .eq('id', session.user.id)
-                    .single();
-
-                const name = profile ? profile.full_name : session.user.email;
-
+                const name = session.user.email.split('@')[0];
                 authPlaceholder.innerHTML = `
-                    <div class="flex items-center gap-3 ml-2">
-                        <span class="text-slate-700 font-semibold text-xs flex items-center gap-1">
-                            <i data-lucide="user-check" size="14" class="text-blue-600"></i> ${name.split(' ')[0]}
-                        </span>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-[10px] font-black text-blue-600 uppercase">Bienvenido</p>
+                            <p class="text-xs font-bold text-slate-700">${name}</p>
+                        </div>
                         <button onclick="logout()" class="logout-btn">Salir</button>
                     </div>
                 `;
@@ -157,60 +164,48 @@
             }
         }
 
-        // 2. CERRAR SESIÓN
         async function logout() {
             await dbClient.auth.signOut();
-            localStorage.clear();
+            localStorage.removeItem('farmaCart');
             window.location.reload();
         }
 
-        // Reloj en vivo
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
-            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+            clockElement.textContent = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
-        // --- LÓGICA DEL CARRITO ACTUALIZADA ---
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-            const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            const total = cart.reduce((acc, item) => acc + item.cantidad, 0);
             const badge = document.getElementById('cart-count');
-            badge.textContent = totalItems;
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'flex' : 'none';
         }
 
         function simulateAdd() {
-            // Esta función es solo para probar el contador visual en esta página
-            let current = parseInt(document.getElementById('cart-count').textContent);
-            document.getElementById('cart-count').textContent = current + 1;
-            
             const badge = document.getElementById('cart-count');
-            badge.style.transform = "scale(1.3)";
-            setTimeout(() => badge.style.transform = "scale(1)", 200);
+            badge.style.display = 'flex';
+            let current = parseInt(badge.textContent);
+            badge.textContent = current + 1;
             
-            alert("Simulación: Producto añadido. Ve al carrito para ver tus productos reales.");
+            badge.classList.remove('badge-animation');
+            void badge.offsetWidth; // Trigger reflow
+            badge.classList.add('badge-animation');
         }
 
         function handleSearch(event) {
             if (event.key === 'Enter') {
-                const query = document.getElementById('main-search').value;
-                if(query.trim() !== "") {
-                    // Redirigir al catálogo con la búsqueda (opcional)
-                    window.location.href = `catalog.html?search=${encodeURIComponent(query)}`;
-                }
+                const query = event.target.value.trim();
+                if(query) window.location.href = `catalog.html?search=${encodeURIComponent(query)}`;
             }
         }
 
-        // Inicialización
         setInterval(updateClock, 1000);
         updateClock();
         checkSession();
-        updateCartBadge(); // Carga el número real de productos al entrar
+        updateCartBadge();
     </script>
 </body>
 </html>
-
-
-
-
