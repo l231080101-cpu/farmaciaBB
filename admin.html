@@ -8,426 +8,302 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 1); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal.active { display: flex; }
         
-        /* Clase para ocultar texto visualmente pero mantenerlo para lectores de pantalla */
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; border-radius: 16px; color: white; font-weight: 700; transform: translateY(100px); transition: 0.3s; z-index: 200; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .toast.show { transform: translateY(0); }
+
+        .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-action:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="text-slate-900 hidden" id="admin-body">
+<body class="text-slate-900 opacity-0 transition-opacity duration-500" id="admin-body">
 
-    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="toast" class="toast bg-slate-900" role="alert"></div>
+    <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
 
     <div id="modal-edit" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="glass-card p-8 rounded-[32px] w-full max-w-md shadow-2xl mx-4 relative" id="modal-content">
-            <h2 id="modal-title" class="text-2xl font-black mb-6">Editar Producto</h2>
+        <div class="glass-card p-10 rounded-[32px] w-full max-w-md shadow-2xl mx-4" id="modal-content">
+            <h2 id="modal-title" class="text-3xl font-black mb-6 tracking-tight">Editar Stock</h2>
             <input type="hidden" id="edit-id">
             
-            <div class="flex flex-col gap-4">
+            <div class="space-y-4">
                 <div>
-                    <label for="edit-nombre" class="sr-only">Nombre del producto</label>
-                    <input type="text" id="edit-nombre" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200" placeholder="Nombre">
+                    <label class="text-xs font-bold text-slate-400 uppercase ml-1">Nombre del Producto</label>
+                    <input type="text" id="edit-nombre" class="w-full p-4 mt-1 rounded-2xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50" placeholder="Ej. Paracetamol 500mg">
                 </div>
-                <div>
-                    <label for="edit-precio" class="sr-only">Precio</label>
-                    <input type="number" id="edit-precio" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200" placeholder="Precio">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Precio ($)</label>
+                        <input type="number" id="edit-precio" class="w-full p-4 mt-1 rounded-2xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1">Categoría</label>
+                        <select id="edit-categoria" class="w-full p-4 mt-1 rounded-2xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50">
+                            <option value="medicamentos">💊 Medicamento</option>
+                            <option value="promos">🔥 Promo</option>
+                            <option value="receta">📋 Receta</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label for="edit-categoria" class="sr-only">Categoría</label>
-                    <select id="edit-categoria" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200">
-                        <option value="medicamentos">💊 Medicamento</option>
-                        <option value="promos">🔥 Promo</option>
-                        <option value="receta">📋 Receta</option>
-                    </select>
-                </div>
-                <div class="flex gap-2 mt-4">
-                    <button onclick="cerrarModal()" class="flex-1 p-4 rounded-xl bg-slate-100 font-bold hover:bg-slate-200 transition-colors focus:ring-2 focus:ring-slate-400">Cancelar</button>
-                    <button onclick="actualizarProducto()" class="flex-1 p-4 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors focus:ring-2 focus:ring-blue-400">Guardar</button>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="cerrarModal()" class="flex-1 p-4 rounded-2xl bg-slate-100 font-bold hover:bg-slate-200 transition-colors">Cerrar</button>
+                    <button onclick="actualizarProducto()" class="flex-1 p-4 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200">Actualizar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="flex min-h-screen">
-        <aside class="w-64 bg-white border-r border-slate-200 p-6 flex flex-col gap-8" aria-label="Menú lateral">
-            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-xl tracking-tighter" aria-label="Volver a la tienda FarmaPlus">
-                <span class="bg-blue-600 text-white p-1 rounded-lg flex items-center justify-center w-8 h-8" aria-hidden="true"><i data-lucide="shield-alert" size="18"></i></span> FarmaPlus
-            </a>
-            <nav class="flex flex-col gap-2" aria-label="Navegación de administración">
-                <button class="flex items-center gap-3 p-3 bg-blue-50 text-blue-600 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-400" aria-current="page">
-                    <i data-lucide="layout-grid" size="20" aria-hidden="true"></i> Dashboard
+        <aside class="w-72 bg-white border-r border-slate-200 p-8 flex flex-col gap-10">
+            <div class="flex items-center gap-3 text-blue-600 font-black text-2xl tracking-tighter">
+                <div class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="shield-check" size="24"></i></div>
+                FarmaPlus <span class="text-slate-300 font-normal">| Admin</span>
+            </div>
+            
+            <nav class="flex flex-col gap-2 flex-1">
+                <button class="flex items-center gap-3 p-4 bg-blue-50 text-blue-700 rounded-2xl font-bold transition-all">
+                    <i data-lucide="layout-dashboard" size="20"></i> Dashboard
                 </button>
-                <button onclick="cerrarSesionAdmin()" class="flex items-center gap-3 p-3 text-red-500 hover:bg-red-50 rounded-xl font-bold mt-auto transition-colors focus:outline-none focus:ring-2 focus:ring-red-400">
-                    <i data-lucide="log-out" size="20" aria-hidden="true"></i> Cerrar Sesión
+                <button onclick="location.href='index.html'" class="flex items-center gap-3 p-4 text-slate-500 hover:bg-slate-50 rounded-2xl font-bold transition-all">
+                    <i data-lucide="external-link" size="20"></i> Ver Tienda
                 </button>
             </nav>
+
+            <button onclick="cerrarSesionAdmin()" class="flex items-center gap-3 p-4 text-red-500 hover:bg-red-50 rounded-2xl font-bold transition-all mt-auto">
+                <i data-lucide="power" size="20"></i> Salir del Sistema
+            </button>
         </aside>
 
-        <main class="flex-1 p-10" role="main">
-            <header class="flex justify-between items-center mb-10">
+        <main class="flex-1 p-12 overflow-y-auto">
+            <header class="flex justify-between items-end mb-12">
                 <div>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Panel Admin Seguro</h1>
-                    <p class="text-slate-500 font-medium">Control total de inventario y usuarios.</p>
+                    <h1 class="text-5xl font-black text-slate-900 tracking-tight">Gestión Pro</h1>
+                    <p class="text-slate-500 text-lg mt-2 font-medium">Panel de control de inventario y seguridad.</p>
                 </div>
-                <div id="admin-info" class="flex items-center gap-4 bg-white p-2 pr-6 rounded-2xl border border-slate-100 shadow-sm" aria-live="polite">
-                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold" id="admin-initial" aria-hidden="true">A</div>
+                <div id="admin-info" class="flex items-center gap-4 bg-white p-3 pr-8 rounded-[24px] border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-inner shadow-blue-400" id="admin-initial">A</div>
                     <div>
-                        <p id="admin-name" class="font-bold text-sm leading-none">Cargando...</p>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">Nivel: Administrador</p>
+                        <p id="admin-name" class="font-black text-slate-800 leading-tight">Cargando...</p>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-blue-100 text-blue-600 uppercase">Master Admin</span>
                     </div>
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <section class="lg:col-span-2" aria-labelledby="inventario-heading">
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl mb-8">
-                        <h2 id="nuevo-prod-heading" class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="plus-circle" class="text-blue-600" aria-hidden="true"></i> Nuevo Producto</h2>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                <section class="xl:col-span-2 space-y-10">
+                    <div class="glass-card p-10 rounded-[40px] shadow-sm">
+                        <h2 class="text-2xl font-black mb-8 flex items-center gap-3"><i data-lucide="package-plus" class="text-blue-600"></i> Registrar Nuevo Stock</h2>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="prod-nombre" class="sr-only">Nombre del medicamento</label>
-                                <input type="text" id="prod-nombre" class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Nombre del medicamento">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Comercial</label>
+                                <input type="text" id="prod-nombre" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-100 focus:bg-white outline-none transition-all" placeholder="Nombre del producto">
                             </div>
-                            <div>
-                                <label for="prod-precio" class="sr-only">Precio en dólares</label>
-                                <input type="number" id="prod-precio" class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="Precio ($)">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Precio Unitario ($)</label>
+                                <input type="number" id="prod-precio" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-100 focus:bg-white outline-none transition-all" placeholder="0.00">
                             </div>
-                            <div>
-                                <label for="prod-categoria" class="sr-only">Categoría del producto</label>
-                                <select id="prod-categoria" class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Categoría</label>
+                                <select id="prod-categoria" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-100 focus:bg-white outline-none transition-all">
                                     <option value="medicamentos">💊 Medicamento General</option>
-                                    <option value="promos">🔥 Promoción</option>
-                                    <option value="receta">📋 Requiere Receta</option>
+                                    <option value="promos">🔥 Oferta Especial</option>
+                                    <option value="receta">📋 Requiere Prescripción</option>
                                 </select>
                             </div>
-                            <div>
-                                <label for="prod-imagen" class="sr-only">URL de la imagen</label>
-                                <input type="text" id="prod-imagen" class="w-full p-4 rounded-2xl border border-slate-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white" placeholder="URL de la imagen">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">URL Imagen</label>
+                                <input type="text" id="prod-imagen" class="w-full p-4 mt-2 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-blue-100 focus:bg-white outline-none transition-all" placeholder="https://...">
                             </div>
                         </div>
-                        <button onclick="guardarProducto()" class="mt-6 w-full bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.01] transition-all focus:outline-none focus:ring-4 focus:ring-blue-300">Publicar Producto Seguro</button>
+                        <button onclick="guardarProducto()" class="mt-8 w-full bg-slate-900 text-white p-5 rounded-2xl font-black text-lg hover:bg-blue-600 hover:scale-[1.02] transition-all shadow-xl active:scale-95">Publicar en Catálogo</button>
                     </div>
 
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl">
-                        <h2 id="inventario-heading" class="text-2xl font-black mb-6 flex justify-between items-center">
-                            Inventario Actual
-                            <span id="count-prod" class="text-xs bg-slate-100 px-3 py-1 rounded-full text-slate-500 font-bold" aria-live="polite">0 items</span>
-                        </h2>
-                        
+                    <div class="glass-card p-10 rounded-[40px] shadow-sm">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-2xl font-black">Inventario Activo</h2>
+                            <span id="count-prod" class="px-4 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-black uppercase tracking-tighter">0 Productos</span>
+                        </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
+                            <table class="w-full">
                                 <thead>
-                                    <tr class="border-b-2 border-slate-100">
-                                        <th scope="col" class="pb-3 text-sm font-bold text-slate-500">Producto</th>
-                                        <th scope="col" class="pb-3 text-sm font-bold text-slate-500">Precio / Cat</th>
-                                        <th scope="col" class="pb-3 text-sm font-bold text-slate-500 text-right">Acciones</th>
+                                    <tr class="text-left text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
+                                        <th class="pb-4">Producto</th>
+                                        <th class="pb-4">Información</th>
+                                        <th class="pb-4 text-right">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="lista-inventario" class="divide-y divide-slate-100">
+                                <tbody id="lista-inventario" class="divide-y divide-slate-50">
                                     </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <section aria-labelledby="usuarios-heading">
-                    <div class="glass-card p-8 rounded-[32px] shadow-xl sticky top-10">
-                        <h2 id="usuarios-heading" class="text-2xl font-black mb-6 flex items-center gap-2"><i data-lucide="users" class="text-blue-600" aria-hidden="true"></i> Control de Usuarios</h2>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left">
-                                <tbody id="usuarios-lista" class="divide-y divide-slate-100">
-                                    </tbody>
-                            </table>
-                        </div>
+                <aside class="space-y-10">
+                    <div class="glass-card p-8 rounded-[40px] shadow-sm border-blue-50 border-t-8">
+                        <h2 class="text-xl font-black mb-6 flex items-center gap-2"><i data-lucide="users" class="text-blue-600"></i> Acceso Personal</h2>
+                        <div class="space-y-6" id="usuarios-lista">
+                            </div>
                     </div>
-                </section>
+                </aside>
             </div>
         </main>
     </div>
 
     <script>
-        // ⚠️ CLAVE EXPUESTA: Considera rotarla en tu panel de Supabase antes de ir a producción
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
         const dbClient = supabase.createClient(_url, _key);
 
-        // Variables globales para la trampa de foco
-        let elementoAnterior;
-        const modalEdit = document.getElementById('modal-edit');
-        const focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
-
-        function announce(message) {
-            const announcer = document.getElementById('sr-announcer');
-            announcer.textContent = '';
-            setTimeout(() => { announcer.textContent = message; }, 100);
-        }
-
         async function init() {
-            lucide.createIcons();
             const isAuthorized = await checkAdmin();
             if (!isAuthorized) return;
 
-            document.getElementById('admin-body').classList.remove('hidden');
+            document.getElementById('admin-body').classList.remove('opacity-0');
+            lucide.createIcons();
             await cargarInventario();
             await cargarUsuarios();
-            
-            // Iniciar escucha de teclado para el modal
-            document.addEventListener('keydown', trapTabKey);
         }
 
         async function checkAdmin() {
-            const { data: { session }, error } = await dbClient.auth.getSession();
-            if (error || !session) {
-                alert("Acceso Restringido. Debes iniciar sesión.");
-                window.location.href = 'login.html';
+            const { data: { session } } = await dbClient.auth.getSession();
+            if (!session) {
+                location.href = 'login.html';
                 return false;
             }
 
             const { data: profile } = await dbClient.from('profiles').select('*').eq('id', session.user.id).single();
             if (!profile || profile.role !== 'admin') {
-                alert("Violación de Seguridad: Tu cuenta no tiene privilegios de administrador.");
-                window.location.href = 'index.html';
+                alert("ACCESO DENEGADO: No eres administrador.");
+                location.href = 'index.html';
                 return false;
             }
 
-            const safeName = DOMPurify.sanitize(profile.full_name || 'Admin');
+            const safeName = DOMPurify.sanitize(profile.full_name || 'Admin Master');
             document.getElementById('admin-name').innerText = safeName;
             document.getElementById('admin-initial').innerText = safeName.charAt(0).toUpperCase();
             return true;
         }
 
-        async function cerrarSesionAdmin() {
-            await dbClient.auth.signOut();
-            window.location.href = 'login.html';
+        function showToast(msg, error = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.background = error ? '#ef4444' : '#0f172a';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- CRUD PRODUCTOS ---
         async function cargarInventario() {
             const { data: productos } = await dbClient.from('productos').select('*').order('created_at', { ascending: false });
-            if(!productos) return;
-
             const container = document.getElementById('lista-inventario');
-            document.getElementById('count-prod').innerText = `${productos.length} items`;
+            document.getElementById('count-prod').innerText = `${productos?.length || 0} Productos`;
             
-            container.innerHTML = productos.map(p => {
-                const safeName = DOMPurify.sanitize(p.nombre);
-                const safeImg = DOMPurify.sanitize(p.imagen_url);
-                const safeCat = DOMPurify.sanitize(p.categoria);
-                
-                // 🔥 Estructura de tabla semántica
-                return `
-                <tr class="hover:bg-slate-50 transition-colors group">
-                    <td class="py-4 pr-4">
-                        <div class="flex items-center gap-3">
-                            <img src="${safeImg}" class="w-10 h-10 rounded-lg object-cover bg-white border border-slate-200" alt="" aria-hidden="true" onerror="this.src='https://via.placeholder.com/150'">
-                            <span class="font-bold text-slate-800 text-sm">${safeName}</span>
+            container.innerHTML = productos?.map(p => `
+                <tr class="group hover:bg-slate-50 transition-colors">
+                    <td class="py-6">
+                        <div class="flex items-center gap-4">
+                            <img src="${p.imagen_url}" class="w-14 h-14 rounded-2xl object-cover bg-slate-100" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200'">
+                            <span class="font-black text-slate-800">${DOMPurify.sanitize(p.nombre)}</span>
                         </div>
                     </td>
-                    <td class="py-4">
-                        <div class="text-sm font-bold text-blue-600">$${p.precio}</div>
-                        <div class="text-[10px] text-slate-500 uppercase tracking-wide">${safeCat}</div>
+                    <td class="py-6">
+                        <div class="text-lg font-black text-blue-600">$${p.precio}</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${p.categoria}</div>
                     </td>
-                    <td class="py-4 text-right">
-                        <div class="flex justify-end gap-1">
-                            <button aria-label="Editar producto ${safeName}" onclick="abrirEditar('${p.id}', '${safeName}', ${p.precio}, '${safeCat}')" class="p-2 text-slate-400 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-colors">
+                    <td class="py-6 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="abrirEditar('${p.id}', '${p.nombre}', ${p.precio}, '${p.categoria}')" class="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm">
                                 <i data-lucide="edit-3" size="18"></i>
                             </button>
-                            <button aria-label="Eliminar producto ${safeName}" onclick="eliminarProducto('${p.id}', '${safeName}')" class="p-2 text-slate-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-colors">
+                            <button onclick="eliminarProducto('${p.id}', '${p.nombre}')" class="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm">
                                 <i data-lucide="trash-2" size="18"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
-                `
-            }).join('');
+            `).join('') || '';
             lucide.createIcons();
         }
 
         async function guardarProducto() {
-            const nombreRaw = document.getElementById('prod-nombre').value;
-            const urlRaw = document.getElementById('prod-imagen').value;
-            
-            const nombre = DOMPurify.sanitize(nombreRaw);
-            const imagen_url = DOMPurify.sanitize(urlRaw);
+            const nombre = DOMPurify.sanitize(document.getElementById('prod-nombre').value);
             const precio = parseFloat(document.getElementById('prod-precio').value);
             const categoria = document.getElementById('prod-categoria').value;
+            const imagen_url = document.getElementById('prod-imagen').value;
 
-            if(!nombre || isNaN(precio) || precio <= 0) {
-                alert("Por favor ingresa un nombre y un precio válido.");
-                return;
-            }
+            if(!nombre || isNaN(precio)) return showToast("Faltan datos", true);
 
             const { error } = await dbClient.from('productos').insert([{ nombre, precio, categoria, imagen_url }]);
-            
-            if(error) {
-                alert("Error al guardar en base de datos. (¿Configuraste RLS?)");
-                console.error(error);
-            } else {
-                announce("Producto agregado exitosamente al inventario.");
-                
-                // Limpiar campos
-                document.getElementById('prod-nombre').value = '';
-                document.getElementById('prod-precio').value = '';
-                document.getElementById('prod-imagen').value = '';
-                
-                await cargarInventario();
-            }
+            if(error) return showToast("Error al guardar", true);
+
+            showToast("Producto publicado");
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            await cargarInventario();
         }
 
-        async function eliminarProducto(id, nombre) {
-            if(confirm(`ALERTA: ¿Eliminar definitivamente "${nombre}"?`)) {
-                const { error } = await dbClient.from('productos').delete().eq('id', id);
-                if(error) {
-                    alert("Error de permisos.");
-                } else {
-                    announce(`Producto ${nombre} eliminado.`);
-                    cargarInventario();
-                }
-            }
-        }
-
-        // --- USUARIOS ---
         async function cargarUsuarios() {
             const { data: usuarios } = await dbClient.from('profiles').select('*');
-            if(!usuarios) return;
-
             const container = document.getElementById('usuarios-lista');
             
-            container.innerHTML = usuarios.map(u => {
-                const safeName = DOMPurify.sanitize(u.full_name || 'Usuario');
-                const safeRole = DOMPurify.sanitize(u.role || 'usuario');
-                const initial = safeName.charAt(0).toUpperCase();
-
-                // 🔥 Estructura de tabla semántica para usuarios
-                return `
-                <tr class="group hover:bg-slate-50 transition-colors">
-                    <td class="py-4">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 ${safeRole === 'admin' ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'} rounded-full flex items-center justify-center text-xs font-bold uppercase" aria-hidden="true">${initial}</div>
-                            <div class="flex-1">
-                                <p class="font-bold text-sm leading-none">${safeName}</p>
-                                <p class="text-[10px] ${safeRole === 'admin' ? 'text-red-500 font-bold' : 'text-slate-500 font-mono'} uppercase tracking-wide mt-1">${safeRole}</p>
-                            </div>
-                            <button aria-label="Eliminar usuario ${safeName}" onclick="eliminarUsuario('${u.id}', '${safeName}')" class="p-2 text-slate-300 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-colors">
-                                <i data-lucide="user-minus" size="16"></i>
-                            </button>
+            container.innerHTML = usuarios?.map(u => `
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-black text-blue-600 border border-blue-50">${u.full_name?.charAt(0) || 'U'}</div>
+                        <div>
+                            <p class="text-sm font-black text-slate-800">${DOMPurify.sanitize(u.full_name || 'Sin nombre')}</p>
+                            <p class="text-[9px] font-bold ${u.role === 'admin' ? 'text-blue-600' : 'text-slate-400'} uppercase">${u.role}</p>
                         </div>
-                        <div class="flex gap-2 pl-11">
-                            <button aria-label="Otorgar permisos de administrador a ${safeName}" onclick="cambiarRol('${u.id}', 'admin', '${safeName}')" class="text-[9px] bg-red-50 text-red-600 px-2 py-1 rounded-md font-bold uppercase hover:bg-red-100 transition-colors focus:ring-2 focus:ring-red-300 outline-none">Hacer Admin</button>
-                            <button aria-label="Revocar permisos de administrador a ${safeName}" onclick="cambiarRol('${u.id}', 'usuario', '${safeName}')" class="text-[9px] bg-slate-100 text-slate-600 px-2 py-1 rounded-md font-bold uppercase hover:bg-slate-200 transition-colors focus:ring-2 focus:ring-slate-300 outline-none">Quitar Admin</button>
-                        </div>
-                    </td>
-                </tr>
-                `
-            }).join('');
+                    </div>
+                    <button onclick="eliminarUsuario('${u.id}')" class="text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="user-x" size="18"></i>
+                    </button>
+                </div>
+            `).join('') || '';
             lucide.createIcons();
         }
 
-        async function cambiarRol(id, nuevoRol, nombre) {
-            const { error } = await dbClient.from('profiles').update({ role: nuevoRol }).eq('id', id);
-            if(error) {
-                alert("Operación denegada. Necesitas configurar políticas RLS en Supabase.");
-            } else {
-                announce(`El rol de ${nombre} ha cambiado a ${nuevoRol}.`);
-                cargarUsuarios();
-            }
+        async function eliminarProducto(id, nombre) {
+            if(!confirm(`¿Eliminar ${nombre}?`)) return;
+            const { error } = await dbClient.from('productos').delete().eq('id', id);
+            if(!error) { showToast("Eliminado"); cargarInventario(); }
         }
 
-        async function eliminarUsuario(id, nombre) {
-            if(confirm(`ALERTA CRÍTICA: ¿Estás seguro de eliminar a "${nombre}" permanentemente?`)) {
-                const { error } = await dbClient.from('profiles').delete().eq('id', id);
-                if(error) {
-                    alert("Error de permisos.");
-                } else {
-                    announce(`Usuario ${nombre} eliminado del sistema.`);
-                    cargarUsuarios();
-                }
-            }
-        }
-
-        // --- TRAMPA DE FOCO Y MODAL ---
         function abrirEditar(id, nombre, precio, cat) {
-            elementoAnterior = document.activeElement; // Guardar donde estaba el foco
-            
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-nombre').value = nombre;
             document.getElementById('edit-precio').value = precio;
             document.getElementById('edit-categoria').value = cat;
-            
-            modalEdit.classList.add('active');
-            
-            // Foco inicial dentro del modal
-            setTimeout(() => {
-                document.getElementById('edit-nombre').focus();
-                announce("Diálogo de edición de producto abierto.");
-            }, 50);
+            document.getElementById('modal-edit').classList.add('active');
         }
 
-        function cerrarModal() { 
-            modalEdit.classList.remove('active');
-            announce("Diálogo cerrado.");
-            // Devolver el foco a donde estaba antes de abrir el modal
-            if(elementoAnterior) elementoAnterior.focus();
-        }
-
-        function trapTabKey(e) {
-            if (!modalEdit.classList.contains('active')) return;
-            
-            // Cerrar con Escape
-            if (e.key === 'Escape') {
-                cerrarModal();
-                return;
-            }
-
-            // Trampa de Tabulador
-            if (e.key === 'Tab') {
-                let focusableElements = modalEdit.querySelectorAll(focusableElementsString);
-                focusableElements = Array.prototype.slice.call(focusableElements);
-                
-                let firstElement = focusableElements[0];
-                let lastElement = focusableElements[focusableElements.length - 1];
-
-                if (e.shiftKey) { // Shift + Tab
-                    if (document.activeElement === firstElement) {
-                        e.preventDefault();
-                        lastElement.focus();
-                    }
-                } else { // Tab solo
-                    if (document.activeElement === lastElement) {
-                        e.preventDefault();
-                        firstElement.focus();
-                    }
-                }
-            }
-        }
+        function cerrarModal() { document.getElementById('modal-edit').classList.remove('active'); }
 
         async function actualizarProducto() {
             const id = document.getElementById('edit-id').value;
-            const nombre = DOMPurify.sanitize(document.getElementById('edit-nombre').value);
-            const precio = parseFloat(document.getElementById('edit-precio').value);
-            const categoria = document.getElementById('edit-categoria').value;
+            const { error } = await dbClient.from('productos').update({
+                nombre: document.getElementById('edit-nombre').value,
+                precio: parseFloat(document.getElementById('edit-precio').value),
+                categoria: document.getElementById('edit-categoria').value
+            }).eq('id', id);
 
-            const { error } = await dbClient.from('productos').update({ nombre, precio, categoria }).eq('id', id);
-            if(error) {
-                alert("Error al actualizar");
-            } else { 
-                announce(`Producto actualizado a ${nombre}.`);
-                cerrarModal(); 
-                cargarInventario(); 
-            }
+            if(!error) { showToast("Actualizado"); cerrarModal(); cargarInventario(); }
+        }
+
+        async function cerrarSesionAdmin() {
+            await dbClient.auth.signOut();
+            location.href = 'login.html';
         }
 
         window.onload = init;
     </script>
-    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
