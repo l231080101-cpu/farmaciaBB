@@ -1,262 +1,78 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Pedido - FarmaPlus</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+paypal.Buttons({
+    style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'checkout' },
+    
+    // 1. CREAR LA ORDEN
+    createOrder: (data, actions) => {
+        return actions.order.create({
+            purchase_units: [{ 
+                description: "Pedido FarmaPlus",
+                amount: { 
+                    currency_code: 'MXN', 
+                    value: total.toFixed(2) 
+                } 
+            }]
+        });
+    },
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .card-style { background: white; border-radius: 20px; border: 1px solid #edf2f7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        
-        /* Enfoque ultra-claro para navegación por teclado */
-        button:focus-visible, a:focus-visible {
-            outline: 4px solid #2563eb;
-            outline-offset: 2px;
-        }
-    </style>
-</head>
-<body class="antialiased">
-
-    <div id="sr-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
-
-    <header class="bg-white border-b border-slate-100 mb-8" role="banner">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-3" aria-label="FarmaPlus - Regresar a inicio">
-                <div class="bg-blue-600 text-white p-2 rounded-xl text-xl" aria-hidden="true">⚕️</div>
-                <div>
-                    <span class="text-xl font-extrabold text-blue-600 leading-none block">FarmaPlus</span>
-                    <span class="text-[10px] text-slate-500 uppercase tracking-tighter">Tu farmacia de confianza</span>
-                </div>
-            </a>
-            <div id="user-info" class="flex items-center gap-3 bg-slate-50 p-2 pr-5 rounded-2xl border border-slate-100 hidden">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm" aria-hidden="true">
-                    <i data-lucide="shield-check" size="18"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Sesión Protegida</p>
-                    <p id="user-email" class="text-xs font-bold text-slate-700 italic">Verificando...</p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-6 mb-20">
-        <div class="mb-8">
-            <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight" id="cart-title">Tu Carrito Seguro</h1>
-            <p class="text-slate-500">Revisa tus productos antes de finalizar el pago.</p>
-        </div>
-
-        <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <section aria-labelledby="cart-title" class="lg:col-span-2 space-y-4">
-                <div id="cart-items-container" class="space-y-4">
-                    </div>
-            </section>
-
-            <aside id="summary-sidebar" class="hidden">
-                <div class="card-style p-8 sticky top-6">
-                    <h2 class="text-xl font-bold mb-6">Resumen de Compra</h2>
-                    
-                    <div class="space-y-4 border-t pt-6 mb-8" role="region" aria-label="Cálculo de costos">
-                        <div class="flex justify-between text-slate-500 font-bold">
-                            <span>Subtotal</span>
-                            <span id="subtotal" aria-label="Subtotal">$0.00</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-black text-xl text-slate-900">Total</span>
-                            <div>
-                                <span class="sr-only">Total a pagar:</span>
-                                <span id="total" class="text-3xl font-black text-blue-600">$0.00</span>
-                                <span class="text-xs font-bold text-slate-400 block text-right">MXN</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="recaptcha-container" class="flex flex-col items-center mb-4">
-                        <p class="text-xs text-slate-500 mb-2 font-semibold">Verifica que eres humano para pagar:</p>
-                        <div class="g-recaptcha" data-sitekey="6LeQ9bosAAAAAGtnWuHoV38cKpEC4_i6oRD0Yhjg" data-callback="habilitarPaypal"></div>
-                    </div>
-
-                    <div id="paypal-button-container" class="hidden" aria-label="Botones de pago seguro"></div>
-                    
-                    <div id="payment-status" class="mt-4 hidden p-4 rounded-xl text-sm font-bold" role="alert"></div>
-
-                    <p class="text-center text-[10px] text-slate-400 mt-4 italic flex items-center justify-center gap-1">
-                        <i data-lucide="lock" size="10" aria-hidden="true"></i> 
-                        Transacción protegida por cifrado SSL de 256 bits
-                    </p>
-                </div>
-            </aside>
-        </div>
-    </main>
-
-    <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
-
-        let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-        let currentUser = null; 
-
-        async function checkSession() {
-            const { data: { session } } = await dbClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html?redirect=carrito.html';
-                return null;
-            }
-            return session.user;
-        }
-
-        function announce(msg) {
-            const announcer = document.getElementById('sr-announcer');
-            announcer.textContent = msg;
-        }
-
-        async function init() {
-            lucide.createIcons();
-            currentUser = await checkSession();
-            if (!currentUser) return; 
-
-            document.getElementById('user-info').classList.remove('hidden');
-            document.getElementById('user-email').innerText = currentUser.email;
+    // 2. CUANDO EL USUARIO AUTORIZA EL PAGO
+    onApprove: async (data, actions) => {
+        try {
+            // Esperamos a que PayPal capture el dinero realmente
+            const detalles = await actions.order.capture();
             
-            render();
-        }
-
-        function render(isUpdate = false) {
-            const container = document.getElementById('cart-items-container');
-            const sidebar = document.getElementById('summary-sidebar');
-
-            if (cart.length === 0) {
-                sidebar.classList.add('hidden');
-                container.innerHTML = `
-                    <div class="card-style py-20 text-center" role="status">
-                        <i data-lucide="shopping-cart" class="mx-auto text-slate-200 mb-4" size="48"></i>
-                        <h2 class="text-2xl font-bold text-slate-400">Tu carrito está vacío</h2>
-                        <a href="catalog.html" class="text-blue-600 underline mt-4 inline-block font-bold">Ir a comprar productos</a>
-                    </div>`;
-                if(isUpdate) announce("Carrito vacío. No hay productos para pagar.");
-                lucide.createIcons();
-            } else {
-                sidebar.classList.remove('hidden');
-                let total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-                
-                container.innerHTML = cart.map((item, idx) => {
-                    const safeName = DOMPurify.sanitize(item.nombre);
-                    return `
-                    <article class="card-style p-5 flex flex-col sm:flex-row items-center gap-6 animate-fade-in">
-                        <img src="${DOMPurify.sanitize(item.imagen_url)}" class="w-20 h-20 object-contain" alt="" aria-hidden="true">
-                        <div class="flex-grow text-center sm:text-left">
-                            <h3 class="font-bold text-slate-800 text-lg">${safeName}</h3>
-                            <p class="text-blue-600 font-black text-lg">
-                                <span class="sr-only">Precio unitario:</span> $${item.precio} MXN
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3 bg-slate-100 p-2 rounded-xl">
-                            <button onclick="changeQty(${idx}, -1, '${safeName}')" 
-                                    aria-label="Quitar uno de ${safeName}"
-                                    class="w-10 h-10 bg-white shadow-sm rounded-lg hover:bg-red-50 text-slate-600 font-bold">-</button>
-                            
-                            <span class="font-black w-8 text-center" aria-label="Cantidad: ${item.cantidad}">${item.cantidad}</span>
-                            
-                            <button onclick="changeQty(${idx}, 1, '${safeName}')" 
-                                    aria-label="Agregar otro de ${safeName}"
-                                    class="w-10 h-10 bg-white shadow-sm rounded-lg hover:bg-green-50 text-slate-600 font-bold">+</button>
-                        </div>
-                    </article>`;
-                }).join('');
-
-                const formatted = total.toLocaleString('es-MX', { minimumFractionDigits: 2 });
-                document.getElementById('total').innerText = `$${formatted}`;
-                document.getElementById('subtotal').innerText = `$${formatted}`;
-                
-                if(isUpdate) announce(`Total actualizado a ${formatted} pesos.`);
+            if (detalles.status === 'COMPLETED') {
+                console.log('Pago capturado con éxito');
+                // Solo si el pago es exitoso, registramos en Supabase
+                await registrarPedidoEnBaseDeDatos(detalles);
             }
+        } catch (error) {
+            console.error('Error en la captura de PayPal:', error);
+            alert('El pago no pudo completarse. Revisa tu saldo o tarjeta.');
         }
+    },
 
-        window.habilitarPaypal = function() {
-            document.getElementById('recaptcha-container').classList.add('hidden');
-            const paypalBtn = document.getElementById('paypal-button-container');
-            paypalBtn.classList.remove('hidden');
-            announce("Verificación humana completa. Los botones de pago están listos.");
-            initPayPal();
-        };
+    onError: (err) => {
+        console.error('Error general del SDK de PayPal:', err);
+        document.getElementById('cart-status').innerHTML = 
+            `<div class="status-error p-4 rounded-xl text-red-700 bg-red-100">
+                Error en la conexión con PayPal. Inténtalo de nuevo.
+            </div>`;
+    }
+}).render('#paypal-button-container');
 
-        function initPayPal() {
-            const container = document.getElementById('paypal-button-container');
-            container.innerHTML = ''; // Limpiar botones previos si cambia el total
+// FUNCIÓN AUXILIAR PARA EL REGISTRO
+async function registrarPedidoEnBaseDeDatos(detallesPayPal) {
+    const statusMsg = document.getElementById('cart-status'); // Asegúrate de tener este ID en tu HTML
+    
+    try {
+        const { data: { session } } = await dbClient.auth.getSession();
+        if (!session) throw new Error("No hay sesión activa");
 
-            const total = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+        const itemsCarrito = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
-            paypal.Buttons({
-                style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'checkout' },
-                createOrder: (data, actions) => {
-                    return actions.order.create({
-                        purchase_units: [{ 
-                            description: "Pedido FarmaPlus",
-                            amount: { currency_code: 'MXN', value: total.toFixed(2) } 
-                        }]
-                    });
-                },
-                onApprove: async (data, actions) => {
-                    const statusDiv = document.getElementById('payment-status');
-                    try {
-                        const details = await actions.order.capture();
-                        
-                        // Guardar en Supabase
-                        const { error } = await dbClient.from('pedidos').insert([{ 
-                            user_id: currentUser.id,
-                            productos: cart,
-                            total: total,
-                            paypal_id: details.id,
-                            estado: 'pagado'
-                        }]);
+        const { error } = await dbClient
+            .from('pedidos')
+            .insert([{
+                user_id: session.user.id,
+                total: total,
+                paypal_order_id: detallesPayPal.id,
+                estado: 'Pagado',
+                items: itemsCarrito,
+                fecha: new Date().toISOString()
+            }]);
 
-                        if (error) throw error;
+        if (error) throw error;
 
-                        statusDiv.className = "mt-4 p-4 rounded-xl text-sm font-bold bg-green-100 text-green-800";
-                        statusDiv.innerHTML = `¡Pago exitoso! Gracias ${details.payer.name.given_name}. Redirigiendo...`;
-                        statusDiv.classList.remove('hidden');
-                        
-                        localStorage.removeItem('farmaCart');
-                        setTimeout(() => window.location.href = "index.html", 3000);
+        // ÉXITO TOTAL
+        localStorage.removeItem('farmaCart');
+        window.location.href = 'confirmacion.html?order=' + detallesPayPal.id;
 
-                    } catch (err) {
-                        statusDiv.className = "mt-4 p-4 rounded-xl text-sm font-bold bg-red-100 text-red-800";
-                        statusDiv.innerText = "Error al procesar el registro del pedido.";
-                        statusDiv.classList.remove('hidden');
-                    }
-                }
-            }).render('#paypal-button-container');
-        }
-
-        window.changeQty = (idx, delta, name) => {
-            cart[idx].cantidad += delta;
-            if (cart[idx].cantidad < 1) {
-                cart.splice(idx, 1);
-                announce(`${name} eliminado del carrito.`);
-            } else {
-                announce(`Cantidad de ${name} cambiada.`);
-            }
-            
-            localStorage.setItem('farmaCart', JSON.stringify(cart));
-            render(true);
-
-            // Reiniciar PayPal para reflejar el nuevo total si ya estaba habilitado
-            if (!document.getElementById('paypal-button-container').classList.contains('hidden')) {
-                initPayPal();
-            }
-        };
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+    } catch (err) {
+        console.error('Error al registrar en BD:', err);
+        statusMsg.innerHTML = `
+            <div class="p-4 bg-yellow-100 text-yellow-800 rounded-xl">
+                Pago realizado, pero hubo un error al registrar tu pedido. 
+                Guarda tu ticket: <b>${detallesPayPal.id}</b> y contáctanos.
+            </div>`;
+    }
+}
