@@ -20,6 +20,35 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+
+        /* =========================================
+           🔔 ALERTAS VISUALES (ACCESIBILIDAD AUDITIVA)
+           ========================================= */
+        .alerta-visual {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .alerta-visual.mostrar {
+            opacity: 1;
+            visibility: visible;
+            bottom: 40px;
+        }
     </style>
 </head>
 <body class="text-slate-900">
@@ -66,8 +95,7 @@
         </div>
 
         <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Se llena dinámicamente -->
-        </div>
+            </div>
 
         <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center">
             <div class="bg-blue-50 p-6 rounded-full mb-4">
@@ -84,18 +112,22 @@
         </div>
     </footer>
 
+    <div id="alerta-accesible" class="alerta-visual" role="alert" aria-live="assertive">
+        <i data-lucide="check-circle" aria-hidden="true"></i>
+        <span id="mensaje-alerta">¡Acción realizada!</span>
+    </div>
+
     <script>
-        // ⚠️ CLAVE EXPUESTA: Debes rotarla inmediatamente en Supabase (Settings > API)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
-        const dbClient = supabase.createClient(_url, _key);  // ✅ sb → dbClient
+        const dbClient = supabase.createClient(_url, _key);  
 
         let todosLosProductos = [];
         let categoriaActual = 'todos';
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
         async function cargarProductos() {
-            const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true });  // ✅ sb → dbClient
+            const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true }); 
             
             if (error) {
                 console.error("Error:", error);
@@ -111,7 +143,6 @@
             const grid = document.getElementById('productos-grid');
             const noResults = document.getElementById('no-results');
             
-            // Filtrar por categoría seleccionada
             let filtrados = lista;
             if (categoriaActual !== 'todos') {
                 filtrados = lista.filter(p => p.categoria?.toLowerCase() === categoriaActual);
@@ -148,7 +179,7 @@
                         <div class="flex flex-col">
                             <span class="text-2xl font-black text-blue-600">$${p.precio}</span>
                         </div>
-                        <button onclick="addToCart('${p.id}')" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
+                        <button onclick="addToCart('${p.id}')" aria-label="Agregar ${p.nombre} al carrito" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
                             <i data-lucide="plus" class="group-hover/btn:rotate-90 transition-transform"></i>
                         </button>
                     </div>
@@ -160,11 +191,9 @@
         function filtrarCategoria(cat) {
             categoriaActual = cat;
             
-            // Actualizar botones UI
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-${cat}`).classList.add('active');
             
-            // Aplicar búsqueda actual + filtro de categoría
             aplicarBusquedaYFiltro();
         }
 
@@ -175,6 +204,19 @@
         }
 
         document.getElementById('search-input').addEventListener('input', aplicarBusquedaYFiltro);
+
+        // Función para mostrar alertas visuales (Accesibilidad)
+        function lanzarAlertaVisual(mensaje) {
+            const alerta = document.getElementById('alerta-accesible');
+            const textoMensaje = document.getElementById('mensaje-alerta');
+            
+            textoMensaje.textContent = mensaje;
+            alerta.classList.add('mostrar');
+            
+            setTimeout(() => {
+                alerta.classList.remove('mostrar');
+            }, 3000);
+        }
 
         function addToCart(id) {
             const producto = todosLosProductos.find(x => x.id === id);
@@ -189,12 +231,8 @@
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             updateCount();
             
-            // Notificación simple
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-10 right-10 bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold shadow-2xl animate-fade-in z-[100]';
-            toast.innerHTML = `✅ ${producto.nombre} añadido`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            // 🔥 Notificación accesible conectada al botón
+            lanzarAlertaVisual(`¡${producto.nombre} añadido al carrito!`);
         }
 
         function updateCount() {
@@ -207,7 +245,6 @@
         window.onload = cargarProductos;
     </script>
 
-    <!-- ✅ NUEVO: Cierre de sesión automático por inactividad -->
     <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
