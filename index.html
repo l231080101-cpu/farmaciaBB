@@ -450,40 +450,51 @@
             }, 500);
         }
 
-        // Accesibilidad
-        function toggleAccPanel() {
-            document.getElementById('accessibility-panel').classList.toggle('active');
-        }
-        function toggleNarrator(active) {
-            if (active && 'speechSynthesis' in window) {
-                const msg = new SpeechSynthesisUtterance("Modo narrador activado");
-                window.speechSynthesis.speak(msg);
-            } else if (!active) {
-                window.speechSynthesis.cancel();
-            }
-        }
-        function toggleReadingGuide(active) {
-            document.getElementById('reading-line').classList.toggle('active', active);
-        }
-        function changeTextSize(size) {
-            document.documentElement.style.fontSize = size + '%';
-            document.getElementById('text-size-val').textContent = size + '%';
-        }
+       // Abrir/Cerrar Panel
+function toggleAccPanel() {
+    const panel = document.getElementById('accessibility-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
 
-        // Búsqueda simple (redirige a catalog.html con query)
-        function setupSearch() {
-            const searchInput = document.getElementById('search-input-header');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        const query = encodeURIComponent(searchInput.value.trim());
-                        if (query) window.location.href = `catalog.html?search=${query}`;
-                        else window.location.href = 'catalog.html';
-                    }
-                });
-            }
-        }
+// Cambiar tamaño de fuente
+function changeTextSize(val) {
+    document.documentElement.style.fontSize = val + "%";
+    document.getElementById('text-size-val').innerText = val + "%";
+}
 
+// Guía de lectura (Sigue al ratón)
+function toggleReadingGuide(active) {
+    const line = document.getElementById('reading-line');
+    if (active) {
+        line.style.display = 'block';
+        window.onmousemove = (e) => {
+            line.style.top = e.clientY + 'px';
+        };
+    } else {
+        line.style.display = 'none';
+        window.onmousemove = null;
+    }
+}
+
+// Narrador de voz básico (Lee el texto al hacer click)
+document.getElementById('narrator-toggle').addEventListener('change', function(e) {
+    if (e.target.checked) {
+        document.body.addEventListener('click', speakText);
+    } else {
+        document.body.removeEventListener('click', speakText);
+        window.speechSynthesis.cancel();
+    }
+});
+
+function speakText(e) {
+    const text = e.target.innerText;
+    if (text) {
+        window.speechSynthesis.cancel(); // Detiene lecturas anteriores
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-MX';
+        window.speechSynthesis.speak(utterance);
+    }
+}
         // Inicialización
         setInterval(updateClock, 1000);
         updateClock();
