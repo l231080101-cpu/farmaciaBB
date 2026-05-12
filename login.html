@@ -12,27 +12,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.11.0/validator.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     
+    <!-- Archivos externos de accesibilidad (opcionales) -->
+    <link rel="stylesheet" href="accesibilidad.css">
+    <script src="accesibilidad.js" defer></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; transition: background-color 0.3s, color 0.3s; }
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.9rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content { display: flex; justify-content: flex-start; gap: 25px; align-items: center; }
         .contact-item { display: flex; align-items: center; gap: 8px; }
-        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; transition: background-color 0.3s; }
         .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
         .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
         
         .login-wrapper { min-height: calc(100vh - 160px); display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
-        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; width: 100%; max-width: 450px; position: relative; overflow: hidden; }
+        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; width: 100%; max-width: 450px; position: relative; overflow: hidden; transition: background-color 0.3s, border-color 0.3s; }
         
         .input-group input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; background: #f8fafc; outline: none; }
         .input-group input:focus { border-color: #2563eb; background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
         
-        /* Pantalla de Carga Overlay */
         #loading-overlay { 
             position: absolute; inset: 0; background: rgba(255, 255, 255, 0.9); 
             display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; 
@@ -45,9 +48,118 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .back-to-index { position: fixed; bottom: 30px; right: 30px; background: #2563eb; color: white; padding: 14px 28px; border-radius: 50px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); z-index: 100; }
+
+        /* ========== ESTILOS DE ACCESIBILIDAD ========== */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover { transform: scale(1.1); }
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active { display: block; }
+        .reading-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: yellow;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active { display: block; }
+        .dark-mode {
+            background-color: #1e293b !important;
+            color: #f1f5f9;
+        }
+        .dark-mode .main-header,
+        .dark-mode .top-bar,
+        .dark-mode .login-card {
+            background-color: #334155 !important;
+            border-color: #475569;
+        }
+        .dark-mode .input-group input,
+        .dark-mode .input-group input:focus {
+            background-color: #1e293b;
+            border-color: #475569;
+            color: white;
+        }
+        .high-contrast {
+            background-color: black !important;
+            color: yellow !important;
+        }
+        .high-contrast a, .high-contrast button {
+            background-color: yellow !important;
+            color: black !important;
+            border: 2px solid white;
+        }
+        .high-contrast .top-bar,
+        .high-contrast .main-header,
+        .high-contrast .login-card {
+            background-color: black !important;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Componentes de accesibilidad -->
+    <div id="reading-line" class="reading-guide"></div>
+
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
+        <i data-lucide="accessibility"></i>
+    </div>
+
+    <div id="accessibility-panel">
+        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2 text-white">Accesibilidad</h3>
+        <div class="flex flex-col gap-4 text-sm text-white">
+            <label class="flex justify-between items-center cursor-pointer">
+                Modo Oscuro
+                <input type="checkbox" id="dark-mode-checkbox" onchange="toggleDarkMode(this.checked)">
+            </label>
+            <div class="flex flex-col gap-1">
+                <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
+            </div>
+            <label class="flex justify-between items-center cursor-pointer">
+                Contraste Alto
+                <input type="checkbox" id="high-contrast-checkbox" onchange="toggleHighContrast(this.checked)">
+            </label>
+            <label class="flex justify-between items-center cursor-pointer">
+                Guía de Lectura
+                <input type="checkbox" id="reading-guide-checkbox" onchange="toggleReadingGuide(this.checked)">
+            </label>
+            <label class="flex justify-between items-center cursor-pointer">
+                Narrador de Voz
+                <input type="checkbox" id="narrator-checkbox" onchange="toggleNarrator(this.checked)">
+            </label>
+        </div>
+    </div>
 
     <header class="site-header" role="banner">
         <div class="top-bar">
@@ -125,14 +237,108 @@
     </a>
 
     <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         lucide.createIcons();
 
+        // ==================== FUNCIONES DE ACCESIBILIDAD ====================
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + "%";
+            const label = document.getElementById('text-size-val');
+            if (label) label.innerText = size + "%";
+            localStorage.setItem('textSize', size);
+            const slider = document.getElementById('text-size-slider');
+            if (slider) slider.value = size;
+        }
+
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => { line.style.top = e.clientY + 'px'; };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = null;
+            }
+            localStorage.setItem('readingGuide', active);
+            const chk = document.getElementById('reading-guide-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        let narratorActive = false;
+        function speakText(e) {
+            if (!narratorActive) return;
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
+                utterance.lang = 'es-MX';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+            }
+            localStorage.setItem('narrator', active);
+            const chk = document.getElementById('narrator-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        function toggleDarkMode(active) {
+            document.body.classList.toggle('dark-mode', active);
+            localStorage.setItem('darkMode', active);
+        }
+
+        function toggleHighContrast(active) {
+            document.body.classList.toggle('high-contrast', active);
+            localStorage.setItem('highContrast', active);
+        }
+
+        function restoreAccessibilityPrefs() {
+            const savedSize = localStorage.getItem('textSize');
+            if (savedSize) changeTextSize(parseInt(savedSize));
+            if (localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
+            if (localStorage.getItem('highContrast') === 'true') toggleHighContrast(true);
+            if (localStorage.getItem('readingGuide') === 'true') {
+                toggleReadingGuide(true);
+                const chk = document.getElementById('reading-guide-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (localStorage.getItem('narrator') === 'true') {
+                toggleNarrator(true);
+                const chk = document.getElementById('narrator-checkbox');
+                if (chk) chk.checked = true;
+            }
+        }
+
+        // ==================== FUNCIONES DE LOGIN ====================
         setInterval(() => {
-            document.getElementById('live-clock').textContent = new Date().toLocaleTimeString();
+            const clock = document.getElementById('live-clock');
+            if (clock) clock.textContent = new Date().toLocaleTimeString();
         }, 1000);
 
         function validateLoginData(rawEmail, rawPassword) {
@@ -184,7 +390,7 @@
                 btn.innerHTML = "Entrar";
             } else {
                 loader.style.display = 'flex';
-                loader.setAttribute('aria-busy', 'true'); // Anuncia al lector de pantalla que está procesando
+                loader.setAttribute('aria-busy', 'true');
 
                 const { data: profile, error: profileError } = await dbClient
                     .from('profiles')
@@ -205,6 +411,17 @@
                 }
             }
         });
+
+        // Inicialización de accesibilidad y sincronización de checkboxes
+        restoreAccessibilityPrefs();
+        if (document.body.classList.contains('dark-mode')) {
+            const chk = document.getElementById('dark-mode-checkbox');
+            if (chk) chk.checked = true;
+        }
+        if (document.body.classList.contains('high-contrast')) {
+            const chk = document.getElementById('high-contrast-checkbox');
+            if (chk) chk.checked = true;
+        }
     </script>
 </body>
 </html>
