@@ -75,6 +75,27 @@
         .high-contrast a, .high-contrast button {
             background-color: yellow !important; color: black !important; border: 2px solid white;
         }
+        /* Botón de seguir comprando */
+        .btn-seguir-comprando {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+        .btn-seguir-comprando:hover {
+            background-color: #e2e8f0;
+            transform: translateX(-3px);
+        }
+        .dark-mode .btn-seguir-comprando {
+            background-color: #334155;
+            color: #f1f5f9;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -131,6 +152,11 @@
     <main class="max-w-7xl mx-auto px-6 mb-20">
         <div class="mb-8">
             <h1 class="text-4xl font-black text-slate-900 mt-4 tracking-tight">Tu Carrito Seguro</h1>
+            <!-- Botón para regresar al catálogo -->
+            <a href="catalog.html" class="btn-seguir-comprando" aria-label="Seguir comprando, regresar al catálogo">
+                <i data-lucide="arrow-left" size="18" aria-hidden="true"></i>
+                Seguir comprando
+            </a>
         </div>
 
         <div id="cart-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -317,6 +343,8 @@
                 document.getElementById('total').innerText = `$${total.toFixed(2)}`;
                 document.getElementById('subtotal').innerText = `$${total.toFixed(2)}`;
             }
+            // Volver a inicializar iconos por si el DOM cambió
+            lucide.createIcons();
         }
 
         window.habilitarPaypal = function() {
