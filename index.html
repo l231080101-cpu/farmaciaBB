@@ -9,8 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Archivos de accesibilidad externos (opcionales) -->
     <link rel="stylesheet" href="accesibilidad.css">
     <script src="accesibilidad.js" defer></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
@@ -118,7 +121,7 @@
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Accesibilidad */
+        /* ========== ACCESIBILIDAD (NUEVO BLOQUE) ========== */
         #acc-toggle-btn {
             position: fixed;
             bottom: 24px;
@@ -313,27 +316,38 @@
         </div>
     </div>
 
-    <!-- Botón de accesibilidad -->
-    <button id="acc-toggle-btn" onclick="toggleAccPanel()" title="Accesibilidad">
-        <i data-lucide="accessibility"></i>
-    </button>
+    <!-- NUEVO BLOQUE DE ACCESIBILITY (proporcionado por el usuario) -->
+    <div id="reading-line" class="reading-guide"></div>
 
-    <!-- Panel de accesibilidad -->
-    <div id="accessibility-panel">
-        <h3 style="color: #fbbf24; margin-bottom: 15px;">Configuración</h3>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
-            <div>
-                <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
-                <input type="range" min="80" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
-            </div>
-            <label><input type="checkbox" id="narrator-toggle"> Narrador de Voz</label>
-            <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
-            <label><input type="checkbox" id="reading-guide-toggle"> Lectura Guiada</label>
-        </div>
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
+        <i data-lucide="accessibility"></i>
     </div>
 
-    <div id="reading-line" class="reading-guide"></div>
+    <div id="accessibility-panel">
+        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2">Accesibilidad</h3>
+        <div class="flex flex-col gap-4 text-sm">
+            <label class="flex justify-between items-center">
+                Modo Oscuro
+                <input type="checkbox" id="dark-mode-checkbox" onchange="document.body.classList.toggle('dark-mode')">
+            </label>
+            <div class="flex flex-col gap-1">
+                <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" oninput="changeTextSize(this.value)">
+            </div>
+            <label class="flex justify-between items-center">
+                Contraste Alto
+                <input type="checkbox" id="high-contrast-checkbox" onchange="document.body.classList.toggle('high-contrast')">
+            </label>
+            <label class="flex justify-between items-center">
+                Guía de Lectura
+                <input type="checkbox" id="reading-guide-checkbox" onchange="toggleReadingGuide(this.checked)">
+            </label>
+            <label class="flex justify-between items-center">
+                Narrador de Voz
+                <input type="checkbox" id="narrator-checkbox" onchange="toggleNarrator(this.checked)">
+            </label>
+        </div>
+    </div>
 
     <script>
         // Configuración Supabase
@@ -343,21 +357,25 @@
 
         let userName = "";
 
-        // ======================== ACCESIBILIDAD MEJORADA ========================
-        // Panel accesibilidad
+        // ======================== FUNCIONES DE ACCESIBILIDAD (compatibles con el nuevo panel) ========================
+        // Panel toggle
         function toggleAccPanel() {
             const panel = document.getElementById('accessibility-panel');
             if (panel) panel.classList.toggle('active');
         }
 
-        // Cambiar tamaño de texto (con límites)
+        // Cambiar tamaño de texto con límites y persistencia
         function changeTextSize(val) {
             let size = Math.min(150, Math.max(80, Number(val)));
             document.documentElement.style.fontSize = size + "%";
             document.getElementById('text-size-val').innerText = size + "%";
+            localStorage.setItem('textSize', size);
+            // Sincronizar slider
+            const slider = document.getElementById('text-size-slider');
+            if (slider) slider.value = size;
         }
 
-        // Línea de lectura guiada (con addEventListener)
+        // Línea de lectura guiada
         let guideHandler = null;
         function toggleReadingGuide(active) {
             const line = document.getElementById('reading-line');
@@ -376,10 +394,16 @@
                     guideHandler = null;
                 }
             }
+            localStorage.setItem('readingGuide', active);
+            // Sincronizar checkbox
+            const chk = document.getElementById('reading-guide-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
         }
 
-        // Narrador de voz (lee solo textos cortos y respeta aria-label)
+        // Narrador de voz
+        let narratorActive = false;
         function speakText(e) {
+            if (!narratorActive) return;
             let target = e.target;
             let text = target.getAttribute('aria-label') || target.innerText;
             if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
@@ -390,31 +414,65 @@
             }
         }
 
-        // Configurar el checkbox del narrador
-        const narratorToggle = document.getElementById('narrator-toggle');
-        if (narratorToggle) {
-            narratorToggle.addEventListener('change', function(e) {
-                if (e.target.checked) {
-                    document.body.addEventListener('click', speakText);
-                    // Anunciar activación
-                    const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
-                    msg.lang = 'es-MX';
-                    window.speechSynthesis.speak(msg);
-                } else {
-                    document.body.removeEventListener('click', speakText);
-                    window.speechSynthesis.cancel();
-                }
-            });
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                // Anunciar activación
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+            }
+            localStorage.setItem('narrator', active);
+            // Sincronizar checkbox
+            const chk = document.getElementById('narrator-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
         }
 
-        // Configurar el checkbox de lectura guiada
-        const guideToggle = document.getElementById('reading-guide-toggle');
-        if (guideToggle) {
-            guideToggle.addEventListener('change', (e) => toggleReadingGuide(e.target.checked));
+        // Restaurar preferencias guardadas
+        function restoreAccessibilityPrefs() {
+            // Tamaño texto
+            const savedSize = localStorage.getItem('textSize');
+            if (savedSize) {
+                let size = parseInt(savedSize);
+                if (!isNaN(size)) changeTextSize(size);
+            }
+            // Modo oscuro
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const chk = document.getElementById('dark-mode-checkbox');
+                if (chk) chk.checked = true;
+            }
+            // Contraste alto
+            if (localStorage.getItem('highContrast') === 'true') {
+                document.body.classList.add('high-contrast');
+                const chk = document.getElementById('high-contrast-checkbox');
+                if (chk) chk.checked = true;
+            }
+            // Guía lectura
+            const savedGuide = localStorage.getItem('readingGuide');
+            if (savedGuide === 'true') {
+                toggleReadingGuide(true);
+            }
+            // Narrador
+            const savedNarrator = localStorage.getItem('narrator');
+            if (savedNarrator === 'true') {
+                toggleNarrator(true);
+            }
         }
-        // ======================== FIN ACCESIBILIDAD ========================
 
-        // Autenticación y sesión
+        // Guardar preferencias de modo oscuro y contraste alto
+        document.getElementById('dark-mode-checkbox')?.addEventListener('change', (e) => {
+            localStorage.setItem('darkMode', e.target.checked);
+        });
+        document.getElementById('high-contrast-checkbox')?.addEventListener('change', (e) => {
+            localStorage.setItem('highContrast', e.target.checked);
+        });
+
+        // ======================== AUTENTICACIÓN ========================
         dbClient.auth.onAuthStateChange((event, session) => {
             if (session) {
                 renderUserSession(session);
@@ -533,6 +591,7 @@
         updateClock();
         updateCartBadge();
         setupSearch();
+        restoreAccessibilityPrefs();   // <-- Cargar preferencias guardadas
         dbClient.auth.getSession().then(({ data }) => {
             if (data.session) renderUserSession(data.session);
             else renderLoginButton();
