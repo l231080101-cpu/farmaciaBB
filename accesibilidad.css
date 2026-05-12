@@ -1,0 +1,65 @@
+/* Variables para Modo Oscuro */
+body.dark-mode {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .main-header, body.dark-mode .hero-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Contraste Alto */
+body.high-contrast {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+body.high-contrast * {
+    border-color: yellow !important;
+}
+body.high-contrast a, body.high-contrast button {
+    background: yellow !important;
+    color: black !important;
+}
+
+/* Guía de Lectura */
+.reading-guide {
+    position: fixed;
+    height: 12px;
+    background: rgba(37, 99, 235, 0.5);
+    width: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+}
+
+/* Panel Flotante */
+#accessibility-panel {
+    position: fixed;
+    bottom: 85px;
+    right: 20px;
+    width: 280px;
+    background: #1e293b;
+    color: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+#acc-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2563eb;
+    color: white;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+}
