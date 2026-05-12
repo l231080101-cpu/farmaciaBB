@@ -10,7 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
+    <!-- Archivos externos de accesibilidad (opcionales) -->
     <link rel="stylesheet" href="accesibilidad.css">
+    <script src="accesibilidad.js" defer></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -24,10 +26,66 @@
 
         .btn-action { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-action:active { transform: scale(0.95); }
+
+        /* ========== ESTILOS DE ACCESIBILIDAD (igual que en otras páginas) ========== */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover { transform: scale(1.1); }
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active { display: block; }
+        .reading-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: yellow;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active { display: block; }
+        .dark-mode { background-color: #1e293b !important; color: #f1f5f9; }
+        .dark-mode .glass-card { background: #334155 !important; border-color: #475569; }
+        .dark-mode .bg-white { background-color: #1e293b !important; border-color: #334155; }
+        .dark-mode aside.bg-white { background-color: #1e293b !important; }
+        .dark-mode .btn-action { color: #f1f5f9; }
+        .high-contrast { background-color: black !important; color: yellow !important; }
+        .high-contrast a, .high-contrast button {
+            background-color: yellow !important; color: black !important; border: 2px solid white;
+        }
     </style>
 </head>
 <body class="text-slate-900 opacity-0 transition-opacity duration-500" id="admin-body">
 
+    <!-- Componentes de accesibilidad (bloque mejorado) -->
     <div id="reading-line" class="reading-guide"></div>
 
     <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
@@ -39,26 +97,27 @@
         <div class="flex flex-col gap-4 text-sm text-white">
             <label class="flex justify-between items-center cursor-pointer">
                 Modo Oscuro
-                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                <input type="checkbox" id="dark-mode-checkbox" onchange="toggleDarkMode(this.checked)">
             </label>
             <div class="flex flex-col gap-1">
                 <span>Zoom Texto: <b id="text-size-val">100%</b></span>
-                <input type="range" min="100" max="130" value="100" class="w-full" oninput="changeTextSize(this.value)">
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
             </div>
             <label class="flex justify-between items-center cursor-pointer">
                 Contraste Alto
-                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
+                <input type="checkbox" id="high-contrast-checkbox" onchange="toggleHighContrast(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Guía de Lectura
-                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
+                <input type="checkbox" id="reading-guide-checkbox" onchange="toggleReadingGuide(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Narrador
-                <input type="checkbox" onchange="toggleNarrator(this.checked)">
+                <input type="checkbox" id="narrator-checkbox" onchange="toggleNarrator(this.checked)">
             </label>
         </div>
     </div>
+
     <div id="toast" class="toast bg-slate-900" role="alert"></div>
 
     <div class="flex min-h-screen">
@@ -136,10 +195,10 @@
                                         <th class="pb-4">Producto</th>
                                         <th class="pb-4">Información</th>
                                         <th class="pb-4 text-right">Acciones</th>
-                                    </tr>
+                                     </tr>
                                 </thead>
                                 <tbody id="lista-inventario" class="divide-y divide-slate-50"></tbody>
-                            </table>
+                             </table>
                         </div>
                     </div>
                 </section>
@@ -174,23 +233,122 @@
         </div>
     </div>
 
-    <script src="accesibilidad.js"></script> <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
-        const dbClient = supabase.createClient(_url, _key);
+    <script>
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function init() {
-            const isAuthorized = await checkAdmin();
-            if (!isAuthorized) return;
-
-            document.getElementById('admin-body').classList.remove('opacity-0');
-            lucide.createIcons(); // Inicializa iconos de Admin e Inclusión
-            await cargarInventario();
-            await cargarUsuarios();
+        // ==================== ACCESIBILIDAD (funciones completas con persistencia) ====================
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
         }
 
-        // [Mantengo tus funciones originales: checkAdmin, cargarInventario, etc.]
-        // ... (Tu lógica de Supabase sigue aquí abajo exactamente como la tenías)
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + "%";
+            const label = document.getElementById('text-size-val');
+            if (label) label.innerText = size + "%";
+            localStorage.setItem('textSize', size);
+            const slider = document.getElementById('text-size-slider');
+            if (slider) slider.value = size;
+        }
+
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => { line.style.top = e.clientY + 'px'; };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = null;
+            }
+            localStorage.setItem('readingGuide', active);
+            const chk = document.getElementById('reading-guide-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        let narratorActive = false;
+        function speakText(e) {
+            if (!narratorActive) return;
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
+                utterance.lang = 'es-MX';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+            }
+            localStorage.setItem('narrator', active);
+            const chk = document.getElementById('narrator-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        function toggleDarkMode(active) {
+            document.body.classList.toggle('dark-mode', active);
+            localStorage.setItem('darkMode', active);
+        }
+
+        function toggleHighContrast(active) {
+            document.body.classList.toggle('high-contrast', active);
+            localStorage.setItem('highContrast', active);
+        }
+
+        function restoreAccessibilityPrefs() {
+            const savedSize = localStorage.getItem('textSize');
+            if (savedSize) changeTextSize(parseInt(savedSize));
+            if (localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
+            if (localStorage.getItem('highContrast') === 'true') toggleHighContrast(true);
+            if (localStorage.getItem('readingGuide') === 'true') {
+                toggleReadingGuide(true);
+                const chk = document.getElementById('reading-guide-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (localStorage.getItem('narrator') === 'true') {
+                toggleNarrator(true);
+                const chk = document.getElementById('narrator-checkbox');
+                if (chk) chk.checked = true;
+            }
+        }
+
+        // ==================== FUNCIONES ADMIN ORIGINALES (con ligeras mejoras) ====================
+        async function init() {
+            restoreAccessibilityPrefs(); // Restaurar preferencias antes de cualquier otra acción
+            const isAuthorized = await checkAdmin();
+            if (!isAuthorized) return;
+            document.getElementById('admin-body').classList.remove('opacity-0');
+            lucide.createIcons();
+            await cargarInventario();
+            await cargarUsuarios();
+            // Sincronizar checkboxes con el estado actual del body (por si se restauraron clases)
+            if (document.body.classList.contains('dark-mode')) {
+                const chk = document.getElementById('dark-mode-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (document.body.classList.contains('high-contrast')) {
+                const chk = document.getElementById('high-contrast-checkbox');
+                if (chk) chk.checked = true;
+            }
+        }
 
         async function checkAdmin() {
             const { data: { session } } = await dbClient.auth.getSession();
@@ -251,11 +409,14 @@
             const precio = parseFloat(document.getElementById('prod-precio').value);
             const categoria = document.getElementById('prod-categoria').value;
             const imagen_url = document.getElementById('prod-imagen').value;
-            if(!nombre || isNaN(precio)) return showToast("Faltan datos", true);
+            if (!nombre || isNaN(precio)) return showToast("Faltan datos", true);
             const { error } = await dbClient.from('productos').insert([{ nombre, precio, categoria, imagen_url }]);
-            if(error) return showToast("Error", true);
+            if (error) return showToast("Error al guardar", true);
             showToast("Producto publicado");
             await cargarInventario();
+            document.getElementById('prod-nombre').value = '';
+            document.getElementById('prod-precio').value = '';
+            document.getElementById('prod-imagen').value = '';
         }
 
         async function cargarUsuarios() {
@@ -276,9 +437,9 @@
         }
 
         async function eliminarProducto(id, nombre) {
-            if(!confirm(`¿Eliminar ${nombre}?`)) return;
+            if (!confirm(`¿Eliminar ${nombre}?`)) return;
             const { error } = await dbClient.from('productos').delete().eq('id', id);
-            if(!error) { showToast("Eliminado"); cargarInventario(); }
+            if (!error) { showToast("Eliminado"); cargarInventario(); }
         }
 
         function abrirEditar(id, nombre, precio, cat) {
@@ -298,11 +459,12 @@
                 precio: parseFloat(document.getElementById('edit-precio').value),
                 categoria: document.getElementById('edit-categoria').value
             }).eq('id', id);
-            if(!error) { showToast("Actualizado"); cerrarModal(); cargarInventario(); }
+            if (!error) { showToast("Actualizado"); cerrarModal(); cargarInventario(); }
         }
 
         async function cerrarSesionAdmin() {
             await dbClient.auth.signOut();
+            localStorage.removeItem('farmaCart'); // Limpiar carrito por si acaso
             location.href = 'login.html';
         }
 
