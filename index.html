@@ -1,236 +1,275 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="FarmaPlus - Tu farmacia de confianza en línea. Compra medicamentos y recíbelos en tu hogar." />
-    <title>FarmaPlus - Tu Farmacia de Confianza</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FarmaPlus - Tu Farmacia de Confianza</title>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
-        
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        .skip-link { position: absolute; top: -40px; left: 0; background: #ef4444; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; text-decoration: none; }
-        .skip-link:focus { top: 0; }
-        *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; border-radius: 6px; }
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
+        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
+        .contact-item { display: flex; align-items: center; gap: 6px; }
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
+        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
+        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
+        .search-bar { flex: 1; position: relative; max-width: 550px; }
+        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; transition: border-color 0.2s; }
+        .search-input:focus { border-color: #2563eb; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
+        
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
+        
+        .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .cart-container:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
+        .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
+        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
+        .nav-link:hover { color: #2563eb; background: #eff6ff; }
+        .nav-link.active { background: #2563eb; color: white; }
+        .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
 
-        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
-        .contact-item { display: flex; align-items: center; gap: 6px; }
-        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
-        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
-        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
-        .logo-subtitle { font-size: 0.85rem; color: #64748b; }
-        
-        .search-bar { flex: 1; position: relative; max-width: 550px; }
-        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; transition: border-color 0.2s; }
-        .search-input:focus { border-color: #2563eb; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; }
-        
-        .header-actions { display: flex; align-items: center; gap: 20px; }
-        .action-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.95rem; }
-        
-        .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
-        .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; }
-        
-        .nav-desktop { display: flex; gap: 10px; margin-top: 20px; }
-        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
-        .nav-link:hover { color: #2563eb; background: #eff6ff; }
-        .nav-link.active { background: #2563eb; color: white; }
+        #user-auth-section { display: flex; align-items: center; gap: 15px; }
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
+        .logout-btn:hover { background: #fee2e2; }
+        .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
-        /* === AJUSTE PARA QUE EL VIDEO NO SE RECORTE === */
-        .hero-container {
-            width: 100%;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 32px;
-            border: 1px solid #f1f5f9;
-            margin-top: 20px;
-        }
-
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            /* Mantiene la proporción 16:9 para evitar recortes */
-            aspect-ratio: 16 / 9; 
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .hero-video {
-            width: 100%;
-            height: 100%;
-            /* contain asegura que se vea todo el video sin importar el tamaño del div */
-            object-fit: contain; 
-        }
-
-        #user-auth-section { display: flex; align-items: center; gap: 15px; }
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
-    </style>
+        #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
+        #chat-messages { scroll-behavior: smooth; }
+        .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
+        .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .animate-pop { animation: popIn 0.3s ease-out; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 
 <body>
-    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    <div id="root">
+        <header class="site-header">
+            <div class="top-bar">
+                <div class="container">
+                    <div class="top-bar-content">
+                        <div class="contact-info">
+                            <div class="contact-item"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
+                            <div class="contact-item"><i data-lucide="map-pin" size="16"></i> <span>Calle 67 #16 duplex</span></div>
+                            <div class="contact-item"><i data-lucide="clock" size="16"></i> <span id="live-clock">Cargando...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div id="root">
-        <header class="site-header" role="banner">
-            <div class="top-bar">
-                <div class="container">
-                    <div class="top-bar-content">
-                        <div class="contact-info">
-                            <div class="contact-item"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
-                            <div class="contact-item"><i data-lucide="map-pin" size="16"></i> <span>Calle 67 #16 duplex</span></div>
-                            <div class="contact-item"><i data-lucide="clock" size="16"></i> <span id="live-clock">Cargando...</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="main-header">
+                <div class="container">
+                    <div class="main-header-content">
+                        <a href="index.html" class="logo">
+                            <div class="logo-box">⚕️</div>
+                            <div>
+                                <h1 class="logo-title">FarmaPlus</h1>
+                                <p class="logo-subtitle">Tu farmacia de confianza</p>
+                            </div>
+                        </a>
+                        <div class="search-bar">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" placeholder="Buscar productos..." class="search-input" />
+                        </div>
+                        <div class="header-actions">
+                            <div id="admin-action-container"></div>
+                            <a href="carrito.html" class="cart-container text-slate-700" title="Ver mi carrito">
+                                <i data-lucide="shopping-basket" size="22"></i>
+                                <span id="cart-count" class="cart-badge">0</span>
+                            </a>
+                            <div id="user-auth-section">
+                                <a href="login.html" class="action-link">
+                                    <i data-lucide="user"></i>
+                                    <span>Iniciar Sesión</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="nav-desktop">
+                        <a href="index.html" class="nav-link active">Inicio</a>
+                        <a href="catalog.html" class="nav-link">Catálogo</a>
+                        <a href="nosotros.html" class="nav-link">Nosotros</a>
+                        <a href="contacto.html" class="nav-link">Contacto</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
 
-            <div class="main-header">
-                <div class="container">
-                    <div class="main-header-content">
-                        <a href="index.html" class="logo">
-                            <div class="logo-box">⚕️</div>
-                            <div>
-                                <h1 class="logo-title">FarmaPlus</h1>
-                                <p class="logo-subtitle">Tu farmacia de confianza</p>
-                            </div>
-                        </a>
-                        
-                        <form class="search-bar" role="search">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="search" id="buscar-productos" placeholder="Buscar productos..." class="search-input" />
-                        </form>
-                        
-                        <div class="header-actions">
-                            <div id="admin-action-container"></div>
-                            <a href="carrito.html" class="cart-container text-slate-700">
-                                <i data-lucide="shopping-basket" size="22"></i>
-                                <span id="cart-count" class="cart-badge">0</span>
-                            </a>
-                            <div id="user-auth-section">
-                                <a href="login.html" class="action-link">
-                                    <i data-lucide="user"></i>
-                                    <span>Iniciar Sesión</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <nav class="nav-desktop">
-                        <a href="index.html" class="nav-link active">Inicio</a>
-                        <a href="catalog.html" class="nav-link">Catálogo</a>
-                        <a href="nosotros.html" class="nav-link">Nosotros</a>
-                        <a href="contacto.html" class="nav-link">Contacto</a>
-                    </nav>
-                </div>
-            </div>
-        </header>
+        <main class="container py-12">
+            <div class="content-card text-center">
+                <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
+                    Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <a href="catalog.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-all">Ver Catálogo</a>
+                    <a href="contacto.html" class="bg-white text-slate-600 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Soporte</a>
+                </div>
+            </div>
+        </main>
 
-        <main id="main-content" class="container" tabindex="-1">
-            <div class="hero-container shadow-sm">
-                <div class="video-wrapper">
-                    <video autoplay muted loop playsinline class="hero-video">
-                        <source src="imagenes/video/hero.mp4" type="video/mp4">
-                        Tu navegador no soporta videos.
-                    </video>
-                </div>
-                
-                <div class="text-center mt-10">
-                    <h2 class="text-4xl md:text-6xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                    <p class="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-                        Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <a href="catalog.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-blue-100 hover:scale-105 transition-all text-center">Ver Catálogo</a>
-                        <a href="contacto.html" class="bg-white text-slate-700 px-10 py-4 rounded-2xl font-bold border border-gray-100 hover:bg-gray-50 transition-all text-center">Soporte</a>
-                    </div>
-                </div>
-            </div>
-        </main>
+        <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
+            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                <i data-lucide="message-circle" id="chat-icon"></i>
+            </button>
 
-        <footer class="bg-slate-900 text-white py-8 mt-20">
-            <div class="container text-center">
-                <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
-            </div>
-        </footer>
-    </div>
+            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+                <div class="bg-blue-600 p-4 text-white">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                    </div>
+                </div>
+                
+                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
+                    <div class="flex justify-start">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
+                            ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
+                        </div>
+                    </div>
+                </div>
 
-    <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
+                <div class="p-3 border-t bg-white flex gap-2">
+                    <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
+                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
+                        <i data-lucide="send" size="16"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-        let userName = ""; 
+        <footer class="bg-slate-900 text-white py-12 mt-20">
+            <div class="container text-center">
+                <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
+            </div>
+        </footer>
+    </div>
 
-        dbClient.auth.onAuthStateChange((event, session) => {
-            if (session) renderUserSession(session);
-            else renderLoginButton();
-        });
+    <script>
+        // ⚠️ RECUERDA ROTAR ESTA CLAVE INMEDIATAMENTE (ver instrucciones abajo)
+        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(_url, _key);
 
-        async function renderUserSession(session) {
-            const authSection = document.getElementById('user-auth-section');
-            const welcomeTitle = document.getElementById('welcome-title');
-            const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-            
-            const fullName = profile?.full_name || session.user.email;
-            userName = fullName.split(' ')[0];
-            
-            authSection.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <span class="text-slate-700 font-semibold text-sm">Hola, ${userName}</span>
-                    <button onclick="logout()" class="logout-btn">Salir</button>
-                </div>`;
-            
-            welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
-            lucide.createIcons();
-        }
+        // ✅ NUEVO: Protección de sesión al cargar la página
+        async function verificarSesion() {
+            const { data } = await dbClient.auth.getSession();
+            if (!data.session) {
+                // Si no hay sesión, redirigimos al login
+                window.location.href = 'login.html';
+            }
+        }
+        verificarSesion();
 
-        function renderLoginButton() {
-            document.getElementById('user-auth-section').innerHTML = `
-                <a href="login.html" class="action-link">
-                    <i data-lucide="user"></i>
-                    <span>Iniciar Sesión</span>
-                </a>`;
-            lucide.createIcons();
-        }
+        let userName = ""; 
 
-        async function logout() {
-            await dbClient.auth.signOut();
-            window.location.href = "index.html";
-        }
+        // 1. ACTUALIZACIÓN AUTOMÁTICA DE SESIÓN
+        dbClient.auth.onAuthStateChange((event, session) => {
+            console.log("Evento de Auth:", event);
+            if (session) {
+                renderUserSession(session);
+            } else {
+                renderLoginButton();
+            }
+        });
 
-        function updateClock() {
-            const clockElement = document.getElementById('live-clock');
-            if (clockElement) {
-                const now = new Date();
-                clockElement.textContent = now.toLocaleTimeString();
-            }
-        }
+        async function renderUserSession(session) {
+            const authSection = document.getElementById('user-auth-section');
+            const welcomeTitle = document.getElementById('welcome-title');
+            const adminContainer = document.getElementById('admin-action-container');
 
-        function updateCartBadge() {
-            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-            const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
-            const badge = document.getElementById('cart-count');
-            if (badge) {
-                badge.innerText = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
-            }
-        }
+            // Intentar obtener nombre de base de datos o de Google
+            const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
+            
+            // Prioridad: 1. Tabla Perfiles, 2. Metadatos Google, 3. Email
+            const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+            userName = fullName.split(' ')[0];
+            const role = profile?.role || 'usuario';
 
-        lucide.createIcons();
-        setInterval(updateClock, 1000);
-        updateCartBadge();
-    </script>
+            if (role === 'admin') {
+                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
+            }
+
+            authSection.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
+                        <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
+                    </span>
+                    <button onclick="logout()" class="logout-btn">Salir</button>
+                </div>`;
+            
+            welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
+            lucide.createIcons();
+        }
+
+        function renderLoginButton() {
+            document.getElementById('user-auth-section').innerHTML = `
+                <a href="login.html" class="action-link">
+                    <i data-lucide="user"></i>
+                    <span>Iniciar Sesión</span>
+                </a>`;
+            document.getElementById('welcome-title').innerText = "Bienvenido a FarmaPlus";
+            lucide.createIcons();
+        }
+
+        async function logout() {
+            await dbClient.auth.signOut();
+            localStorage.removeItem('farmaCart');
+            window.location.href = "index.html";
+        }
+
+        // RELOJ Y CARRITO
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
+            const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            const badge = document.getElementById('cart-count');
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        // CHATBOT SIMPLE PARA PRUEBAS
+        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
+        function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msgContainer = document.getElementById('chat-messages');
+            if (!input.value.trim()) return;
+            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${input.value}</div></div>`;
+            input.value = '';
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        // INICIALIZACIÓN
+        setInterval(updateClock, 1000);
+        updateClock();
+        updateCartBadge();
+        // Verificamos sesión al cargar por si el evento onAuthStateChange tarda un poco
+        dbClient.auth.getSession().then(({data}) => {
+            if(data.session) renderUserSession(data.session);
+        });
+    </script>
+
+    <!-- ✅ NUEVO: Script de cierre de sesión por inactividad -->
+    <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
