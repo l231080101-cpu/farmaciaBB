@@ -9,10 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="accesibilidad.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="accesibilidad.js"></script>
-    <script>lucide.createIcons();</script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
@@ -48,6 +45,7 @@
         .logout-btn:hover { background: #fee2e2; }
         .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
 
+        /* Chatbot */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
         #chat-messages { scroll-behavior: smooth; }
         .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
@@ -55,6 +53,79 @@
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Accesibilidad */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover { transform: scale(1.1); }
+        #acc-toggle-btn:active { transform: scale(0.95); }
+
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active { display: block; }
+
+        .reading-guide {
+            display: none;
+        }
+        .reading-guide.active {
+            display: block;
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: yellow;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .dark-mode {
+            background-color: #1e293b;
+            color: #f1f5f9;
+        }
+        .dark-mode .main-header,
+        .dark-mode .content-card,
+        .dark-mode .top-bar {
+            background-color: #334155 !important;
+            color: #f1f5f9;
+        }
+        .high-contrast {
+            background-color: black;
+            color: yellow;
+        }
+        .high-contrast a,
+        .high-contrast button {
+            background-color: yellow !important;
+            color: black !important;
+            border: 2px solid white;
+        }
     </style>
 </head>
 
@@ -124,36 +195,6 @@
             </div>
         </main>
 
-        <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-            <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
-                <i data-lucide="message-circle" id="chat-icon"></i>
-            </button>
-
-            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
-                <div class="bg-blue-600 p-4 text-white">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
-                    </div>
-                </div>
-                
-                <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
-                    <div class="flex justify-start">
-                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 border-t bg-white flex gap-2">
-                    <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
-                    <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
-                        <i data-lucide="send" size="16"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <footer class="bg-slate-900 text-white py-12 mt-20">
             <div class="container text-center">
                 <p class="opacity-50 text-sm">© 2026 FarmaPlus. Todos los derechos reservados.</p>
@@ -161,17 +202,72 @@
         </footer>
     </div>
 
+    <!-- Chatbot -->
+    <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
+        <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+            <i data-lucide="message-circle" id="chat-icon"></i>
+        </button>
+
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+            <div class="bg-blue-600 p-4 text-white">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                </div>
+            </div>
+            
+            <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
+                <div class="flex justify-start">
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
+                        ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 border-t bg-white flex gap-2">
+                <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
+                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
+                    <i data-lucide="send" size="16"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de accesibilidad -->
+    <button id="acc-toggle-btn" onclick="toggleAccPanel()" title="Accesibilidad">
+        <i data-lucide="accessibility"></i>
+    </button>
+
+    <!-- Panel de accesibilidad -->
+    <div id="accessibility-panel">
+        <h3 style="color: #fbbf24; margin-bottom: 15px;">Configuración</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
+            
+            <div>
+                <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
+                <input type="range" min="100" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
+            </div>
+
+            <label><input type="checkbox" onchange="toggleNarrator(this.checked)"> Narrador de Voz</label>
+            <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
+            <label><input type="checkbox" onchange="toggleReadingGuide(this.checked)"> Lectura Guiada</label>
+        </div>
+    </div>
+
+    <!-- Línea de lectura guiada -->
+    <div id="reading-line" class="reading-guide"></div>
+
     <script>
-        // ⚠️ RECUERDA ROTAR ESTA CLAVE INMEDIATAMENTE (ver instrucciones abajo)
+        // ⚠️ CLAVE EXPUESTA: Debes rotarla en Supabase (Settings > API > Add secret)
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
-        // ✅ NUEVO: Protección de sesión al cargar la página
+        // Protección de sesión
         async function verificarSesion() {
             const { data } = await dbClient.auth.getSession();
             if (!data.session) {
-                // Si no hay sesión, redirigimos al login
                 window.location.href = 'login.html';
             }
         }
@@ -179,9 +275,7 @@
 
         let userName = ""; 
 
-        // 1. ACTUALIZACIÓN AUTOMÁTICA DE SESIÓN
         dbClient.auth.onAuthStateChange((event, session) => {
-            console.log("Evento de Auth:", event);
             if (session) {
                 renderUserSession(session);
             } else {
@@ -194,10 +288,8 @@
             const welcomeTitle = document.getElementById('welcome-title');
             const adminContainer = document.getElementById('admin-action-container');
 
-            // Intentar obtener nombre de base de datos o de Google
             const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
             
-            // Prioridad: 1. Tabla Perfiles, 2. Metadatos Google, 3. Email
             const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
             userName = fullName.split(' ')[0];
             const role = profile?.role || 'usuario';
@@ -234,7 +326,6 @@
             window.location.href = "index.html";
         }
 
-        // RELOJ Y CARRITO
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             const now = new Date();
@@ -250,7 +341,7 @@
             badge.style.display = count > 0 ? 'flex' : 'none';
         }
 
-        // CHATBOT SIMPLE PARA PRUEBAS
+        // Chatbot
         function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
         function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
         async function sendMessage() {
@@ -262,38 +353,35 @@
             msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
-        // INICIALIZACIÓN
+        // Accesibilidad
+        function toggleAccPanel() {
+            document.getElementById('accessibility-panel').classList.toggle('active');
+        }
+
+        function toggleNarrator(active) {
+            console.log('Narrador ' + (active ? 'activado' : 'desactivado'));
+            // Aquí puedes implementar la síntesis de voz
+        }
+
+        function toggleReadingGuide(active) {
+            document.getElementById('reading-line').classList.toggle('active', active);
+        }
+
+        function changeTextSize(size) {
+            document.documentElement.style.fontSize = size + '%';
+            document.getElementById('text-size-val').textContent = size + '%';
+        }
+
+        // Inicialización
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
-        // Verificamos sesión al cargar por si el evento onAuthStateChange tarda un poco
         dbClient.auth.getSession().then(({data}) => {
             if(data.session) renderUserSession(data.session);
         });
+        lucide.createIcons();
     </script>
 
-    <!-- ✅ NUEVO: Script de cierre de sesión por inactividad -->
     <script src="js/sessionTimeout.js"></script>
-    <div id="reading-line" class="reading-guide"></div>
-
-<div id="acc-toggle-btn" onclick="toggleAccPanel()">
-    <i data-lucide="accessibility"></i>
-</div>
-
-<div id="accessibility-panel">
-    <h3 style="color: #fbbf24; margin-bottom: 15px;">Configuración</h3>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
-        
-        <div>
-            <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
-            <input type="range" min="100" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
-        </div>
-
-        <label><input type="checkbox" onchange="toggleNarrator(this.checked)"> Narrador de Voz</label>
-        <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
-        <label><input type="checkbox" onchange="toggleReadingGuide(this.checked)"> Lectura Guiada</label>
-    </div>
-</div>
 </body>
 </html>
