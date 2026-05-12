@@ -12,7 +12,9 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     
+    <!-- Archivos externos de accesibilidad (opcionales) -->
     <link rel="stylesheet" href="accesibilidad.css">
+    <script src="accesibilidad.js" defer></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -21,10 +23,63 @@
         /* Ajuste para que el texto sea legible en modo oscuro en el carrito */
         body.dark-mode .card-style { background: #1e293b; border-color: #334155; color: white; }
         body.dark-mode h1, body.dark-mode h3, body.dark-mode h4 { color: white; }
+        body.dark-mode .bg-white.border-b { background-color: #1e293b !important; border-color: #334155; }
+        
+        /* Estilos de accesibilidad (igual que en index y catalog) */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover { transform: scale(1.1); }
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active { display: block; }
+        .reading-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: yellow;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active { display: block; }
+        .dark-mode { background-color: #1e293b !important; color: #f1f5f9; }
+        .high-contrast { background-color: black !important; color: yellow !important; }
+        .high-contrast a, .high-contrast button {
+            background-color: yellow !important; color: black !important; border: 2px solid white;
+        }
     </style>
 </head>
 <body class="antialiased">
 
+    <!-- Componentes de accesibilidad (bloque mejorado) -->
     <div id="reading-line" class="reading-guide"></div>
 
     <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
@@ -36,26 +91,27 @@
         <div class="flex flex-col gap-4 text-sm text-white">
             <label class="flex justify-between items-center cursor-pointer">
                 Modo Oscuro
-                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                <input type="checkbox" id="dark-mode-checkbox" onchange="toggleDarkMode(this.checked)">
             </label>
             <div class="flex flex-col gap-1">
                 <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
-                <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
             </div>
             <label class="flex justify-between items-center cursor-pointer">
                 Contraste Alto
-                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
+                <input type="checkbox" id="high-contrast-checkbox" onchange="toggleHighContrast(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Guía de Lectura
-                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
+                <input type="checkbox" id="reading-guide-checkbox" onchange="toggleReadingGuide(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Narrador de Voz
-                <input type="checkbox" onchange="toggleNarrator(this.checked)">
+                <input type="checkbox" id="narrator-checkbox" onchange="toggleNarrator(this.checked)">
             </label>
         </div>
     </div>
+
     <header class="bg-white border-b border-slate-100 mb-8">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <a href="index.html" class="flex items-center gap-3">
@@ -99,14 +155,108 @@
         </div>
     </main>
 
-    <script src="accesibilidad.js"></script> <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
+    <script>
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        // ==================== VARIABLES GLOBALES ====================
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-        let currentUser = null; 
+        let currentUser = null;
 
+        // ==================== ACCESIBILIDAD (funciones completas con persistencia) ====================
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + "%";
+            const label = document.getElementById('text-size-val');
+            if (label) label.innerText = size + "%";
+            localStorage.setItem('textSize', size);
+            const slider = document.getElementById('text-size-slider');
+            if (slider) slider.value = size;
+        }
+
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => { line.style.top = e.clientY + 'px'; };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = null;
+            }
+            localStorage.setItem('readingGuide', active);
+            const chk = document.getElementById('reading-guide-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        let narratorActive = false;
+        function speakText(e) {
+            if (!narratorActive) return;
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
+                utterance.lang = 'es-MX';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+            }
+            localStorage.setItem('narrator', active);
+            const chk = document.getElementById('narrator-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        function toggleDarkMode(active) {
+            document.body.classList.toggle('dark-mode', active);
+            localStorage.setItem('darkMode', active);
+        }
+
+        function toggleHighContrast(active) {
+            document.body.classList.toggle('high-contrast', active);
+            localStorage.setItem('highContrast', active);
+        }
+
+        function restoreAccessibilityPrefs() {
+            const savedSize = localStorage.getItem('textSize');
+            if (savedSize) changeTextSize(parseInt(savedSize));
+            if (localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
+            if (localStorage.getItem('highContrast') === 'true') toggleHighContrast(true);
+            if (localStorage.getItem('readingGuide') === 'true') {
+                toggleReadingGuide(true);
+                const chk = document.getElementById('reading-guide-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (localStorage.getItem('narrator') === 'true') {
+                toggleNarrator(true);
+                const chk = document.getElementById('narrator-checkbox');
+                if (chk) chk.checked = true;
+            }
+        }
+
+        // ==================== FUNCIONES DEL CARRITO ====================
         async function checkSession() {
             const { data: { session }, error } = await dbClient.auth.getSession();
             if (error || !session) {
@@ -117,13 +267,22 @@
         }
 
         async function init() {
-            lucide.createIcons(); // Inicializa iconos generales e inclusión
+            restoreAccessibilityPrefs(); // Restaurar preferencias de accesibilidad
+            lucide.createIcons();
             currentUser = await checkSession();
-            if (!currentUser) return; 
-
+            if (!currentUser) return;
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('user-email').innerText = currentUser.email;
             render();
+            // Sincronizar checkboxes con el estado actual del body (por si se restauraron clases)
+            if (document.body.classList.contains('dark-mode')) {
+                const chk = document.getElementById('dark-mode-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (document.body.classList.contains('high-contrast')) {
+                const chk = document.getElementById('high-contrast-checkbox');
+                if (chk) chk.checked = true;
+            }
         }
 
         function render() {
@@ -168,7 +327,9 @@
 
         function initPayPal() {
             const totalCompra = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-
+            const paypalContainer = document.getElementById('paypal-button-container');
+            if (!paypalContainer) return;
+            paypalContainer.innerHTML = ''; // Limpiar por si se reinicia
             paypal.Buttons({
                 style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay', height: 45 },
                 createOrder: (data, actions) => {
@@ -189,9 +350,7 @@
                             paypal_id: details.id, 
                             estado: 'pagado'
                         }]);
-
                         if (error) throw error;
-
                         alert("¡Compra exitosa! Pedido registrado.");
                         localStorage.removeItem('farmaCart');
                         window.location.href = "index.html";
@@ -208,15 +367,17 @@
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             render(); 
+            // Si el botón de PayPal ya estaba visible, reiniciarlo para reflejar nuevo total
             const paypalContainer = document.getElementById('paypal-button-container');
-            if (paypalContainer.style.display === 'block') {
+            if (paypalContainer && paypalContainer.style.display === 'block') {
                 paypalContainer.innerHTML = '';
                 initPayPal();
             }
-        }
+        };
 
         window.onload = init;
     </script>
+    <!-- Referencia a sessionTimeout.js si existe (no causa error si falta) -->
     <script src="js/sessionTimeout.js"></script>
 </body>
 </html>
