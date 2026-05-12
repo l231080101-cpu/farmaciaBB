@@ -15,13 +15,11 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
         
-        /* === CLASES DE ACCESIBILIDAD === */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
         .skip-link { position: absolute; top: -40px; left: 0; background: #ef4444; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; text-decoration: none; }
         .skip-link:focus { top: 0; }
         *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; border-radius: 6px; }
 
-        /* === ESTILOS GENERALES === */
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .top-bar-content, .contact-info { display: flex; align-items: center; gap: 20px; }
@@ -49,45 +47,35 @@
         .nav-link:hover { color: #2563eb; background: #eff6ff; }
         .nav-link.active { background: #2563eb; color: white; }
 
-        /* === AJUSTE DE TAMAÑO VIDEO HERO === */
-        .hero-section { 
-            position: relative; 
-            height: 400px; /* Reducido de 500px a 400px para mejor balance */
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            border-radius: 24px; 
-            margin-top: 20px; 
-            background: #0f172a;
+        /* === AJUSTE PARA QUE EL VIDEO NO SE RECORTE === */
+        .hero-container {
+            width: 100%;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 32px;
+            border: 1px solid #f1f5f9;
+            margin-top: 20px;
         }
-        .hero-video { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            min-width: 100%; 
-            min-height: 100%; 
-            width: auto; 
-            height: auto; 
-            z-index: 0; 
-            transform: translate(-50%, -50%); 
-            object-fit: cover;
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            /* Mantiene la proporción 16:9 para evitar recortes */
+            aspect-ratio: 16 / 9; 
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
         }
-        .hero-overlay { 
-            position: absolute; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(rgba(15, 23, 42, 0.3), rgba(15, 23, 42, 0.7)); 
-            z-index: 1; 
+
+        .hero-video {
+            width: 100%;
+            height: 100%;
+            /* contain asegura que se vea todo el video sin importar el tamaño del div */
+            object-fit: contain; 
         }
-        .hero-content { position: relative; z-index: 2; color: white; text-align: center; padding: 0 20px; }
 
         #user-auth-section { display: flex; align-items: center; gap: 15px; }
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
-
-        @media (max-width: 768px) {
-            .hero-section { height: 350px; border-radius: 0; }
-            .hero-content h2 { font-size: 2rem; }
-        }
     </style>
 </head>
 
@@ -150,24 +138,25 @@
         </header>
 
         <main id="main-content" class="container" tabindex="-1">
-            <section class="hero-section shadow-2xl">
-                <video autoplay muted loop playsinline class="hero-video">
-                    <source src="imagenes/video/hero.mp4" type="video/mp4">
-                    Tu navegador no soporta videos.
-                </video>
-                <div class="hero-overlay"></div>
+            <div class="hero-container shadow-sm">
+                <div class="video-wrapper">
+                    <video autoplay muted loop playsinline class="hero-video">
+                        <source src="imagenes/video/hero.mp4" type="video/mp4">
+                        Tu navegador no soporta videos.
+                    </video>
+                </div>
                 
-                <div class="hero-content">
-                    <h2 class="text-4xl md:text-5xl font-black mb-4 drop-shadow-lg" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                    <p class="text-base md:text-lg max-w-xl mx-auto mb-8 opacity-90 font-medium">
-                        Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en casa.
+                <div class="text-center mt-10">
+                    <h2 class="text-4xl md:text-6xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                    <p class="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+                        Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
                     </p>
-                    <div class="flex justify-center gap-4">
-                        <a href="catalog.html" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 hover:scale-105 transition-all">Ver Catálogo</a>
-                        <a href="contacto.html" class="bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-3 rounded-xl font-bold hover:bg-white/30 transition-all">Soporte</a>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="catalog.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-blue-100 hover:scale-105 transition-all text-center">Ver Catálogo</a>
+                        <a href="contacto.html" class="bg-white text-slate-700 px-10 py-4 rounded-2xl font-bold border border-gray-100 hover:bg-gray-50 transition-all text-center">Soporte</a>
                     </div>
                 </div>
-            </section>
+            </div>
         </main>
 
         <footer class="bg-slate-900 text-white py-8 mt-20">
@@ -223,16 +212,20 @@
 
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
-            const now = new Date();
-            clockElement.textContent = now.toLocaleTimeString();
+            if (clockElement) {
+                const now = new Date();
+                clockElement.textContent = now.toLocaleTimeString();
+            }
         }
 
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
             const badge = document.getElementById('cart-count');
-            badge.innerText = count;
-            badge.style.display = count > 0 ? 'flex' : 'none';
+            if (badge) {
+                badge.innerText = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
         }
 
         lucide.createIcons();
