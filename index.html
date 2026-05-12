@@ -9,7 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="accesibilidad.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="accesibilidad.js"></script>
+    <script>lucide.createIcons();</script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
@@ -271,5 +274,26 @@
 
     <!-- ✅ NUEVO: Script de cierre de sesión por inactividad -->
     <script src="js/sessionTimeout.js"></script>
+    <div id="reading-line" class="reading-guide"></div>
+
+<div id="acc-toggle-btn" onclick="toggleAccPanel()">
+    <i data-lucide="accessibility"></i>
+</div>
+
+<div id="accessibility-panel">
+    <h3 style="color: #fbbf24; margin-bottom: 15px;">Configuración</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
+        
+        <div>
+            <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
+            <input type="range" min="100" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
+        </div>
+
+        <label><input type="checkbox" onchange="toggleNarrator(this.checked)"> Narrador de Voz</label>
+        <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
+        <label><input type="checkbox" onchange="toggleReadingGuide(this.checked)"> Lectura Guiada</label>
+    </div>
+</div>
 </body>
 </html>
