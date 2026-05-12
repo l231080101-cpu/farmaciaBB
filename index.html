@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="FarmaPlus - Tu farmacia de confianza en línea. Compra medicamentos y recíbelos en tu hogar." />
+    <meta name="description" content="FarmaPlus - Tu farmacia de confianza en línea." />
     <title>FarmaPlus - Tu Farmacia de Confianza</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,55 +11,46 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="accesibilidad.css">
-
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; transition: background-color 0.3s; }
         body.dark-mode { background-color: #0f172a; color: #f1f5f9; }
         
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        .skip-link { position: absolute; top: -40px; left: 0; background: #ef4444; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; text-decoration: none; }
-        .skip-link:focus { top: 0; }
-        *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; border-radius: 6px; }
+        /* Guía de lectura */
+        #reading-line { position: fixed; height: 3px; background: #2563eb; width: 100%; pointer-events: none; z-index: 9999; display: none; }
 
-        .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
+        /* Estilos Base */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .contact-info { display: flex; align-items: center; gap: 20px; }
-        
         .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; transition: background 0.3s; }
         body.dark-mode .main-header { background: #1e293b; border-color: #334155; }
-        
-        .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
-        .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
-        
-        .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; }
-        body.dark-mode .search-input { background: #334155; border-color: #475569; color: white; }
-
-        .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
-        .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; }
         
         .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: 0.2s; }
         body.dark-mode .nav-link { color: #cbd5e1; }
         .nav-link.active { background: #2563eb; color: white; }
 
-        .hero-container { background: #ffffff; padding: 24px; border-radius: 32px; border: 1px solid #f1f5f9; margin-top: 20px; transition: background 0.3s; }
-        body.dark-mode .hero-container { background: #1e293b; border-color: #334155; }
-        
-        .video-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
-        .hero-video { width: 100%; height: 100%; object-fit: contain; }
+        /* Botón Accesibilidad (IZQUIERDA) */
+        #acc-toggle-btn { position: fixed; bottom: 24px; left: 24px; z-index: 1001; background: #2563eb; color: white; width: 56px; height: 56px; border-radius: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; }
+        /* Panel Accesibilidad (IZQUIERDA) */
+        #accessibility-panel { position: fixed; left: -300px; top: 0; width: 280px; height: 100vh; background: #1e293b; transition: 0.3s; z-index: 1000; padding: 2rem; color: white; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
+        #accessibility-panel.open { left: 0; }
+
+        /* Chatbot (DERECHA) */
+        #chatbot-container { position: fixed; bottom: 24px; right: 24px; z-index: 1001; display: flex; flex-col; items-end; }
+        
+        .hero-container { background: #ffffff; padding: 24px; border-radius: 32px; border: 1px solid #f1f5f9; margin-top: 20px; }
+        body.dark-mode .hero-container { background: #1e293b; border-color: #334155; }
     </style>
 </head>
-<body>
-    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+<body onmousemove="moveReadingLine(event)">
 
-    <div id="reading-line" class="reading-guide" style="position: fixed; height: 2px; background: #2563eb; width: 100%; pointer-events: none; z-index: 9999; display: none;"></div>
-    <div id="acc-toggle-btn" onclick="toggleAccPanel()" style="position: fixed; bottom: 24px; right: 24px; z-index: 1001; background: #2563eb; color: white; width: 56px; height: 56px; border-radius: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    <div id="reading-line"></div>
+
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Opciones de Accesibilidad">
         <i data-lucide="accessibility"></i>
     </div>
 
-    <div id="accessibility-panel" style="position: fixed; right: -300px; top: 0; width: 280px; height: 100vh; background: #1e293b; transition: 0.3s; z-index: 1000; padding: 2rem; color: white; box-shadow: -5px 0 15px rgba(0,0,0,0.3);">
+    <div id="accessibility-panel">
         <h3 class="text-xl font-bold mb-6 border-b border-slate-700 pb-2">Accesibilidad</h3>
         <div class="space-y-6">
             <label class="flex justify-between items-center cursor-pointer">Modo Oscuro <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"></label>
@@ -68,194 +59,97 @@
                 <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
             </div>
             <label class="flex justify-between items-center cursor-pointer">Guía de Lectura <input type="checkbox" onchange="toggleReadingGuide(this.checked)"></label>
-            <label class="flex justify-between items-center cursor-pointer">Narrador de voz <input type="checkbox" onchange="toggleNarrator(this.checked)"></label>
         </div>
     </div>
 
-    <header class="site-header">
-        <div class="top-bar">
-            <div class="container flex justify-between items-center">
-                <div class="contact-info">
-                    <div class="contact-item flex items-center gap-2"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
-                    <div class="contact-item flex items-center gap-2"><i data-lucide="clock" size="16"></i> <span id="live-clock">--:--:--</span></div>
-                </div>
+    <header class="main-header">
+        <div class="container flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold">⚕️</div>
+                <h1 class="text-2xl font-black text-blue-600">FarmaPlus</h1>
             </div>
-        </div>
-
-        <div class="main-header">
-            <div class="container">
-                <div class="flex items-center justify-between gap-8">
-                    <a href="index.html" class="logo flex items-center gap-3 decoration-none">
-                        <div class="logo-box">⚕️</div>
-                        <div>
-                            <h1 class="logo-title">FarmaPlus</h1>
-                            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Salud Digital</p>
-                        </div>
-                    </a>
-                    
-                    <div class="flex-1 max-w-md relative">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5"></i>
-                        <input type="search" id="buscar-productos" placeholder="¿Qué medicina buscas?" class="search-input" />
-                    </div>
-                    
-                    <div class="flex items-center gap-6">
-                        <a href="carrito.html" class="cart-container">
-                            <i data-lucide="shopping-basket" class="text-slate-600"></i>
-                            <span id="cart-count" class="cart-badge" style="display:none">0</span>
-                        </a>
-                        <div id="user-auth-section">
-                            <a href="login.html" class="flex items-center gap-2 font-bold text-slate-700">
-                                <i data-lucide="user"></i><span class="hidden sm:inline">Ingresar</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <nav class="flex gap-2 mt-6">
-                    <a href="index.html" class="nav-link active">Inicio</a>
-                    <a href="catalog.html" class="nav-link">Catálogo</a>
-                    <a href="nosotros.html" class="nav-link">Nosotros</a>
-                    <a href="contacto.html" class="nav-link">Contacto</a>
-                </nav>
-            </div>
+            <nav class="flex gap-2">
+                <a href="#" class="nav-link active">Inicio</a>
+                <a href="#" class="nav-link">Catálogo</a>
+            </nav>
         </div>
     </header>
 
-    <main id="main-content" class="container pb-20">
-        <div class="hero-container shadow-sm">
-            <div class="video-wrapper">
-                <video autoplay muted loop playsinline class="hero-video">
-                    <source src="imagenes/video/hero.mp4" type="video/mp4">
-                    Tu navegador no soporta videos.
-                </video>
-            </div>
-            
-            <div class="text-center mt-12">
-                <h2 class="text-4xl md:text-6xl font-black mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">Tu salud es nuestra prioridad. Recibe tus medicamentos en la puerta de tu hogar en menos de 24 horas.</p>
-                <div class="flex justify-center gap-4">
-                    <a href="catalog.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition">Ver Catálogo</a>
-                </div>
-            </div>
+    <main class="container py-20 text-center">
+        <div class="hero-container shadow-sm p-10">
+            <h2 class="text-5xl font-black mb-6">Tu salud, nuestra misión.</h2>
+            <p class="text-slate-500 text-lg">Ahora con herramientas de accesibilidad integradas para todos.</p>
         </div>
     </main>
 
-    <div id="chatbot-container" class="fixed z-50 flex flex-col items-end" style="bottom: 100px; right: 24px;">
-        <div id="chat-window" class="hidden bg-white w-80 sm:w-96 h-[480px] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 transition-all duration-300">
-            <div class="bg-blue-600 p-4 text-white flex justify-between items-center shadow-md">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="bot"></i>
-                    <div>
-                        <p class="font-bold text-sm">Asistente FarmaPlus</p>
-                        <p class="text-[10px] opacity-80">En línea ahora</p>
-                    </div>
-                </div>
-                <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded-full"><i data-lucide="x" size="20"></i></button>
+    <div id="chatbot-container">
+        <div id="chat-window" class="hidden bg-white w-80 sm:w-96 h-[450px] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4">
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2"><i data-lucide="bot"></i><span class="font-bold">Asistente</span></div>
+                <button onclick="toggleChat()"><i data-lucide="x"></i></button>
             </div>
-            
-            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
-                <div class="flex flex-col gap-2">
-                    <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm max-w-[85%]">
-                        ¡Hola! 👋 Soy tu asistente virtual. ¿Cómo puedo ayudarte hoy?
-                    </div>
-                    <div id="chat-options" class="flex flex-wrap gap-2 mt-1">
-                        <button onclick="handleOption('catalogo', '💊 Ver Catálogo')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">💊 Ver Catálogo</button>
-                        <button onclick="handleOption('pedido', '📦 Mi Pedido')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">📦 Mi Pedido</button>
-                        <button onclick="handleOption('soporte', '🛠️ Soporte')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">🛠️ Soporte</button>
-                    </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 text-sm">
+                <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
+                    ¡Hola! 👋 Soy tu asistente de FarmaPlus. ¿En qué te puedo ayudar?
+                </div>
+                <div id="chat-options" class="flex flex-wrap gap-2">
+                    <button onclick="handleOption('catalogo')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-50">💊 Ver Catálogo</button>
+                    <button onclick="handleOption('sucursal')" class="bg-white border border-blue-200 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-50">📍 Sucursales</button>
                 </div>
             </div>
-
             <div class="p-3 border-t bg-white flex gap-2">
-                <input type="text" id="chat-input" placeholder="Escribe tu duda..." class="flex-1 p-2 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600">
-                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl shadow-md"><i data-lucide="send" size="18"></i></button>
+                <input type="text" id="chat-input" placeholder="Escribe..." class="flex-1 p-2 bg-slate-100 rounded-xl outline-none">
+                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="send" size="18"></i></button>
             </div>
         </div>
-
-        <button onclick="toggleChat()" class="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-white">
+        <button onclick="toggleChat()" class="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition border-4 border-white">
             <i data-lucide="message-circle" id="chat-icon"></i>
         </button>
     </div>
 
-    <script src="accesibilidad.js"></script>
     <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
-
         lucide.createIcons();
 
-        // Lógica de Autenticación
-        dbClient.auth.onAuthStateChange((event, session) => {
-            const authSection = document.getElementById('user-auth-section');
-            if (session) {
-                const name = session.user.email.split('@')[0];
-                authSection.innerHTML = `<div class="flex items-center gap-4"><span class="font-bold text-sm">Hola, ${name}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
-                document.getElementById('welcome-title').innerText = `¡Qué gusto verte, ${name}!`;
-            }
-        });
+        // LÓGICA ACCESIBILIDAD
+        function toggleAccPanel() {
+            document.getElementById('accessibility-panel').classList.toggle('open');
+        }
+        function changeTextSize(val) {
+            document.body.style.fontSize = val + "%";
+            document.getElementById('text-size-val').innerText = val + "%";
+        }
+        function toggleReadingGuide(checked) {
+            document.getElementById('reading-line').style.display = checked ? 'block' : 'none';
+        }
+        function moveReadingLine(e) {
+            const line = document.getElementById('reading-line');
+            line.style.top = e.clientY + "px";
+        }
 
-        async function logout() { await dbClient.auth.signOut(); window.location.reload(); }
-
-        // Lógica del Chatbot Estructural
+        // LÓGICA CHATBOT
         function toggleChat() {
             const win = document.getElementById('chat-window');
             win.classList.toggle('hidden');
-            lucide.createIcons();
         }
-
-        function handleOption(key, label) {
-            appendMessage(label, 'user');
-            setTimeout(() => {
-                let r = "";
-                if(key === 'catalogo') r = "Puedes explorar todos nuestros productos <a href='catalog.html' class='underline font-bold'>aquí</a>.";
-                if(key === 'pedido') r = "Para rastrear un pedido, por favor ingresa tu número de guía.";
-                if(key === 'soporte') r = "Te pondré en contacto con un agente humano. Espera un momento...";
-                appendMessage(r, 'bot');
-            }, 600);
+        function handleOption(opt) {
+            appendMsg("Seleccionaste: " + opt, 'user');
+            setTimeout(() => appendMsg("Entendido, te llevaré a esa sección ahora mismo.", 'bot'), 600);
         }
-
-        function appendMessage(text, sender) {
-            const msgBox = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = sender === 'user' ? "flex justify-end" : "flex justify-start";
-            
-            const bgColor = sender === 'user' ? "bg-slate-200 text-slate-800" : "bg-blue-600 text-white";
-            const rounded = sender === 'user' ? "rounded-tr-none" : "rounded-tl-none";
-            
-            div.innerHTML = `<div class="${bgColor} p-3 rounded-2xl ${rounded} text-sm shadow-sm max-w-[85%]">${text}</div>`;
-            msgBox.appendChild(div);
-            msgBox.scrollTop = msgBox.scrollHeight;
-        }
-
         function sendMessage() {
             const input = document.getElementById('chat-input');
-            const val = input.value.trim();
-            if(!val) return;
-            
-            appendMessage(val, 'user');
-            input.value = '';
-            
-            setTimeout(() => {
-                let r = "Entiendo. ¿Deseas que te ayude con algo más específico de nuestro menú?";
-                if(val.toLowerCase().includes("hola")) r = "¡Hola! ¿Cómo puedo ayudarte hoy?";
-                appendMessage(r, 'bot');
-            }, 800);
+            if(!input.value) return;
+            appendMsg(input.value, 'user');
+            input.value = "";
         }
-
-        // Reloj y Carrito
-        setInterval(() => { document.getElementById('live-clock').textContent = new Date().toLocaleTimeString(); }, 1000);
-        
-        function updateCartBadge() {
-            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-            const count = cart.reduce((a, b) => a + b.cantidad, 0);
-            const b = document.getElementById('cart-count');
-            if(b) {
-                b.innerText = count;
-                b.style.display = count > 0 ? 'flex' : 'none';
-            }
+        function appendMsg(text, sender) {
+            const box = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = sender === 'user' ? "flex justify-end" : "flex justify-start";
+            const color = sender === 'user' ? "bg-slate-200 text-slate-800" : "bg-blue-600 text-white";
+            div.innerHTML = `<div class="${color} p-3 rounded-2xl ${sender==='user'?'rounded-tr-none':'rounded-tl-none'} max-w-[85%] shadow-sm">${text}</div>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         }
-        updateCartBadge();
     </script>
 </body>
 </html>
