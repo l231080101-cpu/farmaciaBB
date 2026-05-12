@@ -9,165 +9,156 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <link rel="stylesheet" href="accesibilidad.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="accesibilidad.css">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; transition: background-color 0.3s, color 0.3s; }
-        
-        /* Soporte Modo Oscuro para elementos específicos de Index */
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; transition: background-color 0.3s; }
         body.dark-mode { background-color: #0f172a; color: #f1f5f9; }
-        body.dark-mode .main-header { background: #1e293b; border-color: #334155; }
-        body.dark-mode .nav-link { color: #cbd5e1; }
-        body.dark-mode .hero-container { background: #1e293b; border-color: #334155; }
-        body.dark-mode .logo-subtitle { color: #94a3b8; }
-        body.dark-mode #welcome-title { color: #f8fafc; }
-
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
-        .skip-link { position: absolute; top: -40px; left: 0; background: #2563eb; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; }
-        .skip-link:focus { top: 0; }
         
-        *:focus-visible { outline: 3px solid #2563eb !important; outline-offset: 3px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: #ef4444; color: white; padding: 8px; z-index: 100; transition: top 0.2s; font-weight: bold; text-decoration: none; }
+        .skip-link:focus { top: 0; }
+        *:focus-visible { outline: 3px solid #ef4444 !important; outline-offset: 3px; border-radius: 6px; }
 
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; sticky: top; z-index: 40; }
-        .main-header-content { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .contact-info { display: flex; align-items: center; gap: 20px; }
         
-        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .main-header { background: white; border-bottom: 1px solid #f1f5f9; padding: 20px 0; transition: background 0.3s; }
+        body.dark-mode .main-header { background: #1e293b; border-color: #334155; }
+        
         .logo-box { background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 1.5rem; }
         .logo-title { font-size: 1.8rem; font-weight: 800; color: #2563eb; line-height: 1; }
         
-        .search-bar { flex: 1; position: relative; max-width: 550px; }
         .search-input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; outline: none; }
-        
+        body.dark-mode .search-input { background: #334155; border-color: #475569; color: white; }
+
         .cart-container { position: relative; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50px; border: 2px solid white; }
         
-        .hero-container { width: 100%; background: #ffffff; padding: 24px; border-radius: 32px; border: 1px solid #f1f5f9; margin-top: 20px; }
+        .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: 0.2s; }
+        body.dark-mode .nav-link { color: #cbd5e1; }
+        .nav-link.active { background: #2563eb; color: white; }
+
+        .hero-container { background: #ffffff; padding: 24px; border-radius: 32px; border: 1px solid #f1f5f9; margin-top: 20px; transition: background 0.3s; }
+        body.dark-mode .hero-container { background: #1e293b; border-color: #334155; }
+        
         .video-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
         .hero-video { width: 100%; height: 100%; object-fit: contain; }
 
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; border: 1px solid #fee2e2; padding: 5px 10px; border-radius: 6px; }
+        /* Chatbot Custom Positions */
+        #chatbot-container { bottom: 90px; right: 24px; }
+        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; }
     </style>
 </head>
-
 <body>
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
-    <div id="reading-line" class="reading-guide"></div>
-
-    <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
+    <div id="reading-line" class="reading-guide" style="position: fixed; height: 2px; background: #2563eb; width: 100%; pointer-events: none; z-index: 9999; display: none;"></div>
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" style="position: fixed; bottom: 24px; right: 24px; z-index: 1001; background: #2563eb; color: white; p: 4; width: 56px; height: 56px; border-radius: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
         <i data-lucide="accessibility"></i>
     </div>
 
-    <div id="accessibility-panel">
-        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2 text-white">Accesibilidad</h3>
-        <div class="flex flex-col gap-4 text-sm text-white">
-            <label class="flex justify-between items-center cursor-pointer">
-                Modo Oscuro
-                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
-            </label>
-            <div class="flex flex-col gap-1">
-                <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
+    <div id="accessibility-panel" style="position: fixed; right: -300px; top: 0; width: 280px; height: 100vh; background: #1e293b; transition: 0.3s; z-index: 1000; padding: 2rem; color: white; box-shadow: -5px 0 15px rgba(0,0,0,0.3);">
+        <h3 class="text-xl font-bold mb-6 border-b border-slate-700 pb-2">Accesibilidad</h3>
+        <div class="space-y-6">
+            <label class="flex justify-between items-center cursor-pointer">Modo Oscuro <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"></label>
+            <div>
+                <span class="block mb-2">Tamaño de letra: <b id="text-size-val">100%</b></span>
                 <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
             </div>
-            <label class="flex justify-between items-center cursor-pointer">
-                Contraste Alto
-                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
-            </label>
-            <label class="flex justify-between items-center cursor-pointer">
-                Guía de Lectura
-                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
-            </label>
-            <label class="flex justify-between items-center cursor-pointer">
-                Narrador de Voz
-                <input type="checkbox" onchange="toggleNarrator(this.checked)">
-            </label>
+            <label class="flex justify-between items-center cursor-pointer">Guía de Lectura <input type="checkbox" onchange="toggleReadingGuide(this.checked)"></label>
+            <label class="flex justify-between items-center cursor-pointer">Narrador de voz <input type="checkbox" onchange="toggleNarrator(this.checked)"></label>
         </div>
     </div>
 
-    <div id="root">
-        <header class="site-header" role="banner">
-            <div class="top-bar">
-                <div class="container flex justify-between items-center">
-                    <div class="flex gap-6">
-                        <div class="flex items-center gap-2"><i data-lucide="phone" size="14"></i> <span>55 23 69 79 40</span></div>
-                        <div class="flex items-center gap-2"><i data-lucide="clock" size="14"></i> <span id="live-clock">--:--:--</span></div>
-                    </div>
-                    <div class="hidden md:block">Envío gratis en pedidos mayores a $500</div>
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container flex justify-between items-center">
+                <div class="contact-info">
+                    <div class="contact-item flex items-center gap-2"><i data-lucide="phone" size="16"></i> <span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item flex items-center gap-2"><i data-lucide="clock" size="16"></i> <span id="live-clock">--:--:--</span></div>
                 </div>
             </div>
+        </div>
 
-            <div class="main-header">
-                <div class="container">
-                    <div class="main-header-content">
-                        <a href="index.html" class="logo" aria-label="FarmaPlus Inicio">
-                            <div class="logo-box" aria-hidden="true">⚕️</div>
-                            <div>
-                                <span class="logo-title block">FarmaPlus</span>
-                                <span class="logo-subtitle text-xs">Tu farmacia de confianza</span>
-                            </div>
-                        </a>
-                        
-                        <form class="search-bar" role="search" action="catalog.html">
-                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5"></i>
-                            <input type="search" name="q" placeholder="Buscar medicamentos..." class="search-input text-slate-900" />
-                        </form>
-                        
-                        <div class="header-actions">
-                            <a href="carrito.html" class="cart-container text-slate-700" aria-label="Ver carrito">
-                                <i data-lucide="shopping-basket" size="22"></i>
-                                <span id="cart-count" class="cart-badge" style="display:none">0</span>
-                            </a>
-                            <div id="user-auth-section">
-                                </div>
+        <div class="main-header">
+            <div class="container">
+                <div class="flex items-center justify-between gap-8">
+                    <a href="index.html" class="logo flex items-center gap-3 decoration-none">
+                        <div class="logo-box">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Salud Digital</p>
                         </div>
+                    </a>
+                    
+                    <div class="flex-1 max-w-md relative">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5"></i>
+                        <input type="search" id="buscar-productos" placeholder="¿Qué medicina buscas?" class="search-input" />
                     </div>
                     
-                    <nav class="flex gap-2 mt-4" aria-label="Navegación principal">
-                        <a href="index.html" class="px-4 py-2 rounded-lg font-bold bg-blue-600 text-white">Inicio</a>
-                        <a href="catalog.html" class="px-4 py-2 rounded-lg font-bold text-slate-600 hover:bg-blue-50 transition-colors">Catálogo</a>
-                        <a href="nosotros.html" class="px-4 py-2 rounded-lg font-bold text-slate-600 hover:bg-blue-50 transition-colors">Nosotros</a>
-                        <a href="contacto.html" class="px-4 py-2 rounded-lg font-bold text-slate-600 hover:bg-blue-50 transition-colors">Contacto</a>
-                    </nav>
-                </div>
-            </div>
-        </header>
-
-        <main id="main-content" class="container outline-none" tabindex="-1">
-            <section class="hero-container shadow-sm">
-                <div class="video-wrapper">
-                    <video autoplay muted loop playsinline class="hero-video">
-                        <source src="imagenes/video/hero.mp4" type="video/mp4">
-                        Tu navegador no soporta videos.
-                    </video>
-                </div>
-                
-                <div class="text-center mt-12 py-10">
-                    <h2 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                    <p class="text-slate-500 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Cuidamos de ti y de los tuyos. Encuentra todo lo que necesitas con entrega inmediata y asesoría profesional.
-                    </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <a href="catalog.html" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:scale-105 transition-all">Explorar Catálogo</a>
-                        <a href="contacto.html" class="bg-white text-slate-700 px-12 py-4 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">Hablar con un asesor</a>
+                    <div class="flex items-center gap-6">
+                        <a href="carrito.html" class="cart-container">
+                            <i data-lucide="shopping-basket" class="text-slate-600"></i>
+                            <span id="cart-count" class="cart-badge" style="display:none">0</span>
+                        </a>
+                        <div id="user-auth-section">
+                            <a href="login.html" class="flex items-center gap-2 font-bold text-slate-700">
+                                <i data-lucide="user"></i><span class="hidden sm:inline">Ingresar</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
-
-        <footer class="bg-slate-900 text-white py-12 mt-20">
-            <div class="container text-center">
-                <div class="flex justify-center gap-6 mb-6">
-                    <i data-lucide="facebook" class="cursor-pointer hover:text-blue-400"></i>
-                    <i data-lucide="instagram" class="cursor-pointer hover:text-pink-400"></i>
-                    <i data-lucide="twitter" class="cursor-pointer hover:text-blue-300"></i>
-                </div>
-                <p class="opacity-50 text-sm">© 2026 FarmaPlus. Cuidado experto para tu salud. Todos los derechos reservados.</p>
+                
+                <nav class="flex gap-2 mt-6">
+                    <a href="index.html" class="nav-link active">Inicio</a>
+                    <a href="catalog.html" class="nav-link">Catálogo</a>
+                    <a href="nosotros.html" class="nav-link">Nosotros</a>
+                    <a href="contacto.html" class="nav-link">Contacto</a>
+                </nav>
             </div>
-        </footer>
+        </div>
+    </header>
+
+    <main id="main-content" class="container pb-20">
+        <div class="hero-container shadow-sm">
+            <div class="video-wrapper">
+                <video autoplay muted loop playsinline class="hero-video">
+                    <source src="imagenes/video/hero.mp4" type="video/mp4">
+                    Tu navegador no soporta videos.
+                </video>
+            </div>
+            
+            <div class="text-center mt-12">
+                <h2 class="text-4xl md:text-6xl font-black mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">Tu salud es nuestra prioridad. Recibe tus medicamentos en la puerta de tu hogar en menos de 24 horas.</p>
+                <div class="flex justify-center gap-4">
+                    <a href="catalog.html" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition">Ver Catálogo</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="chatbot-container" class="fixed z-50 flex flex-col items-end">
+        <div id="chat-window" class="hidden bg-white w-80 h-96 rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4">
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2"><i data-lucide="bot"></i><span class="font-bold">Asistente FarmaPlus</span></div>
+                <button onclick="toggleChat()"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm bg-slate-50">
+                <div class="bg-blue-100 text-blue-800 p-3 rounded-2xl rounded-tl-none mr-8">¡Hola! 👋 Soy tu asistente. ¿En qué puedo ayudarte hoy?</div>
+            </div>
+            <div class="p-3 border-t bg-white flex gap-2">
+                <input type="text" id="chat-input" placeholder="Escribe..." class="flex-1 p-2 border rounded-xl text-sm outline-none">
+                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="send" size="18"></i></button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:scale-110 transition">
+            <i data-lucide="message-square" id="chat-icon"></i>
+        </button>
     </div>
 
     <script src="accesibilidad.js"></script>
@@ -176,65 +167,55 @@
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
 
-        // Control de Sesión
+        lucide.createIcons();
+
+        // Auth Logic
         dbClient.auth.onAuthStateChange((event, session) => {
-            if (session) renderUserSession(session);
-            else renderLoginButton();
+            const authSection = document.getElementById('user-auth-section');
+            if (session) {
+                const name = session.user.email.split('@')[0];
+                authSection.innerHTML = `<div class="flex items-center gap-4"><span class="font-bold">Hola, ${name}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
+                document.getElementById('welcome-title').innerText = `¡Hola de nuevo, ${name}!`;
+            }
         });
 
-        async function renderUserSession(session) {
-            const authSection = document.getElementById('user-auth-section');
-            const welcomeTitle = document.getElementById('welcome-title');
-            
-            const { data: profile } = await dbClient.from('profiles').select('full_name').eq('id', session.user.id).single();
-            const name = profile?.full_name?.split(' ')[0] || "Usuario";
-            
-            authSection.innerHTML = `
-                <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                    <span class="text-slate-700 font-bold text-sm">Hola, ${name}</span>
-                    <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase hover:underline">Salir</button>
-                </div>`;
-            
-            welcomeTitle.innerText = `¡Bienvenido de nuevo, ${name}!`;
+        async function logout() { await dbClient.auth.signOut(); window.location.reload(); }
+
+        // Chatbot Logic
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.classList.toggle('hidden');
             lucide.createIcons();
         }
 
-        function renderLoginButton() {
-            document.getElementById('user-auth-section').innerHTML = `
-                <a href="login.html" class="flex items-center gap-2 font-bold text-slate-600 hover:text-blue-600 transition-colors">
-                    <i data-lucide="user" size="20"></i>
-                    <span>Ingresar</span>
-                </a>`;
-            lucide.createIcons();
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msgBox = document.getElementById('chat-messages');
+            if(!input.value.trim()) return;
+            
+            msgBox.innerHTML += `<div class="bg-white border p-3 rounded-2xl ml-8 text-right shadow-sm">${input.value}</div>`;
+            const val = input.value.toLowerCase();
+            input.value = '';
+            
+            setTimeout(() => {
+                let r = "Estamos para servirte. ¿Deseas ver el catálogo?";
+                if(val.includes("hola")) r = "¡Hola! ¿Cómo podemos ayudarte hoy?";
+                if(val.includes("envio")) r = "Enviamos a todo México en menos de 24 horas.";
+                msgBox.innerHTML += `<div class="bg-blue-100 text-blue-800 p-3 rounded-2xl mr-8 shadow-sm">${r}</div>`;
+                msgBox.scrollTop = msgBox.scrollHeight;
+            }, 800);
         }
 
-        async function logout() {
-            await dbClient.auth.signOut();
-            window.location.reload();
-        }
-
-        // Reloj y Carrito
-        function updateClock() {
-            const clock = document.getElementById('live-clock');
-            if (clock) clock.textContent = new Date().toLocaleTimeString();
-        }
-
+        // Global functions
+        setInterval(() => { document.getElementById('live-clock').textContent = new Date().toLocaleTimeString(); }, 1000);
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
-            const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
-            const badge = document.getElementById('cart-count');
-            if (badge) {
-                badge.innerText = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
-            }
+            const count = cart.reduce((a, b) => a + b.cantidad, 0);
+            const b = document.getElementById('cart-count');
+            b.innerText = count;
+            b.style.display = count > 0 ? 'flex' : 'none';
         }
-
-        // Inicialización
-        window.onload = () => {
-            setInterval(updateClock, 1000);
-            updateCartBadge();
-            lucide.createIcons();
-        };
+        updateCartBadge();
     </script>
 </body>
 </html>
