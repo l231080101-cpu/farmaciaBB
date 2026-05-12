@@ -677,53 +677,42 @@
         }
 
         function initChatbot() {
-    const toggleBtn = document.getElementById('chat-toggle-btn');
-    const chatWindow = document.getElementById('chat-window');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('chat-send-btn');
-    const quickReplyBtns = document.querySelectorAll('.quick-reply-btn');
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            const quickReplyBtns = document.querySelectorAll('.quick-reply-btn');
 
-    if (!toggleBtn || !chatWindow) return;
+            if (!toggleBtn || !chatWindow) return;
 
-    toggleBtn.addEventListener('click', () => {
-        const isHidden = chatWindow.classList.contains('hidden');
-        if (isHidden) {
-            // Abrir el chat: limpiar historial y mostrar solo mensaje de bienvenida
-            chatWindow.classList.remove('hidden');
-            toggleBtn.setAttribute('aria-expanded', 'true');
-            
-            // Resetear conversación (borrar localStorage y limpiar HTML)
-            localStorage.removeItem('farmaplus_chat_history');
-            const container = document.getElementById('chat-messages');
-            if (container) {
-                container.innerHTML = `
-                    <div class="flex justify-start">
-                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                            ¡Bienvenido a FarmaPlus! 👋 Soy su asistente. ¿En qué podemos servirle con respecto a su bienestar hoy?
-                        </div>
-                    </div>
-                `;
-            }
-            chatInput.focus();
-        } else {
-            chatWindow.classList.add('hidden');
-            toggleBtn.setAttribute('aria-expanded', 'false');
-        }
-        lucide.createIcons();
-    });
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = chatWindow.classList.contains('hidden');
+                if (isHidden) {
+                    chatWindow.classList.remove('hidden');
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                    chatInput.focus();
+                    if (document.getElementById('chat-messages').children.length === 0) {
+                        loadChatHistory();
+                    }
+                } else {
+                    chatWindow.classList.add('hidden');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+                lucide.createIcons();
+            });
 
-    if (sendBtn) sendBtn.addEventListener('click', () => sendMessage());
-    if (chatInput) chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+            if (sendBtn) sendBtn.addEventListener('click', () => sendMessage());
+            if (chatInput) chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
 
-    quickReplyBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const replyText = btn.getAttribute('data-reply') || btn.innerText.replace(/[🛒📦📄⏰📍👋]/g, '').trim();
-            sendMessage(replyText);
-        });
-    });
-}
+            quickReplyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const replyText = btn.getAttribute('data-reply') || btn.innerText.replace(/[🛒📦📄⏰📍👋]/g, '').trim();
+                    sendMessage(replyText);
+                });
+            });
+
             if (document.getElementById('chat-messages').children.length === 0) {
                 loadChatHistory();
             }
