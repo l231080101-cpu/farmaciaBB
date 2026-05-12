@@ -38,17 +38,80 @@
         .nav-link { text-decoration: none; color: #475569; font-weight: 600; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
         .nav-link:hover { color: #2563eb; background: #eff6ff; }
         .nav-link.active { background: #2563eb; color: white; }
-        .content-card { background: #f8fafc; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; margin-top: 40px; }
-
-        #user-auth-section { display: flex; align-items: center; gap: 15px; }
-        .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; }
-        .logout-btn:hover { background: #fee2e2; }
-        .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }
+        
+        /* Hero video container */
+        .hero-video-container {
+            position: relative;
+            height: 550px;
+            overflow: hidden;
+            margin-top: 0;
+        }
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 0 1rem;
+        }
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        .hero-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.125rem;
+            max-width: 42rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 2.5rem;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-weight: bold;
+            box-shadow: 0 10px 15px -3px rgba(37,99,235,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background-color: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #f8fafc;
+        }
 
         /* Chatbot */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
         #chat-messages { scroll-behavior: smooth; }
-        .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
         .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .animate-pop { animation: popIn 0.3s ease-out; }
@@ -91,9 +154,7 @@
         }
         #accessibility-panel.active { display: block; }
 
-        .reading-guide {
-            display: none;
-        }
+        .reading-guide { display: none; }
         .reading-guide.active {
             display: block;
             position: fixed;
@@ -111,10 +172,12 @@
             color: #f1f5f9;
         }
         .dark-mode .main-header,
-        .dark-mode .content-card,
         .dark-mode .top-bar {
             background-color: #334155 !important;
             color: #f1f5f9;
+        }
+        .dark-mode .hero-overlay {
+            background: rgba(0,0,0,0.7);
         }
         .high-contrast {
             background-color: black;
@@ -125,6 +188,15 @@
             background-color: yellow !important;
             color: black !important;
             border: 2px solid white;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .hero-video-container { height: 450px; }
+            .main-header-content { flex-wrap: wrap; }
+            .search-bar { order: 3; width: 100%; max-width: none; margin-top: 10px; }
+            .nav-desktop { overflow-x: auto; gap: 5px; }
         }
     </style>
 </head>
@@ -156,7 +228,7 @@
                         </a>
                         <div class="search-bar">
                             <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" placeholder="Buscar productos..." class="search-input" />
+                            <input type="text" placeholder="Buscar productos..." class="search-input" id="search-input-header" />
                         </div>
                         <div class="header-actions">
                             <div id="admin-action-container"></div>
@@ -182,18 +254,24 @@
             </div>
         </header>
 
-        <main class="container py-12">
-            <div class="content-card text-center">
-                <h2 class="text-5xl font-black text-slate-900 mb-6" id="welcome-title">Bienvenido a FarmaPlus</h2>
-                <p class="text-slate-500 text-lg max-w-2xl mx-auto mb-10">
+        <!-- Sección Hero con video de fondo -->
+        <div class="hero-video-container">
+            <video class="hero-video" autoplay loop muted playsinline>
+                <source src="images/video/hero.mp4" type="video/mp4">
+                Tu navegador no soporta videos HTML5.
+            </video>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h2 class="hero-title" id="welcome-title">Bienvenido a FarmaPlus</h2>
+                <p class="hero-subtitle">
                     Tu salud es nuestra prioridad. Explora nuestro catálogo y recibe tus medicamentos en la puerta de tu hogar.
                 </p>
-                <div class="flex justify-center gap-4">
-                    <a href="catalog.html" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:scale-105 transition-all">Ver Catálogo</a>
-                    <a href="contacto.html" class="bg-white text-slate-600 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Soporte</a>
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <a href="catalog.html" class="btn-primary">Ver Catálogo</a>
+                    <a href="contacto.html" class="btn-secondary">Soporte</a>
                 </div>
             </div>
-        </main>
+        </div>
 
         <footer class="bg-slate-900 text-white py-12 mt-20">
             <div class="container text-center">
@@ -208,7 +286,7 @@
             <i data-lucide="message-circle" id="chat-icon"></i>
         </button>
 
-        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col">
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex-col">
             <div class="bg-blue-600 p-4 text-white">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -243,38 +321,30 @@
         <h3 style="color: #fbbf24; margin-bottom: 15px;">Configuración</h3>
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
-            
             <div>
                 <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
                 <input type="range" min="100" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
             </div>
-
             <label><input type="checkbox" onchange="toggleNarrator(this.checked)"> Narrador de Voz</label>
             <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
             <label><input type="checkbox" onchange="toggleReadingGuide(this.checked)"> Lectura Guiada</label>
         </div>
     </div>
 
-    <!-- Línea de lectura guiada -->
     <div id="reading-line" class="reading-guide"></div>
 
     <script>
-        // ⚠️ CLAVE EXPUESTA: Debes rotarla en Supabase (Settings > API > Add secret)
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
-        const dbClient = supabase.createClient(_url, _key);
+        // Configuración Supabase (clave anónima - usar RLS para proteger datos)
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Protección de sesión
-        async function verificarSesion() {
-            const { data } = await dbClient.auth.getSession();
-            if (!data.session) {
-                window.location.href = 'login.html';
-            }
-        }
-        verificarSesion();
+        // NO redirigimos automáticamente al login, la página es pública.
+        // Solo actualizamos la interfaz si hay sesión.
+        
+        let userName = "";
 
-        let userName = ""; 
-
+        // Escuchar cambios en autenticación
         dbClient.auth.onAuthStateChange((event, session) => {
             if (session) {
                 renderUserSession(session);
@@ -288,35 +358,45 @@
             const welcomeTitle = document.getElementById('welcome-title');
             const adminContainer = document.getElementById('admin-action-container');
 
-            const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
-            
-            const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
-            userName = fullName.split(' ')[0];
-            const role = profile?.role || 'usuario';
+            try {
+                const { data: profile } = await dbClient.from('profiles').select('full_name, role').eq('id', session.user.id).single();
+                const fullName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+                userName = fullName.split(' ')[0];
+                const role = profile?.role || 'usuario';
 
-            if (role === 'admin') {
-                adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
+                if (role === 'admin') {
+                    adminContainer.innerHTML = `<a href="admin.html" class="flex items-center gap-2 text-blue-600"><span class="admin-badge">ADMIN</span><i data-lucide="layout-grid"></i></a>`;
+                } else {
+                    adminContainer.innerHTML = '';
+                }
+
+                authSection.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
+                            <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
+                        </span>
+                        <button onclick="logout()" class="logout-btn">Salir</button>
+                    </div>`;
+                
+                if (welcomeTitle) welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error al obtener perfil:', error);
+                renderLoginButton(); // fallback
             }
-
-            authSection.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <span class="text-slate-700 font-semibold text-sm flex items-center gap-1">
-                        <i data-lucide="user-check" size="18" class="text-blue-600"></i> ${userName}
-                    </span>
-                    <button onclick="logout()" class="logout-btn">Salir</button>
-                </div>`;
-            
-            welcomeTitle.innerText = `¡Qué gusto verte, ${userName}!`;
-            lucide.createIcons();
         }
 
         function renderLoginButton() {
-            document.getElementById('user-auth-section').innerHTML = `
-                <a href="login.html" class="action-link">
-                    <i data-lucide="user"></i>
-                    <span>Iniciar Sesión</span>
-                </a>`;
-            document.getElementById('welcome-title').innerText = "Bienvenido a FarmaPlus";
+            const authSection = document.getElementById('user-auth-section');
+            const welcomeTitle = document.getElementById('welcome-title');
+            if (authSection) {
+                authSection.innerHTML = `
+                    <a href="login.html" class="action-link">
+                        <i data-lucide="user"></i>
+                        <span>Iniciar Sesión</span>
+                    </a>`;
+            }
+            if (welcomeTitle) welcomeTitle.innerText = "Bienvenido a FarmaPlus";
             lucide.createIcons();
         }
 
@@ -326,8 +406,10 @@
             window.location.href = "index.html";
         }
 
+        // Funciones de reloj y carrito
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
+            if (!clockElement) return;
             const now = new Date();
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
@@ -337,51 +419,88 @@
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((acc, item) => acc + item.cantidad, 0);
             const badge = document.getElementById('cart-count');
-            badge.innerText = count;
-            badge.style.display = count > 0 ? 'flex' : 'none';
+            if (badge) {
+                badge.innerText = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
         }
 
-        // Chatbot
-        function toggleChat() { document.getElementById('chat-window').classList.toggle('hidden'); }
-        function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+        // Chatbot (simple eco)
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            if (win) win.classList.toggle('hidden');
+        }
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msgContainer = document.getElementById('chat-messages');
-            if (!input.value.trim()) return;
-            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${input.value}</div></div>`;
+            if (!input || !msgContainer) return;
+            const text = input.value.trim();
+            if (!text) return;
+            // Mensaje del usuario
+            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
+            // Respuesta automática genérica (simulada)
+            setTimeout(() => {
+                msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-2 rounded-lg border border-slate-200">Gracias por contactarnos. Un asesor te responderá pronto.</div></div>`;
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }, 500);
         }
 
         // Accesibilidad
         function toggleAccPanel() {
             document.getElementById('accessibility-panel').classList.toggle('active');
         }
-
         function toggleNarrator(active) {
-            console.log('Narrador ' + (active ? 'activado' : 'desactivado'));
-            // Aquí puedes implementar la síntesis de voz
+            if (active && 'speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance("Modo narrador activado");
+                window.speechSynthesis.speak(msg);
+            } else if (!active) {
+                window.speechSynthesis.cancel();
+            }
         }
-
         function toggleReadingGuide(active) {
             document.getElementById('reading-line').classList.toggle('active', active);
         }
-
         function changeTextSize(size) {
             document.documentElement.style.fontSize = size + '%';
             document.getElementById('text-size-val').textContent = size + '%';
+        }
+
+        // Búsqueda simple (redirige a catalog.html con query)
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input-header');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const query = encodeURIComponent(searchInput.value.trim());
+                        if (query) window.location.href = `catalog.html?search=${query}`;
+                        else window.location.href = 'catalog.html';
+                    }
+                });
+            }
         }
 
         // Inicialización
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
-        dbClient.auth.getSession().then(({data}) => {
-            if(data.session) renderUserSession(data.session);
+        setupSearch();
+        // Verificar sesión actual sin redirigir
+        dbClient.auth.getSession().then(({ data }) => {
+            if (data.session) renderUserSession(data.session);
+            else renderLoginButton();
         });
         lucide.createIcons();
-    </script>
 
-    <script src="js/sessionTimeout.js"></script>
+        // Estilos adicionales para botón logout
+        const style = document.createElement('style');
+        style.textContent = `.logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; } .logout-btn:hover { background: #fee2e2; } .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }`;
+        document.head.appendChild(style);
+    </script>
+    <!-- Eliminamos referencia a sessionTimeout.js si no existe, o se puede agregar después -->
 </body>
 </html>
