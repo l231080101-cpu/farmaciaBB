@@ -48,8 +48,6 @@
         .video-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 16px; overflow: hidden; }
         .hero-video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* Chatbot Custom Positions */
-        #chatbot-container { bottom: 90px; right: 24px; }
         .logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; }
     </style>
 </head>
@@ -57,7 +55,7 @@
     <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 
     <div id="reading-line" class="reading-guide" style="position: fixed; height: 2px; background: #2563eb; width: 100%; pointer-events: none; z-index: 9999; display: none;"></div>
-    <div id="acc-toggle-btn" onclick="toggleAccPanel()" style="position: fixed; bottom: 24px; right: 24px; z-index: 1001; background: #2563eb; color: white; p: 4; width: 56px; height: 56px; border-radius: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" style="position: fixed; bottom: 24px; right: 24px; z-index: 1001; background: #2563eb; color: white; width: 56px; height: 56px; border-radius: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
         <i data-lucide="accessibility"></i>
     </div>
 
@@ -142,22 +140,40 @@
         </div>
     </main>
 
-    <div id="chatbot-container" class="fixed z-50 flex flex-col items-end">
-        <div id="chat-window" class="hidden bg-white w-80 h-96 rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4">
-            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
-                <div class="flex items-center gap-2"><i data-lucide="bot"></i><span class="font-bold">Asistente FarmaPlus</span></div>
-                <button onclick="toggleChat()"><i data-lucide="x" size="18"></i></button>
+    <div id="chatbot-container" class="fixed z-50 flex flex-col items-end" style="bottom: 100px; right: 24px;">
+        <div id="chat-window" class="hidden bg-white w-80 sm:w-96 h-[480px] rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden mb-4 transition-all duration-300">
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="bot"></i>
+                    <div>
+                        <p class="font-bold text-sm">Asistente FarmaPlus</p>
+                        <p class="text-[10px] opacity-80">En línea ahora</p>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="hover:bg-white/20 p-1 rounded-full"><i data-lucide="x" size="20"></i></button>
             </div>
-            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm bg-slate-50">
-                <div class="bg-blue-100 text-blue-800 p-3 rounded-2xl rounded-tl-none mr-8">¡Hola! 👋 Soy tu asistente. ¿En qué puedo ayudarte hoy?</div>
+            
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
+                <div class="flex flex-col gap-2">
+                    <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm max-w-[85%]">
+                        ¡Hola! 👋 Soy tu asistente virtual. ¿Cómo puedo ayudarte hoy?
+                    </div>
+                    <div id="chat-options" class="flex flex-wrap gap-2 mt-1">
+                        <button onclick="handleOption('catalogo', '💊 Ver Catálogo')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">💊 Ver Catálogo</button>
+                        <button onclick="handleOption('pedido', '📦 Mi Pedido')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">📦 Mi Pedido</button>
+                        <button onclick="handleOption('soporte', '🛠️ Soporte')" class="bg-white border border-blue-200 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 transition">🛠️ Soporte</button>
+                    </div>
+                </div>
             </div>
+
             <div class="p-3 border-t bg-white flex gap-2">
-                <input type="text" id="chat-input" placeholder="Escribe..." class="flex-1 p-2 border rounded-xl text-sm outline-none">
-                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl"><i data-lucide="send" size="18"></i></button>
+                <input type="text" id="chat-input" placeholder="Escribe tu duda..." class="flex-1 p-2 bg-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl shadow-md"><i data-lucide="send" size="18"></i></button>
             </div>
         </div>
-        <button onclick="toggleChat()" class="bg-blue-600 text-white p-4 rounded-full shadow-xl hover:scale-110 transition">
-            <i data-lucide="message-square" id="chat-icon"></i>
+
+        <button onclick="toggleChat()" class="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-white">
+            <i data-lucide="message-circle" id="chat-icon"></i>
         </button>
     </div>
 
@@ -169,51 +185,75 @@
 
         lucide.createIcons();
 
-        // Auth Logic
+        // Lógica de Autenticación
         dbClient.auth.onAuthStateChange((event, session) => {
             const authSection = document.getElementById('user-auth-section');
             if (session) {
                 const name = session.user.email.split('@')[0];
-                authSection.innerHTML = `<div class="flex items-center gap-4"><span class="font-bold">Hola, ${name}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
-                document.getElementById('welcome-title').innerText = `¡Hola de nuevo, ${name}!`;
+                authSection.innerHTML = `<div class="flex items-center gap-4"><span class="font-bold text-sm">Hola, ${name}</span><button onclick="logout()" class="logout-btn">Salir</button></div>`;
+                document.getElementById('welcome-title').innerText = `¡Qué gusto verte, ${name}!`;
             }
         });
 
         async function logout() { await dbClient.auth.signOut(); window.location.reload(); }
 
-        // Chatbot Logic
+        // Lógica del Chatbot Estructural
         function toggleChat() {
             const win = document.getElementById('chat-window');
             win.classList.toggle('hidden');
             lucide.createIcons();
         }
 
+        function handleOption(key, label) {
+            appendMessage(label, 'user');
+            setTimeout(() => {
+                let r = "";
+                if(key === 'catalogo') r = "Puedes explorar todos nuestros productos <a href='catalog.html' class='underline font-bold'>aquí</a>.";
+                if(key === 'pedido') r = "Para rastrear un pedido, por favor ingresa tu número de guía.";
+                if(key === 'soporte') r = "Te pondré en contacto con un agente humano. Espera un momento...";
+                appendMessage(r, 'bot');
+            }, 600);
+        }
+
+        function appendMessage(text, sender) {
+            const msgBox = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = sender === 'user' ? "flex justify-end" : "flex justify-start";
+            
+            const bgColor = sender === 'user' ? "bg-slate-200 text-slate-800" : "bg-blue-600 text-white";
+            const rounded = sender === 'user' ? "rounded-tr-none" : "rounded-tl-none";
+            
+            div.innerHTML = `<div class="${bgColor} p-3 rounded-2xl ${rounded} text-sm shadow-sm max-w-[85%]">${text}</div>`;
+            msgBox.appendChild(div);
+            msgBox.scrollTop = msgBox.scrollHeight;
+        }
+
         function sendMessage() {
             const input = document.getElementById('chat-input');
-            const msgBox = document.getElementById('chat-messages');
-            if(!input.value.trim()) return;
+            const val = input.value.trim();
+            if(!val) return;
             
-            msgBox.innerHTML += `<div class="bg-white border p-3 rounded-2xl ml-8 text-right shadow-sm">${input.value}</div>`;
-            const val = input.value.toLowerCase();
+            appendMessage(val, 'user');
             input.value = '';
             
             setTimeout(() => {
-                let r = "Estamos para servirte. ¿Deseas ver el catálogo?";
-                if(val.includes("hola")) r = "¡Hola! ¿Cómo podemos ayudarte hoy?";
-                if(val.includes("envio")) r = "Enviamos a todo México en menos de 24 horas.";
-                msgBox.innerHTML += `<div class="bg-blue-100 text-blue-800 p-3 rounded-2xl mr-8 shadow-sm">${r}</div>`;
-                msgBox.scrollTop = msgBox.scrollHeight;
+                let r = "Entiendo. ¿Deseas que te ayude con algo más específico de nuestro menú?";
+                if(val.toLowerCase().includes("hola")) r = "¡Hola! ¿Cómo puedo ayudarte hoy?";
+                appendMessage(r, 'bot');
             }, 800);
         }
 
-        // Global functions
+        // Reloj y Carrito
         setInterval(() => { document.getElementById('live-clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+        
         function updateCartBadge() {
             const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
             const count = cart.reduce((a, b) => a + b.cantidad, 0);
             const b = document.getElementById('cart-count');
-            b.innerText = count;
-            b.style.display = count > 0 ? 'flex' : 'none';
+            if(b) {
+                b.innerText = count;
+                b.style.display = count > 0 ? 'flex' : 'none';
+            }
         }
         updateCartBadge();
     </script>
