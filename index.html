@@ -154,17 +154,18 @@
         }
         #accessibility-panel.active { display: block; }
 
-        .reading-guide { display: none; }
-        .reading-guide.active {
-            display: block;
+        .reading-guide {
+            display: none;
             position: fixed;
-            top: 50%;
             left: 0;
             width: 100%;
             height: 4px;
-            background: yellow;
-            z-index: 200;
+            background-color: yellow;
             pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active {
+            display: block;
         }
 
         .dark-mode {
@@ -323,28 +324,96 @@
             <label><input type="checkbox" onchange="document.body.classList.toggle('dark-mode')"> Modo Nocturno</label>
             <div>
                 <span>Tamaño de Texto: <span id="text-size-val">100%</span></span>
-                <input type="range" min="100" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
+                <input type="range" min="80" max="150" value="100" style="width: 100%" oninput="changeTextSize(this.value)">
             </div>
-            <label><input type="checkbox" onchange="toggleNarrator(this.checked)"> Narrador de Voz</label>
+            <label><input type="checkbox" id="narrator-toggle"> Narrador de Voz</label>
             <label><input type="checkbox" onchange="document.body.classList.toggle('high-contrast')"> Contraste Alto</label>
-            <label><input type="checkbox" onchange="toggleReadingGuide(this.checked)"> Lectura Guiada</label>
+            <label><input type="checkbox" id="reading-guide-toggle"> Lectura Guiada</label>
         </div>
     </div>
 
     <div id="reading-line" class="reading-guide"></div>
 
     <script>
-        // Configuración Supabase (clave anónima - usar RLS para proteger datos)
+        // Configuración Supabase
         const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // NO redirigimos automáticamente al login, la página es pública.
-        // Solo actualizamos la interfaz si hay sesión.
-        
         let userName = "";
 
-        // Escuchar cambios en autenticación
+        // ======================== ACCESIBILIDAD MEJORADA ========================
+        // Panel accesibilidad
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        // Cambiar tamaño de texto (con límites)
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + "%";
+            document.getElementById('text-size-val').innerText = size + "%";
+        }
+
+        // Línea de lectura guiada (con addEventListener)
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => {
+                    line.style.top = e.clientY + 'px';
+                };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) {
+                    window.removeEventListener('mousemove', guideHandler);
+                    guideHandler = null;
+                }
+            }
+        }
+
+        // Narrador de voz (lee solo textos cortos y respeta aria-label)
+        function speakText(e) {
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
+                utterance.lang = 'es-MX';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Configurar el checkbox del narrador
+        const narratorToggle = document.getElementById('narrator-toggle');
+        if (narratorToggle) {
+            narratorToggle.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    document.body.addEventListener('click', speakText);
+                    // Anunciar activación
+                    const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                    msg.lang = 'es-MX';
+                    window.speechSynthesis.speak(msg);
+                } else {
+                    document.body.removeEventListener('click', speakText);
+                    window.speechSynthesis.cancel();
+                }
+            });
+        }
+
+        // Configurar el checkbox de lectura guiada
+        const guideToggle = document.getElementById('reading-guide-toggle');
+        if (guideToggle) {
+            guideToggle.addEventListener('change', (e) => toggleReadingGuide(e.target.checked));
+        }
+        // ======================== FIN ACCESIBILIDAD ========================
+
+        // Autenticación y sesión
         dbClient.auth.onAuthStateChange((event, session) => {
             if (session) {
                 renderUserSession(session);
@@ -382,7 +451,7 @@
                 lucide.createIcons();
             } catch (error) {
                 console.error('Error al obtener perfil:', error);
-                renderLoginButton(); // fallback
+                renderLoginButton();
             }
         }
 
@@ -390,11 +459,7 @@
             const authSection = document.getElementById('user-auth-section');
             const welcomeTitle = document.getElementById('welcome-title');
             if (authSection) {
-                authSection.innerHTML = `
-                    <a href="login.html" class="action-link">
-                        <i data-lucide="user"></i>
-                        <span>Iniciar Sesión</span>
-                    </a>`;
+                authSection.innerHTML = `<a href="login.html" class="action-link"><i data-lucide="user"></i><span>Iniciar Sesión</span></a>`;
             }
             if (welcomeTitle) welcomeTitle.innerText = "Bienvenido a FarmaPlus";
             lucide.createIcons();
@@ -406,7 +471,7 @@
             window.location.href = "index.html";
         }
 
-        // Funciones de reloj y carrito
+        // Reloj y carrito
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             if (!clockElement) return;
@@ -425,7 +490,21 @@
             }
         }
 
-        // Chatbot (simple eco)
+        // Búsqueda
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input-header');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const query = encodeURIComponent(searchInput.value.trim());
+                        if (query) window.location.href = `catalog.html?search=${query}`;
+                        else window.location.href = 'catalog.html';
+                    }
+                });
+            }
+        }
+
+        // Chatbot
         function toggleChat() {
             const win = document.getElementById('chat-window');
             if (win) win.classList.toggle('hidden');
@@ -439,79 +518,29 @@
             if (!input || !msgContainer) return;
             const text = input.value.trim();
             if (!text) return;
-            // Mensaje del usuario
             msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${text}</div></div>`;
             input.value = '';
             msgContainer.scrollTop = msgContainer.scrollHeight;
-            // Respuesta automática genérica (simulada)
             setTimeout(() => {
                 msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-2 rounded-lg border border-slate-200">Gracias por contactarnos. Un asesor te responderá pronto.</div></div>`;
                 msgContainer.scrollTop = msgContainer.scrollHeight;
             }, 500);
         }
 
-       // Abrir/Cerrar Panel
-function toggleAccPanel() {
-    const panel = document.getElementById('accessibility-panel');
-    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-}
-
-// Cambiar tamaño de fuente
-function changeTextSize(val) {
-    document.documentElement.style.fontSize = val + "%";
-    document.getElementById('text-size-val').innerText = val + "%";
-}
-
-// Guía de lectura (Sigue al ratón)
-function toggleReadingGuide(active) {
-    const line = document.getElementById('reading-line');
-    if (active) {
-        line.style.display = 'block';
-        window.onmousemove = (e) => {
-            line.style.top = e.clientY + 'px';
-        };
-    } else {
-        line.style.display = 'none';
-        window.onmousemove = null;
-    }
-}
-
-// Narrador de voz básico (Lee el texto al hacer click)
-document.getElementById('narrator-toggle').addEventListener('change', function(e) {
-    if (e.target.checked) {
-        document.body.addEventListener('click', speakText);
-    } else {
-        document.body.removeEventListener('click', speakText);
-        window.speechSynthesis.cancel();
-    }
-});
-
-function speakText(e) {
-    const text = e.target.innerText;
-    if (text) {
-        window.speechSynthesis.cancel(); // Detiene lecturas anteriores
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-MX';
-        window.speechSynthesis.speak(utterance);
-    }
-}
         // Inicialización
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
         setupSearch();
-        // Verificar sesión actual sin redirigir
         dbClient.auth.getSession().then(({ data }) => {
             if (data.session) renderUserSession(data.session);
             else renderLoginButton();
         });
         lucide.createIcons();
 
-        // Estilos adicionales para botón logout
         const style = document.createElement('style');
         style.textContent = `.logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; } .logout-btn:hover { background: #fee2e2; } .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }`;
         document.head.appendChild(style);
     </script>
-    <!-- Eliminamos referencia a sessionTimeout.js si no existe, o se puede agregar después -->
 </body>
 </html>
