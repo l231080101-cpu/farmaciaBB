@@ -8,7 +8,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Archivos externos de accesibilidad (opcionales, no causan conflicto) -->
     <link rel="stylesheet" href="accesibilidad.css">
+    <script src="accesibilidad.js" defer></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -39,10 +41,63 @@
         }
         .alerta-visual.mostrar { opacity: 1; visibility: visible; bottom: 40px; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+
+        /* ========== ESTILOS DE ACCESIBILIDAD (igual que en index) ========== */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover { transform: scale(1.1); }
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active { display: block; }
+        .reading-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: yellow;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active { display: block; }
+        .dark-mode { background-color: #1e293b !important; color: #f1f5f9; }
+        .dark-mode .bg-white\/80 { background-color: #1e293b !important; }
+        .high-contrast { background-color: black !important; color: yellow !important; }
+        .high-contrast a, .high-contrast button {
+            background-color: yellow !important; color: black !important; border: 2px solid white;
+        }
     </style>
 </head>
 <body class="text-slate-900">
 
+    <!-- Componentes de accesibilidad (bloque mejorado) -->
     <div id="reading-line" class="reading-guide"></div>
 
     <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
@@ -54,23 +109,23 @@
         <div class="flex flex-col gap-4 text-sm text-white">
             <label class="flex justify-between items-center cursor-pointer">
                 Modo Oscuro
-                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                <input type="checkbox" id="dark-mode-checkbox" onchange="toggleDarkMode(this.checked)">
             </label>
             <div class="flex flex-col gap-1">
                 <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
-                <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
             </div>
             <label class="flex justify-between items-center cursor-pointer">
                 Contraste Alto
-                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
+                <input type="checkbox" id="high-contrast-checkbox" onchange="toggleHighContrast(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Guía de Lectura
-                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
+                <input type="checkbox" id="reading-guide-checkbox" onchange="toggleReadingGuide(this.checked)">
             </label>
             <label class="flex justify-between items-center cursor-pointer">
                 Narrador de Voz
-                <input type="checkbox" onchange="toggleNarrator(this.checked)">
+                <input type="checkbox" id="narrator-checkbox" onchange="toggleNarrator(this.checked)">
             </label>
         </div>
     </div>
@@ -118,7 +173,7 @@
         </nav>
 
         <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" role="region" aria-live="polite" aria-busy="false">
-            </div>
+        </div>
 
         <div id="no-results" class="hidden flex-col items-center justify-center py-20 text-center" role="alert">
             <div class="bg-blue-50 p-6 rounded-full mb-4">
@@ -134,59 +189,143 @@
         <span id="mensaje-alerta">¡Acción realizada!</span>
     </div>
 
-    <script src="accesibilidad.js"></script>
     <script>
-        const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
-        const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4'; 
-        const dbClient = supabase.createClient(_url, _key);  
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        // ==================== VARIABLES GLOBALES ====================
         let todosLosProductos = [];
         let categoriaActual = 'todos';
         let cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
 
+        // ==================== ACCESIBILIDAD (funciones completas con persistencia) ====================
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + "%";
+            document.getElementById('text-size-val').innerText = size + "%";
+            localStorage.setItem('textSize', size);
+            const slider = document.getElementById('text-size-slider');
+            if (slider) slider.value = size;
+        }
+
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => { line.style.top = e.clientY + 'px'; };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = null;
+            }
+            localStorage.setItem('readingGuide', active);
+            const chk = document.getElementById('reading-guide-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        let narratorActive = false;
+        function speakText(e) {
+            if (!narratorActive) return;
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
+                utterance.lang = 'es-MX';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+            }
+            localStorage.setItem('narrator', active);
+            const chk = document.getElementById('narrator-checkbox');
+            if (chk && chk.checked !== active) chk.checked = active;
+        }
+
+        function toggleDarkMode(active) {
+            document.body.classList.toggle('dark-mode', active);
+            localStorage.setItem('darkMode', active);
+        }
+
+        function toggleHighContrast(active) {
+            document.body.classList.toggle('high-contrast', active);
+            localStorage.setItem('highContrast', active);
+        }
+
+        function restoreAccessibilityPrefs() {
+            const savedSize = localStorage.getItem('textSize');
+            if (savedSize) changeTextSize(parseInt(savedSize));
+            if (localStorage.getItem('darkMode') === 'true') toggleDarkMode(true);
+            if (localStorage.getItem('highContrast') === 'true') toggleHighContrast(true);
+            if (localStorage.getItem('readingGuide') === 'true') {
+                toggleReadingGuide(true);
+                const chk = document.getElementById('reading-guide-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (localStorage.getItem('narrator') === 'true') {
+                toggleNarrator(true);
+                const chk = document.getElementById('narrator-checkbox');
+                if (chk) chk.checked = true;
+            }
+        }
+
+        // ==================== FUNCIONES DEL CATÁLOGO ====================
         async function cargarProductos() {
             const grid = document.getElementById('productos-grid');
             grid.setAttribute('aria-busy', 'true');
-            
-            const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true }); 
-            
+            const { data, error } = await dbClient.from('productos').select('*').order('nombre', { ascending: true });
             if (error) {
                 console.error("Error:", error);
                 return;
             }
-            
             todosLosProductos = data;
             renderizar(data);
-            updateCount();
+            updateCartBadge();
             grid.setAttribute('aria-busy', 'false');
         }
 
         function renderizar(lista) {
             const grid = document.getElementById('productos-grid');
             const noResults = document.getElementById('no-results');
-            
             let filtrados = lista;
             if (categoriaActual !== 'todos') {
                 filtrados = lista.filter(p => p.categoria?.toLowerCase() === categoriaActual);
             }
-
             if (filtrados.length === 0) {
                 grid.innerHTML = '';
                 noResults.classList.remove('hidden');
                 noResults.classList.add('flex');
                 return;
             }
-
             noResults.classList.add('hidden');
             noResults.classList.remove('flex');
-
             grid.innerHTML = filtrados.map((p, index) => `
                 <article class="product-card bg-white p-6 rounded-[35px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col animate-fade-in" style="animation-delay: ${index * 0.05}s">
                     <div class="relative aspect-square w-full mb-6 overflow-hidden rounded-[25px] bg-slate-50 group">
                         <img src="${p.imagen_url}" class="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110" alt="Empaque de ${p.nombre}">
                         ${p.categoria === 'promos' ? '<span class="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">OFERTA</span>' : ''}
                     </div>
-                    
                     <div class="flex-grow px-2">
                         <div class="flex items-center gap-2 mb-2">
                              <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-tighter">${p.categoria || 'General'}</span>
@@ -196,15 +335,12 @@
                             <span class="w-1.5 h-1.5 bg-green-500 rounded-full" aria-hidden="true"></span> Producto en existencia
                         </p>
                     </div>
-
                     <div class="flex justify-between items-center mt-4 bg-slate-50 p-3 rounded-2xl">
                         <div class="flex flex-col">
                             <span class="sr-only">Precio:</span>
                             <span class="text-2xl font-black text-blue-600" aria-label="${p.precio} pesos">$${p.precio}</span>
                         </div>
-                        <button onclick="addToCart('${p.id}')" 
-                                aria-label="Añadir ${p.nombre} al carrito" 
-                                class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
+                        <button onclick="addToCart('${p.id}')" aria-label="Añadir ${p.nombre} al carrito" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-md shadow-blue-200 group/btn">
                             <i data-lucide="plus" class="group-hover/btn:rotate-90 transition-transform" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -220,9 +356,10 @@
                 btn.setAttribute('aria-pressed', 'false');
             });
             const activeBtn = document.getElementById(`btn-${cat}`);
-            activeBtn.classList.add('active');
-            activeBtn.setAttribute('aria-pressed', 'true');
-            
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
             aplicarBusquedaYFiltro();
         }
 
@@ -237,48 +374,53 @@
         function lanzarAlertaVisual(mensaje) {
             const alerta = document.getElementById('alerta-accesible');
             const textoMensaje = document.getElementById('mensaje-alerta');
-            
             textoMensaje.textContent = mensaje;
             alerta.classList.add('mostrar');
-            
-            // Si el narrador está activo, leer la alerta
-            if (window.narratorEnabled && window.speechSynthesis) {
+            if (narratorActive && window.speechSynthesis) {
                 const utterance = new SpeechSynthesisUtterance(mensaje);
                 utterance.lang = 'es-MX';
                 window.speechSynthesis.speak(utterance);
             }
-            
-            setTimeout(() => {
-                alerta.classList.remove('mostrar');
-            }, 3000);
+            setTimeout(() => alerta.classList.remove('mostrar'), 3000);
         }
 
         function addToCart(id) {
             const producto = todosLosProductos.find(x => x.id === id);
+            if (!producto) return;
             const itemExistente = cart.find(x => x.id === id);
-            
             if (itemExistente) {
                 itemExistente.cantidad++;
             } else {
                 cart.push({ ...producto, cantidad: 1 });
             }
-            
             localStorage.setItem('farmaCart', JSON.stringify(cart));
-            updateCount();
+            updateCartBadge();
             lanzarAlertaVisual(`¡${producto.nombre} añadido al carrito!`);
         }
 
-        function updateCount() {
+        function updateCartBadge() {
             const total = cart.reduce((acc, item) => acc + item.cantidad, 0);
             const badge = document.getElementById('cart-count');
-            badge.innerText = total;
-            badge.style.display = total > 0 ? 'flex' : 'none';
+            if (badge) {
+                badge.innerText = total;
+                badge.style.display = total > 0 ? 'flex' : 'none';
+            }
         }
 
+        // Inicialización
         window.onload = () => {
+            restoreAccessibilityPrefs();
             cargarProductos();
-            // Inicializar iconos de accesibilidad
             lucide.createIcons();
+            // Sincronizar estado de los checkboxes con las clases del body al cargar (por si se restauraron)
+            if (document.body.classList.contains('dark-mode')) {
+                const chk = document.getElementById('dark-mode-checkbox');
+                if (chk) chk.checked = true;
+            }
+            if (document.body.classList.contains('high-contrast')) {
+                const chk = document.getElementById('high-contrast-checkbox');
+                if (chk) chk.checked = true;
+            }
         };
     </script>
 </body>
