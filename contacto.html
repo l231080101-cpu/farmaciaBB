@@ -1,32 +1,381 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contacto - FarmaPlus</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <link rel="stylesheet" href="accesibilidad.css">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
-        .contact-card { background: white; border-radius: 30px; border: 1px solid #edf2f7; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
-        
-        /* Soporte Modo Oscuro */
-        body.dark-mode .contact-card { background: #1e293b; border-color: #334155; color: white; }
-        body.dark-mode input, body.dark-mode textarea { background: #0f172a; border-color: #334155; color: white; }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode label { color: white; }
 
-        input:focus, textarea:focus { outline: 3px solid #2563eb; outline-offset: 2px; }
-        
-        .success-animation { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s, color 0.2s;
+        }
+        /* Estilos generales */
+        .top-bar {
+            background: #2563eb;
+            color: white;
+            padding: 10px 0;
+            font-size: 0.9rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .top-bar-content {
+            display: flex;
+            justify-content: flex-start;
+            gap: 25px;
+            align-items: center;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-header {
+            background: white;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 20px 0;
+        }
+        .main-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .logo-box {
+            background: #2563eb;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+        }
+        .logo-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2563eb;
+            line-height: 1;
+        }
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .search-bar {
+            flex: 1;
+            position: relative;
+            max-width: 600px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #2563eb;
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .nav-desktop {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+        .nav-link:hover:not(.active) {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+        .logout-btn {
+            color: #ef4444;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #fee2e2;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #fee2e2;
+        }
+        .back-to-index {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2563eb;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        .back-to-index:hover {
+            transform: translateY(-5px);
+        }
+        .map-container {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid white;
+            height: 100%;
+            min-height: 400px;
+        }
+        .form-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid #edf2f7;
+        }
+
+        /* ========== ACCESIBILIDAD ========== */
+        #acc-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+            border: none;
+        }
+        #acc-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+        #accessibility-panel {
+            position: fixed;
+            bottom: 96px;
+            left: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 260px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        }
+        #accessibility-panel.active {
+            display: block;
+        }
+        .reading-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: yellow;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .reading-guide.active {
+            display: block;
+        }
+        /* Modo oscuro */
+        .dark-mode {
+            background-color: #0f172a !important;
+            color: #f1f5f9;
+        }
+        .dark-mode .main-header,
+        .dark-mode .top-bar,
+        .dark-mode .form-card {
+            background-color: #1e293b !important;
+            color: #f1f5f9;
+        }
+        .dark-mode .form-card input,
+        .dark-mode .form-card textarea {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+        .dark-mode .nav-link:not(.active) {
+            color: #cbd5e1;
+        }
+        /* Alto contraste */
+        .high-contrast {
+            background-color: black !important;
+            color: yellow !important;
+        }
+        .high-contrast a,
+        .high-contrast button,
+        .high-contrast .btn-primary,
+        .high-contrast .btn-secondary {
+            background-color: yellow !important;
+            color: black !important;
+            border: 2px solid white;
+        }
+        .high-contrast .top-bar,
+        .high-contrast .main-header {
+            background-color: black !important;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-header-content {
+                flex-wrap: wrap;
+            }
+            .search-bar {
+                order: 3;
+                width: 100%;
+                max-width: none;
+                margin-top: 10px;
+            }
+            .nav-desktop {
+                overflow-x: auto;
+                gap: 5px;
+            }
+            .map-container {
+                min-height: 300px;
+            }
+        }
     </style>
 </head>
-<body class="text-slate-900">
+<body>
 
+    <header class="site-header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <div class="contact-item"><i data-lucide="phone" size="18"></i><span>+52 55 23 69 79 40</span></div>
+                    <div class="contact-item"><i data-lucide="map-pin" size="18"></i><span>Calle 67 #16 duplex, CDMX</span></div>
+                    <div class="contact-item"><i data-lucide="clock" size="18"></i><span id="live-clock">Cargando...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-header">
+            <div class="container">
+                <div class="main-header-content">
+                    <a href="index.html" class="logo">
+                        <div class="logo-box">⚕️</div>
+                        <div>
+                            <h1 class="logo-title">FarmaPlus</h1>
+                            <p class="logo-subtitle">Tu farmacia de confianza</p>
+                        </div>
+                    </a>
+
+                    <div class="search-bar">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="main-search" placeholder="Buscar productos..." class="search-input" onkeypress="handleSearch(event)" />
+                    </div>
+
+                    <div class="flex items-center gap-4" id="user-auth-section">
+                        <!-- Ícono de admin (oculto por defecto) -->
+                        <div id="admin-icon" style="display: none;">
+                            <i data-lucide="layout-grid" class="text-blue-600 cursor-pointer" onclick="window.location.href='admin.html'"></i>
+                        </div>
+                        
+                        <div class="relative cursor-pointer" onclick="window.location.href='carrito.html'">
+                            <i data-lucide="shopping-cart" class="text-slate-700"></i>
+                            <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </div>
+
+                        <div id="user-auth-placeholder">
+                            <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
+                                <i data-lucide="user"></i>
+                                <span class="text-sm font-medium">Iniciar Sesión</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="nav-desktop">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="catalog.html" class="nav-link">Catálogo</a>
+                    <a href="nosotros.html" class="nav-link">Nosotros</a>
+                    <a href="contacto.html" class="nav-link active">Contacto</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold text-slate-900 mb-4">Contáctanos</h2>
+            <p class="text-slate-500 text-lg">Estamos aquí para resolver tus dudas.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+            <div class="form-card">
+                <form id="contact-form" class="flex flex-col gap-6">
+                    <div class="flex flex-col gap-2">
+                        <label for="contact-name" class="text-slate-700 font-semibold">Tu nombre</label>
+                        <input type="text" id="contact-name" placeholder="Nombre completo" required class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="contact-email" class="text-slate-700 font-semibold">Correo electrónico</label>
+                        <input type="email" id="contact-email" placeholder="email@ejemplo.com" required class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="contact-message" class="text-slate-700 font-semibold">Mensaje</label>
+                        <textarea id="contact-message" placeholder="¿En qué podemos ayudarte?" rows="4" required class="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition-all transform active:scale-95">Enviar Mensaje</button>
+                </form>
+            </div>
+            <div class="map-container">
+                <!-- Mapa con ubicación real aproximada (Calle 67 #16, CDMX) -->
+                <iframe src="https://www.google.com/maps?q=19.4326,-99.1332&z=15&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <a href="index.html" class="back-to-index">
+        <i data-lucide="arrow-left"></i>
+        <span>Regresar al Inicio</span>
+    </a>
+
+    <!-- Componentes de accesibilidad -->
     <div id="reading-line" class="reading-guide"></div>
 
     <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
@@ -34,131 +383,288 @@
     </div>
 
     <div id="accessibility-panel">
-        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2 text-white">Accesibilidad</h3>
-        <div class="flex flex-col gap-4 text-sm text-white">
-            <label class="flex justify-between items-center cursor-pointer">
+        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2">Accesibilidad</h3>
+        <div class="flex flex-col gap-4 text-sm">
+            <label class="flex justify-between items-center">
                 Modo Oscuro
-                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+                <input type="checkbox" id="dark-mode-toggle" onchange="document.body.classList.toggle('dark-mode')">
             </label>
             <div class="flex flex-col gap-1">
                 <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
-                <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
+                <input type="range" id="text-size-slider" min="80" max="150" value="100" oninput="changeTextSize(this.value)">
             </div>
-            <label class="flex justify-between items-center cursor-pointer">
+            <label class="flex justify-between items-center">
                 Contraste Alto
-                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
+                <input type="checkbox" id="high-contrast-toggle" onchange="document.body.classList.toggle('high-contrast')">
             </label>
-            <label class="flex justify-between items-center cursor-pointer">
+            <label class="flex justify-between items-center">
                 Guía de Lectura
-                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
+                <input type="checkbox" id="reading-guide-toggle">
             </label>
-            <label class="flex justify-between items-center cursor-pointer">
+            <label class="flex justify-between items-center">
                 Narrador de Voz
-                <input type="checkbox" onchange="toggleNarrator(this.checked)">
+                <input type="checkbox" id="narrator-toggle">
             </label>
         </div>
     </div>
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold text-2xl tracking-tighter">
-                <span class="bg-blue-600 text-white p-1.5 rounded-xl">⚕️</span> FarmaPlus
-            </a>
-            <nav class="hidden md:flex gap-8">
-                <a href="index.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Inicio</a>
-                <a href="catalog.html" class="text-slate-500 font-bold hover:text-blue-600 transition-colors">Catálogo</a>
-                <a href="contacto.html" class="text-blue-600 font-bold">Contacto</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="max-w-4xl mx-auto px-6 py-16">
-        <div class="text-center mb-12">
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight mb-4">¿Cómo podemos ayudarte?</h1>
-            <p class="text-slate-500 text-lg">Estamos aquí para escucharte. Envíanos un mensaje y te responderemos pronto.</p>
-        </div>
-
-        <div class="contact-card p-8 md:p-12">
-            <form id="contact-form" class="space-y-6" onsubmit="handleContact(event)">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex flex-col gap-2">
-                        <label for="name" class="font-bold text-slate-700">Nombre completo</label>
-                        <input type="text" id="name" required placeholder="Ej. Juan Pérez" 
-                               class="p-4 rounded-2xl border border-slate-200 focus:border-blue-400 transition-all outline-none">
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label for="email" class="font-bold text-slate-700">Correo electrónico</label>
-                        <input type="email" id="email" required placeholder="juan@ejemplo.com"
-                               class="p-4 rounded-2xl border border-slate-200 focus:border-blue-400 transition-all outline-none">
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <label for="subject" class="font-bold text-slate-700">Asunto</label>
-                    <select id="subject" class="p-4 rounded-2xl border border-slate-200 focus:border-blue-400 transition-all outline-none text-slate-600">
-                        <option value="consulta">Consulta General</option>
-                        <option value="pedido">Problema con un Pedido</option>
-                        <option value="sugerencia">Sugerencia</option>
-                        <option value="otro">Otro</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <label for="message" class="font-bold text-slate-700">Mensaje</label>
-                    <textarea id="message" rows="5" required placeholder="Escribe tu mensaje aquí..."
-                              class="p-4 rounded-2xl border border-slate-200 focus:border-blue-400 transition-all outline-none resize-none"></textarea>
-                </div>
-
-                <button type="submit" 
-                        class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex justify-center items-center gap-3">
-                    <i data-lucide="send" size="20"></i> Enviar Mensaje
-                </button>
-            </form>
-
-            <div id="success-message" class="success-animation py-10">
-                <div class="bg-green-100 text-green-600 p-6 rounded-full mb-6">
-                    <i data-lucide="check-circle-2" size="64"></i>
-                </div>
-                <h2 class="text-3xl font-black text-slate-900 mb-2">¡Mensaje Enviado!</h2>
-                <p class="text-slate-500 mb-8">Gracias por contactarnos. Un asesor revisará tu caso en breve.</p>
-                <button onclick="resetForm()" class="text-blue-600 font-bold hover:underline">Enviar otro mensaje</button>
-            </div>
-        </div>
-    </main>
-
-    <footer class="text-center py-10 text-slate-400 text-sm">
-        &copy; 2024 FarmaPlus - Compromiso total con tu salud y accesibilidad.
-    </footer>
-
-    <script src="accesibilidad.js"></script>
     <script>
-        lucide.createIcons();
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
+        const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        function handleContact(e) {
-            e.preventDefault();
-            
-            // Simulación de envío
-            const form = document.getElementById('contact-form');
-            const success = document.getElementById('success-message');
-            
-            form.style.display = 'none';
-            success.style.display = 'flex';
+        // ==================== FUNCIONES GENERALES ====================
+        function updateClock() {
+            const clockElement = document.getElementById('live-clock');
+            if (!clockElement) return;
+            const now = new Date();
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            clockElement.textContent = `${days[now.getDay()]}: ${now.toLocaleTimeString()}`;
+        }
 
-            const msg = "Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo pronto.";
-            
-            // ACCESIBILIDAD: Narrar el éxito del envío si el narrador está activo
-            if (window.narratorEnabled && window.speechSynthesis) {
-                const utterance = new SpeechSynthesisUtterance(msg);
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmaCart')) || [];
+            const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
+            const badge = document.getElementById('cart-count');
+            if (badge) {
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('main-search').value.trim();
+                if (query) {
+                    window.location.href = `catalog.html?search=${encodeURIComponent(query)}`;
+                } else {
+                    window.location.href = 'catalog.html';
+                }
+            }
+        }
+
+        // ==================== AUTENTICACIÓN Y PERFIL ====================
+        async function checkSession() {
+            const { data: { session } } = await dbClient.auth.getSession();
+            const authPlaceholder = document.getElementById('user-auth-placeholder');
+            const adminIconDiv = document.getElementById('admin-icon');
+
+            // Por defecto ocultar icono admin
+            if (adminIconDiv) adminIconDiv.style.display = 'none';
+
+            if (session) {
+                try {
+                    const { data: profile, error } = await dbClient
+                        .from('profiles')
+                        .select('full_name, role')
+                        .eq('id', session.user.id)
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    const name = profile?.full_name || session.user.email;
+                    const firstName = name.split(' ')[0];
+                    const role = profile?.role || 'usuario';
+
+                    // Mostrar icono admin si corresponde
+                    if (role === 'admin' && adminIconDiv) {
+                        adminIconDiv.style.display = 'inline-block';
+                    }
+
+                    authPlaceholder.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-700 font-semibold text-xs flex items-center gap-1">
+                                <i data-lucide="user-check" size="14" class="text-blue-600"></i> ${firstName}
+                            </span>
+                            <button onclick="logout()" class="logout-btn">Salir</button>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                } catch (err) {
+                    console.error('Error al cargar perfil:', err);
+                    authPlaceholder.innerHTML = `<div class="text-sm">¡Hola!</div>`;
+                }
+            } else {
+                // Usuario no autenticado: mostrar enlace de login
+                authPlaceholder.innerHTML = `
+                    <div class="flex items-center gap-2 text-slate-700 cursor-pointer" onclick="window.location.href='login.html'">
+                        <i data-lucide="user"></i>
+                        <span class="text-sm font-medium">Iniciar Sesión</span>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        async function logout() {
+            await dbClient.auth.signOut();
+            // Solo borrar el carrito, no las preferencias de accesibilidad
+            localStorage.removeItem('farmaCart');
+            window.location.href = "index.html";
+        }
+
+        // ==================== FORMULARIO DE CONTACTO (GUARDADO EN SUPABASE) ====================
+        async function handleContactSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const nombre = document.getElementById('contact-name').value;
+            const email = document.getElementById('contact-email').value;
+            const mensaje = document.getElementById('contact-message').value;
+
+            // Insertar en la tabla 'contact_messages' (debes crearla en Supabase)
+            const { error } = await dbClient.from('contact_messages').insert([
+                { nombre, email, mensaje, created_at: new Date().toISOString() }
+            ]);
+
+            if (error) {
+                console.error('Error al enviar mensaje:', error);
+                alert('Ocurrió un error al enviar tu mensaje. Por favor intenta más tarde.');
+            } else {
+                alert('¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.');
+                form.reset();
+            }
+        }
+
+        // Asignar evento al formulario
+        document.getElementById('contact-form').addEventListener('submit', handleContactSubmit);
+
+        // ==================== ACCESIBILIDAD MEJORADA ====================
+        // Panel accesibilidad (toggle con clase active)
+        function toggleAccPanel() {
+            const panel = document.getElementById('accessibility-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        // Cambiar tamaño de fuente (con límites)
+        function changeTextSize(val) {
+            let size = Math.min(150, Math.max(80, Number(val)));
+            document.documentElement.style.fontSize = size + '%';
+            const label = document.getElementById('text-size-val');
+            if (label) label.innerText = size + '%';
+            // Guardar preferencia en localStorage
+            localStorage.setItem('textSize', size);
+        }
+
+        // Línea de lectura guiada (con addEventListener)
+        let guideHandler = null;
+        function toggleReadingGuide(active) {
+            const line = document.getElementById('reading-line');
+            if (!line) return;
+            if (active) {
+                line.classList.add('active');
+                if (guideHandler) window.removeEventListener('mousemove', guideHandler);
+                guideHandler = (e) => {
+                    line.style.top = e.clientY + 'px';
+                };
+                window.addEventListener('mousemove', guideHandler);
+            } else {
+                line.classList.remove('active');
+                if (guideHandler) {
+                    window.removeEventListener('mousemove', guideHandler);
+                    guideHandler = null;
+                }
+            }
+            // Guardar preferencia
+            localStorage.setItem('readingGuide', active);
+        }
+
+        // Narrador de voz (solo textos cortos y evita lecturas repetidas)
+        let narratorActive = false;
+        function speakText(e) {
+            if (!narratorActive) return;
+            let target = e.target;
+            let text = target.getAttribute('aria-label') || target.innerText;
+            if (text && typeof text === 'string' && text.trim().length > 0 && text.trim().length < 200) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text.trim());
                 utterance.lang = 'es-MX';
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        function resetForm() {
-            document.getElementById('contact-form').reset();
-            document.getElementById('contact-form').style.display = 'block';
-            document.getElementById('success-message').style.display = 'none';
+        function toggleNarrator(active) {
+            narratorActive = active;
+            if (active) {
+                document.body.addEventListener('click', speakText);
+                // Anunciar activación
+                const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
+                msg.lang = 'es-MX';
+                window.speechSynthesis.speak(msg);
+                localStorage.setItem('narrator', 'true');
+            } else {
+                document.body.removeEventListener('click', speakText);
+                window.speechSynthesis.cancel();
+                localStorage.setItem('narrator', 'false');
+            }
         }
+
+        // ==================== RESTAURAR PREFERENCIAS DE ACCESIBILIDAD ====================
+        function restoreAccessibilityPrefs() {
+            // Tamaño de texto
+            const savedTextSize = localStorage.getItem('textSize');
+            if (savedTextSize) {
+                let size = parseInt(savedTextSize);
+                if (!isNaN(size)) {
+                    document.documentElement.style.fontSize = size + '%';
+                    const slider = document.getElementById('text-size-slider');
+                    const label = document.getElementById('text-size-val');
+                    if (slider) slider.value = size;
+                    if (label) label.innerText = size + '%';
+                }
+            }
+            // Modo oscuro
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const toggle = document.getElementById('dark-mode-toggle');
+                if (toggle) toggle.checked = true;
+            }
+            // Contraste alto
+            if (localStorage.getItem('highContrast') === 'true') {
+                document.body.classList.add('high-contrast');
+                const toggle = document.getElementById('high-contrast-toggle');
+                if (toggle) toggle.checked = true;
+            }
+            // Guía de lectura
+            const savedGuide = localStorage.getItem('readingGuide');
+            if (savedGuide === 'true') {
+                toggleReadingGuide(true);
+                const toggle = document.getElementById('reading-guide-toggle');
+                if (toggle) toggle.checked = true;
+            }
+            // Narrador
+            const savedNarrator = localStorage.getItem('narrator');
+            if (savedNarrator === 'true') {
+                toggleNarrator(true);
+                const toggle = document.getElementById('narrator-toggle');
+                if (toggle) toggle.checked = true;
+            }
+        }
+
+        // Guardar preferencias al cambiar (para modo oscuro y contraste alto)
+        document.getElementById('dark-mode-toggle')?.addEventListener('change', (e) => {
+            localStorage.setItem('darkMode', e.target.checked);
+        });
+        document.getElementById('high-contrast-toggle')?.addEventListener('change', (e) => {
+            localStorage.setItem('highContrast', e.target.checked);
+        });
+        document.getElementById('reading-guide-toggle')?.addEventListener('change', (e) => {
+            toggleReadingGuide(e.target.checked);
+        });
+        document.getElementById('narrator-toggle')?.addEventListener('change', (e) => {
+            toggleNarrator(e.target.checked);
+        });
+
+        // ==================== INICIALIZACIÓN ====================
+        setInterval(updateClock, 1000);
+        updateClock();
+        updateCartBadge();
+        checkSession();
+        restoreAccessibilityPrefs();
+        lucide.createIcons();
+
+        // Pequeño ajuste: al hacer logout no recargar la página con confirmación extra
+        window.logout = logout;
     </script>
 </body>
 </html>
