@@ -4,20 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Pedido - FarmaPlus</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=ASEcLzy9M3HCy1i29pwdbZfFqobzlFMtf3zm55Cvz5tcdTLRV-sqkBM4lItOa6I0T19Ydec2cLWz4WLq&currency=MXN&locale=es_MX"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    
+    <link rel="stylesheet" href="accesibilidad.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; transition: background-color 0.3s, color 0.3s; }
         .card-style { background: white; border-radius: 20px; border: 1px solid #edf2f7; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        /* Ajuste para que el texto sea legible en modo oscuro en el carrito */
+        body.dark-mode .card-style { background: #1e293b; border-color: #334155; color: white; }
+        body.dark-mode h1, body.dark-mode h3, body.dark-mode h4 { color: white; }
     </style>
 </head>
 <body class="antialiased">
 
+    <div id="reading-line" class="reading-guide"></div>
+
+    <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
+        <i data-lucide="accessibility"></i>
+    </div>
+
+    <div id="accessibility-panel">
+        <h3 class="text-lg font-bold mb-4 border-b border-slate-700 pb-2 text-white">Accesibilidad</h3>
+        <div class="flex flex-col gap-4 text-sm text-white">
+            <label class="flex justify-between items-center cursor-pointer">
+                Modo Oscuro
+                <input type="checkbox" onchange="document.body.classList.toggle('dark-mode')">
+            </label>
+            <div class="flex flex-col gap-1">
+                <span>Tamaño de letra: <b id="text-size-val">100%</b></span>
+                <input type="range" min="100" max="150" value="100" class="w-full" oninput="changeTextSize(this.value)">
+            </div>
+            <label class="flex justify-between items-center cursor-pointer">
+                Contraste Alto
+                <input type="checkbox" onchange="document.body.classList.toggle('high-contrast')">
+            </label>
+            <label class="flex justify-between items-center cursor-pointer">
+                Guía de Lectura
+                <input type="checkbox" onchange="toggleReadingGuide(this.checked)">
+            </label>
+            <label class="flex justify-between items-center cursor-pointer">
+                Narrador de Voz
+                <input type="checkbox" onchange="toggleNarrator(this.checked)">
+            </label>
+        </div>
+    </div>
     <header class="bg-white border-b border-slate-100 mb-8">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <a href="index.html" class="flex items-center gap-3">
@@ -45,18 +83,14 @@
             <aside id="summary-sidebar" class="hidden">
                 <div class="card-style p-8 sticky top-6">
                     <h3 class="text-xl font-bold mb-6">Resumen de Compra</h3>
-                    
                     <div class="space-y-4 border-t pt-6 mb-8">
                         <div class="flex justify-between text-slate-500 font-bold"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
                         <div class="flex justify-between items-center"><span class="font-black text-xl text-slate-900">Total</span><span id="total" class="text-3xl font-black text-blue-600">$0.00</span></div>
                     </div>
-
                     <div id="recaptcha-container" class="flex justify-center mb-4">
                         <div class="g-recaptcha" data-sitekey="6LeQ9bosAAAAAGtnWuHoV38cKpEC4_i6oRD0Yhjg" data-callback="habilitarPaypal"></div>
                     </div>
-
                     <div id="paypal-button-container" style="display: none;"></div>
-                    
                     <p class="text-center text-[10px] text-slate-400 mt-4 italic flex items-center justify-center gap-1">
                         <i data-lucide="lock" size="10"></i> Pago seguro y encriptado por PayPal Inc.
                     </p>
@@ -65,7 +99,7 @@
         </div>
     </main>
 
-    <script>
+    <script src="accesibilidad.js"></script> <script>
         const _url = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(_url, _key);
@@ -83,7 +117,7 @@
         }
 
         async function init() {
-            lucide.createIcons();
+            lucide.createIcons(); // Inicializa iconos generales e inclusión
             currentUser = await checkSession();
             if (!currentUser) return; 
 
@@ -114,9 +148,9 @@
                             <p class="text-blue-600 font-black text-lg">$${item.precio}</p>
                         </div>
                         <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
-                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg">-</button>
-                            <span class="font-bold w-4 text-center">${item.cantidad}</span>
-                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg">+</button>
+                            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg text-slate-900">-</button>
+                            <span class="font-bold w-4 text-center text-slate-900">${item.cantidad}</span>
+                            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 bg-white shadow-sm border border-slate-100 rounded-lg text-slate-900">+</button>
                         </div>
                     </div>`;
                 }).join('');
@@ -133,27 +167,21 @@
         };
 
         function initPayPal() {
-            // Recalculamos el total exacto antes de crear los botones
             const totalCompra = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
 
             paypal.Buttons({
                 style: { layout: 'vertical', color: 'blue', shape: 'pill', label: 'pay', height: 45 },
                 createOrder: (data, actions) => {
-    return actions.order.create({
-        purchase_units: [{ 
-            description: "Compra segura en FarmaPlus",
-            amount: { 
-                currency_code: 'MXN', 
-                value: totalCompra.toFixed(2).toString() // Aseguramos que sea String con 2 decimales
-            }
+                    return actions.order.create({
+                        purchase_units: [{ 
+                            description: "Compra segura en FarmaPlus",
+                            amount: { currency_code: 'MXN', value: totalCompra.toFixed(2).toString() }
                         }]
                     });
                 },
                 onApprove: async (data, actions) => {
                     try {
                         const details = await actions.order.capture();
-                        
-                        // Insertar en Supabase
                         const { error } = await dbClient.from('pedidos').insert([{ 
                             user_id: currentUser.id,
                             productos: cart,      
@@ -162,23 +190,15 @@
                             estado: 'pagado'
                         }]);
 
-                        if (error) {
-                            console.error("Error Supabase:", error.message);
-                            throw error;
-                        }
+                        if (error) throw error;
 
                         alert("¡Compra exitosa! Pedido registrado.");
                         localStorage.removeItem('farmaCart');
                         window.location.href = "index.html";
-
                     } catch (err) {
-                        console.error("Error al registrar pedido:", err);
-                        alert("El pago se procesó, pero hubo un error al guardar tu pedido. Guarda tu ID de transacción: " + data.orderID);
+                        console.error("Error:", err);
+                        alert("Error al registrar pedido. ID: " + data.orderID);
                     }
-                }, // <--- AQUÍ FALTABA ESTA COMA
-                onError: (err) => {
-                    console.error("Error en PayPal:", err);
-                    alert("No se pudo procesar el pago con PayPal. Verifica tu conexión o tarjeta.");
                 }
             }).render('#paypal-button-container');
         }
@@ -188,11 +208,10 @@
             if(cart[idx].cantidad < 1) cart.splice(idx, 1);
             localStorage.setItem('farmaCart', JSON.stringify(cart));
             render(); 
-            
             const paypalContainer = document.getElementById('paypal-button-container');
             if (paypalContainer.style.display === 'block') {
-                paypalContainer.innerHTML = ''; // Limpiar botones viejos
-                initPayPal(); // Re-renderizar con el nuevo total
+                paypalContainer.innerHTML = '';
+                initPayPal();
             }
         }
 
