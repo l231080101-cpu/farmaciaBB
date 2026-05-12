@@ -15,6 +15,7 @@
     <script src="accesibilidad.js" defer></script>
 
     <style>
+        /* (todos los estilos originales se conservan, solo añadimos algunos para el nuevo chatbot) */
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; margin: 0; }
         .top-bar { background: #2563eb; color: white; padding: 10px 0; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
@@ -113,15 +114,18 @@
             background-color: #f8fafc;
         }
 
-        /* Chatbot */
+        /* Chatbot - estilos mejorados */
         #chat-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; z-index: 1000; }
         #chat-messages { scroll-behavior: smooth; }
-        .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .typing-indicator { font-style: italic; color: #94a3b8; font-size: 10px; margin-bottom: 5px; }
+        .quick-reply-btn { background: white; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 12px; font-size: 10px; color: #2563eb; font-weight: 600; transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
         .quick-reply-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ========== ACCESIBILIDAD (NUEVO BLOQUE) ========== */
+        /* ========== ACCESIBILIDAD ========== */
         #acc-toggle-btn {
             position: fixed;
             bottom: 24px;
@@ -285,38 +289,44 @@
         </footer>
     </div>
 
-    <!-- Chatbot -->
+    <!-- CHATBOT MEJORADO -->
     <div id="chat-container" class="fixed bottom-6 right-6 z-[100]">
-        <button onclick="toggleChat()" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+        <button id="chat-toggle-btn" class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all" aria-label="Abrir chat de asistencia" aria-expanded="false">
             <i data-lucide="message-circle" id="chat-icon"></i>
         </button>
 
-        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex-col">
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 bg-white rounded-[24px] shadow-2xl border border-slate-100 overflow-hidden flex flex-col" role="dialog" aria-label="Ventana de chat">
             <div class="bg-blue-600 p-4 text-white">
                 <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <h4 class="font-bold text-sm">Asistente FarmaPlus</h4>
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse" aria-hidden="true"></div>
+                    <h4 class="font-bold text-sm">Asistente Virtual FarmaPlus</h4>
                 </div>
+                <p class="text-[10px] opacity-80">Atención profesional e inmediata</p>
             </div>
             
-            <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50">
-                <div class="flex justify-start">
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
-                        ¡Bienvenido! 👋 ¿En qué podemos ayudarle hoy?
-                    </div>
-                </div>
+            <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 text-[11px] bg-slate-50" role="log" aria-live="polite"></div>
+
+            <div id="quick-replies" class="px-3 py-2 flex flex-wrap gap-1.5 bg-slate-50 border-t border-slate-100">
+                <button type="button" data-reply="¿Cómo comprar?" class="quick-reply-btn">🛒 Comprar</button>
+                <button type="button" data-reply="Estado de mi pedido" class="quick-reply-btn">📦 Mi Pedido</button>
+                <button type="button" data-reply="Subir receta" class="quick-reply-btn">📄 Receta</button>
+                <button type="button" data-reply="Horarios" class="quick-reply-btn">⏰ Horarios</button>
+                <button type="button" data-reply="Ubicación" class="quick-reply-btn">📍 Ubicación</button>
+                <button type="button" data-reply="Adiós" class="quick-reply-btn">👋 Salir</button>
             </div>
 
+            <div id="typing" class="hidden px-4 py-1 typing-indicator">El asistente está analizando...</div>
+            
             <div class="p-3 border-t bg-white flex gap-2">
-                <input id="chat-input" type="text" placeholder="Escriba aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none" onkeypress="handleChatKey(event)">
-                <button onclick="sendMessage()" class="bg-blue-600 text-white p-2 rounded-xl">
+                <input id="chat-input" type="text" placeholder="Escriba su duda aquí..." class="flex-grow text-xs p-2 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-400" aria-label="Mensaje">
+                <button id="chat-send-btn" class="bg-blue-600 text-white p-2 rounded-xl" aria-label="Enviar mensaje">
                     <i data-lucide="send" size="16"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- NUEVO BLOQUE DE ACCESIBILITY (proporcionado por el usuario) -->
+    <!-- NUEVO BLOQUE DE ACCESIBILITY -->
     <div id="reading-line" class="reading-guide"></div>
 
     <div id="acc-toggle-btn" onclick="toggleAccPanel()" title="Menú de Accesibilidad">
@@ -350,32 +360,28 @@
     </div>
 
     <script>
-        // Configuración Supabase
+        // ==================== CONFIGURACIÓN SUPABASE ====================
         const supabaseUrl = 'https://ftngnzdavwvqcacmxvjw.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0bmduemRhdnd2cWNhY214dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2OTEyMDUsImV4cCI6MjA4ODI2NzIwNX0.8TkmNg9hpcj-JKnusmAa_uL0L1H6VgPbVQthFtDump4';
         const dbClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let userName = "";
 
-        // ======================== FUNCIONES DE ACCESIBILIDAD (compatibles con el nuevo panel) ========================
-        // Panel toggle
+        // ======================== FUNCIONES DE ACCESIBILIDAD ========================
         function toggleAccPanel() {
             const panel = document.getElementById('accessibility-panel');
             if (panel) panel.classList.toggle('active');
         }
 
-        // Cambiar tamaño de texto con límites y persistencia
         function changeTextSize(val) {
             let size = Math.min(150, Math.max(80, Number(val)));
             document.documentElement.style.fontSize = size + "%";
             document.getElementById('text-size-val').innerText = size + "%";
             localStorage.setItem('textSize', size);
-            // Sincronizar slider
             const slider = document.getElementById('text-size-slider');
             if (slider) slider.value = size;
         }
 
-        // Línea de lectura guiada
         let guideHandler = null;
         function toggleReadingGuide(active) {
             const line = document.getElementById('reading-line');
@@ -383,9 +389,7 @@
             if (active) {
                 line.classList.add('active');
                 if (guideHandler) window.removeEventListener('mousemove', guideHandler);
-                guideHandler = (e) => {
-                    line.style.top = e.clientY + 'px';
-                };
+                guideHandler = (e) => { line.style.top = e.clientY + 'px'; };
                 window.addEventListener('mousemove', guideHandler);
             } else {
                 line.classList.remove('active');
@@ -395,12 +399,10 @@
                 }
             }
             localStorage.setItem('readingGuide', active);
-            // Sincronizar checkbox
             const chk = document.getElementById('reading-guide-checkbox');
             if (chk && chk.checked !== active) chk.checked = active;
         }
 
-        // Narrador de voz
         let narratorActive = false;
         function speakText(e) {
             if (!narratorActive) return;
@@ -418,7 +420,6 @@
             narratorActive = active;
             if (active) {
                 document.body.addEventListener('click', speakText);
-                // Anunciar activación
                 const msg = new SpeechSynthesisUtterance('Narrador activado. Haga clic en cualquier texto para leerlo.');
                 msg.lang = 'es-MX';
                 window.speechSynthesis.speak(msg);
@@ -427,44 +428,31 @@
                 window.speechSynthesis.cancel();
             }
             localStorage.setItem('narrator', active);
-            // Sincronizar checkbox
             const chk = document.getElementById('narrator-checkbox');
             if (chk && chk.checked !== active) chk.checked = active;
         }
 
-        // Restaurar preferencias guardadas
         function restoreAccessibilityPrefs() {
-            // Tamaño texto
             const savedSize = localStorage.getItem('textSize');
-            if (savedSize) {
-                let size = parseInt(savedSize);
-                if (!isNaN(size)) changeTextSize(size);
-            }
-            // Modo oscuro
+            if (savedSize) changeTextSize(parseInt(savedSize));
             if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 const chk = document.getElementById('dark-mode-checkbox');
                 if (chk) chk.checked = true;
             }
-            // Contraste alto
             if (localStorage.getItem('highContrast') === 'true') {
                 document.body.classList.add('high-contrast');
                 const chk = document.getElementById('high-contrast-checkbox');
                 if (chk) chk.checked = true;
             }
-            // Guía lectura
-            const savedGuide = localStorage.getItem('readingGuide');
-            if (savedGuide === 'true') {
+            if (localStorage.getItem('readingGuide') === 'true') {
                 toggleReadingGuide(true);
             }
-            // Narrador
-            const savedNarrator = localStorage.getItem('narrator');
-            if (savedNarrator === 'true') {
+            if (localStorage.getItem('narrator') === 'true') {
                 toggleNarrator(true);
             }
         }
 
-        // Guardar preferencias de modo oscuro y contraste alto
         document.getElementById('dark-mode-checkbox')?.addEventListener('change', (e) => {
             localStorage.setItem('darkMode', e.target.checked);
         });
@@ -530,7 +518,7 @@
             window.location.href = "index.html";
         }
 
-        // Reloj y carrito
+        // ======================== RELOJ Y CARRITO ========================
         function updateClock() {
             const clockElement = document.getElementById('live-clock');
             if (!clockElement) return;
@@ -549,7 +537,7 @@
             }
         }
 
-        // Búsqueda
+        // ======================== BÚSQUEDA ========================
         function setupSearch() {
             const searchInput = document.getElementById('search-input-header');
             if (searchInput) {
@@ -563,40 +551,185 @@
             }
         }
 
-        // Chatbot
-        function toggleChat() {
-            const win = document.getElementById('chat-window');
-            if (win) win.classList.toggle('hidden');
-        }
-        function handleChatKey(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const msgContainer = document.getElementById('chat-messages');
-            if (!input || !msgContainer) return;
-            const text = input.value.trim();
-            if (!text) return;
-            msgContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded-lg">${text}</div></div>`;
-            input.value = '';
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-            setTimeout(() => {
-                msgContainer.innerHTML += `<div class="flex justify-start"><div class="bg-white p-2 rounded-lg border border-slate-200">Gracias por contactarnos. Un asesor te responderá pronto.</div></div>`;
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }, 500);
+        // ======================== CHATBOT MEJORADO ========================
+        const CHAT_STORAGE_KEY = 'farmaplus_chat_history';
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
-        // Inicialización
+        function saveChatHistory() {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            const messages = Array.from(container.children).map(msg => ({
+                html: msg.outerHTML,
+                isUser: msg.classList.contains('justify-end')
+            }));
+            localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages.slice(-50)));
+        }
+
+        function loadChatHistory() {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+            if (saved) {
+                try {
+                    const messages = JSON.parse(saved);
+                    container.innerHTML = '';
+                    messages.forEach(msg => {
+                        container.insertAdjacentHTML('beforeend', msg.html);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                } catch(e) { console.warn('Error al cargar historial', e); }
+            } else {
+                container.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100">
+                            ¡Bienvenido a FarmaPlus! 👋 Soy su asistente. ¿En qué podemos servirle con respecto a su bienestar hoy?
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function addMessage(text, isUser = false) {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            const safeText = escapeHtml(text);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} animate-pop`;
+            const bubbleClass = isUser 
+                ? 'bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm' 
+                : 'bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-slate-700 border border-slate-100 max-w-[85%]';
+            messageDiv.innerHTML = `<div class="${bubbleClass}">${safeText.replace(/\n/g, '<br>')}</div>`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+            saveChatHistory();
+        }
+
+        function showTyping() {
+            const typingDiv = document.getElementById('typing');
+            if (typingDiv) typingDiv.classList.remove('hidden');
+        }
+
+        function hideTyping() {
+            const typingDiv = document.getElementById('typing');
+            if (typingDiv) typingDiv.classList.add('hidden');
+        }
+
+        function getReply(userMessage, username) {
+            const lowText = userMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!.,:;]/g, "");
+            const despedidas = ["adios", "hasta luego", "bye", "chao", "nos vemos", "luego hablamos", "cerrar chat", "terminar", "gracias adios", "es todo", "salir"];
+            if (despedidas.some(p => lowText.includes(p))) {
+                const nombre = username ? `, ${username}` : "";
+                return `Ha sido un honor servirle${nombre}. En **FarmaPlus** cuidamos de usted. ¡Hasta pronto! 👋`;
+            }
+            if (lowText.includes("comprar") || lowText.includes("cómo comprar") || lowText.includes("quiero comprar")) {
+                return `Realizar su compra es sencillo: 1️⃣ Busque su producto, 2️⃣ Agréguelo al carrito, 3️⃣ Registre su envío y 4️⃣ Pague de forma segura. 🛒`;
+            }
+            if (lowText.includes("pedido") || lowText.includes("paquete") || lowText.includes("envío") || lowText.includes("estado")) {
+                return `Consulte el estado de su orden en la sección **"Mis Pedidos"** de su perfil. El tiempo de entrega es de 30-90 min. 📦`;
+            }
+            if (lowText.includes("horario") || lowText.includes("abierto") || lowText.includes("atención")) {
+                return `Abrimos de **Lunes a Sábado de 8 AM a 10 PM** y **Domingos de 9 AM a 8 PM**. ⏰`;
+            }
+            if (lowText.includes("ubicacion") || lowText.includes("donde") || lowText.includes("dirección")) {
+                return `Estamos en la **Calle 67 #16 duplex**. ¡Esperamos su visita! 📍`;
+            }
+            if (lowText.includes("receta") || lowText.includes("controlado") || lowText.includes("receta médica")) {
+                return `Para controlados, adjunte su receta al finalizar la compra o envíela a nuestro WhatsApp. 📄`;
+            }
+            if (lowText.includes("hola") || lowText.includes("buenos dias") || lowText.includes("buenas tardes") || lowText.includes("buenas noches") || lowText.includes("saludo")) {
+                return `¡Hola! Es un privilegio atenderle. ¿Desea consultar algún medicamento o conocer nuestras ofertas? ✨`;
+            }
+            if (lowText.includes("gracias") || lowText.includes("agradezco")) {
+                return `¡De nada! Estamos para apoyarle en su salud. 😊`;
+            }
+            return `Para ayudarle mejor, ¿su duda es sobre la **ubicación**, el proceso de **compra** o sus **pedidos**?`;
+        }
+
+        async function sendMessage(messageText = null) {
+            const input = document.getElementById('chat-input');
+            let userMessage = messageText !== null ? messageText : input.value.trim();
+            if (!userMessage) return;
+
+            addMessage(userMessage, true);
+            if (messageText === null) input.value = '';
+            
+            showTyping();
+            
+            // Obtener nombre de usuario desde el DOM (el mismo que se usa en la bienvenida)
+            const userSpan = document.querySelector('#user-auth-section span');
+            const username = userSpan ? userSpan.innerText.trim() : '';
+            
+            setTimeout(() => {
+                hideTyping();
+                const reply = getReply(userMessage, username);
+                addMessage(reply, false);
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 800);
+        }
+
+        function initChatbot() {
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            const quickReplyBtns = document.querySelectorAll('.quick-reply-btn');
+
+            if (!toggleBtn || !chatWindow) return;
+
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = chatWindow.classList.contains('hidden');
+                if (isHidden) {
+                    chatWindow.classList.remove('hidden');
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                    chatInput.focus();
+                    if (document.getElementById('chat-messages').children.length === 0) {
+                        loadChatHistory();
+                    }
+                } else {
+                    chatWindow.classList.add('hidden');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+                lucide.createIcons();
+            });
+
+            if (sendBtn) sendBtn.addEventListener('click', () => sendMessage());
+            if (chatInput) chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            quickReplyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const replyText = btn.getAttribute('data-reply') || btn.innerText.replace(/[🛒📦📄⏰📍👋]/g, '').trim();
+                    sendMessage(replyText);
+                });
+            });
+
+            if (document.getElementById('chat-messages').children.length === 0) {
+                loadChatHistory();
+            }
+        }
+
+        // ======================== INICIALIZACIÓN GENERAL ========================
         setInterval(updateClock, 1000);
         updateClock();
         updateCartBadge();
         setupSearch();
-        restoreAccessibilityPrefs();   // <-- Cargar preferencias guardadas
+        restoreAccessibilityPrefs();
         dbClient.auth.getSession().then(({ data }) => {
             if (data.session) renderUserSession(data.session);
             else renderLoginButton();
         });
         lucide.createIcons();
+        initChatbot();  // Iniciar el chatbot mejorado
 
         const style = document.createElement('style');
         style.textContent = `.logout-btn { color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 5px 10px; border-radius: 6px; border: 1px solid #fee2e2; transition: 0.3s; } .logout-btn:hover { background: #fee2e2; } .admin-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; border: 1px solid #dbeafe; }`;
